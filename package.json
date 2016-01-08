@@ -1,15 +1,12 @@
 {
   "name": "propsd",
   "version": "0.0.1",
-  "description": "A local daemon for loading static and dynamic properties",
+  "author": "Rapid7 <coreservices@rapid7.com>",
+  "description": "A local properties management service",
   "main": "lib/index.js",
-  "directories": {
-    "doc": "docs",
-    "bin": "bin"
-  },
   "scripts": {
-    "test": "mocha",
-    "lint": "eslint lib/**"
+    "test": "./node_modules/.bin/mocha",
+    "lint": "./node_modules/.bin/eslint bin/* lib/** test/*"
   },
   "repository": {
     "type": "git",
@@ -19,15 +16,15 @@
   "bugs": {
     "url": "https://github.com/rapid7/propsd/issues"
   },
-  "homepage": "https://github.com/rapid7/propsd#readme",
+  "homepage": "https://github.com/rapid7/propsd",
   "devDependencies": {
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^3.1.0",
     "eslint-config-rapid7": "0.0.15",
     "eslint-plugin-rapid7": "^5.0.1",
     "eslint-plugin-react": "^3.14.0",
-    "mocha": "^2.3.4",
-    "should": "^8.1.1"
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
   },
   "dependencies": {
     "aws-sdk": "^2.2.28",

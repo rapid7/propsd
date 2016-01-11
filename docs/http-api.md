@@ -2,7 +2,7 @@
 
 The main interface to propsd is a HTTP API. The API can be used to retrieve
 properties and perform status checks. The endpoints are versioned to enable
-changes without breaking backwards compatibility. 
+changes without breaking backwards compatibility.
 
 Each endpoint manages a different aspect of propsd:
 
@@ -23,21 +23,21 @@ An example response from the health API is:
 
 ~~~json
 {
-  "status": "ok",
+  "status": "okay",
   "plugins": ["s3", "consul"]
 }
 ~~~
 
-The status field is a string with one of the following values: "ok", "warning",
-"fail". The ok status means all of the plugins are working. The warning status
-means some of the plugins are working. The fail status means none of the plugins
-are working.
+The status field is a string with one of the following values: "okay",
+"warning", "fail". The okay status means all of the plugins are working. The
+warning status means some of the plugins are working. The fail status means none
+of the plugins are working.
 
 The plugins field is an array of strings listing all the installed plugins.
 
 Response codes are compatible with Consul HTTP health checks. A 200 (OK) is
-returned with an ok status. A 429 (Too Many Requests) is returned with a warning
-status. A 500 (Internal Server Error) is returned with a fail status.
+returned with an okay status. A 429 (Too Many Requests) is returned with a
+warning status. A 500 (Internal Server Error) is returned with a fail status.
 
 ## Status ##
 
@@ -52,18 +52,18 @@ An example response from the status API is:
 
 ~~~json
 {
-  "status": "ok",
+  "status": "okay",
   "plugins": [{
     "type": "s3",
     "name": "global-properties",
     "bucket": "bucket",
     "path": "global.json",
-    "status": "ok",
+    "status": "okay",
     "mtime": "2016-01-06T16:47:45-05:00"
   },{
     "type": "consul",
     "name": "consul:service:rabbitmq",
-    "status": "ok",
+    "status": "okay",
     "mtime": "2016-01-06T16:47:45-05:00"
   }]
 }
@@ -81,12 +81,12 @@ in the "plugins" field from the health API.
 A plugin's name field is a string describing the plugin. The name field is
 unique for all instances of the same type of plugin.
 
-A plugin's status field is a string with one of the following values: "ok",
-"fail". The ok status means the plugin is working. The fail status means the
+A plugin's status field is a string with one of the following values: "okay",
+"fail". The okay status means the plugin is working. The fail status means the
 plugin is not working.
 
-A plugin's mtime field is a timestamp of the last time the plugin checked
-for updates. The timestamp is formatted as an ISO-8601 string with one second
+A plugin's mtime field is a time stamp of the last time the plugin checked
+for updates. The time stamp is formatted as an ISO-8601 string with one second
 resolution.
 
 ## Conqueso ##

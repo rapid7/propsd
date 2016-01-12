@@ -2,13 +2,15 @@
   "name": "propsd",
   "version": "0.0.1",
   "description": "A local daemon for loading static and dynamic properties",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "directories": {
     "doc": "docs",
     "bin": "bin"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "babel src --source-maps --out-dir lib -w",
+    "build": "babel src --source-maps --out-dir lib"
   },
   "repository": {
     "type": "git",

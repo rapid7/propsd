@@ -84,7 +84,7 @@ The content of the initial configuration file stored in S3 should have the follo
 ```json
 {
   "version": 1.1,
-  "constant": 4
+  "constant": 4,
   "sources": {
     "rabbitmq": {
       "type": "consul",
@@ -94,7 +94,7 @@ The content of the initial configuration file stored in S3 should have the follo
       "type": "consul",
       "tags": ["tag", "tag", "tag", "..."]
     }
-  }
+  },
   "properties": {
     "disks": "{{constant}}",
     "rabbit.nodes": "{{sources.rabbitmq.ipaddress}}"

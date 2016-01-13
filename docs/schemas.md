@@ -70,11 +70,10 @@ The content of the initial configuration file stored in S3 should have the follo
 
 ```json
 {
-  version: 1.0,
-  properties:
-  {
-    key: value,
-    key: value
+  "version": 1.0,
+  "properties": {
+    "key": "value",
+    "key": "value"
   }
 }
 ```
@@ -84,25 +83,21 @@ The content of the initial configuration file stored in S3 should have the follo
 
 ```json
 {
-  version: 1.1,
-  constant: 4
-  sources: 
-  {
-    rabbitmq:
-    {
-      type: consul,
-      tags: tag, tag, tag, ...
+  "version": 1.1,
+  "constant": 4
+  "sources": {
+    "rabbitmq": {
+      "type": "consul",
+      "tags": ["tag", "tag", "tag", "..."]
     },
-    cassandra,
-    {
-      type: consul,
-      tags: tag, tag, tag, ...
-    },
+    "cassandra": {
+      "type": "consul",
+      "tags": ["tag", "tag", "tag", "..."]
+    }
   }
-  properties:
-  {
-    disks: {{constant}},
-    rabbit.nodes: {{sources.rabbitmq.ipaddress}}
+  "properties": {
+    "disks": "{{constant}}",
+    "rabbit.nodes": "{{sources.rabbitmq.ipaddress}}"
   }
 }
 ```
@@ -113,26 +108,24 @@ With the multitude of layering options, the sources are read from global down to
 
 ```json
 {
-  version: 1.1,
-  constant: 4
-  sources:
-  [
+  "version": 1.1,
+  "constant": 4
+  "sources: [
     {
-      name: rabbitmq,
-      type: consul,
-      tags: tag, tag, tag, ...
+      "name": "rabbitmq",
+      "type": "consul",
+      "tags": ["tag", "tag", "tag", "..."]
     },
     {
-      name: config,
-      type: S3,
-      path: "",
-      bucket: "(optional)"
+      "name": "config",
+      "type": "S3",
+      "path": "",
+      "bucket": "(optional)"
      }
   ]
-  properties:
-  {
-    disks: {{constant}},
-    rabbit.nodes: {{sources.rabbitmq.ipaddress}}
+  "properties": {
+    "disks": "{{constant}}",
+    "rabbit.nodes": "{{sources.rabbitmq.ipaddress}}"
   }
 }
 ```

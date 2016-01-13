@@ -110,7 +110,7 @@ With the multitude of layering options, the sources are read from global down to
 {
   "version": 1.1,
   "constant": 4,
-  "sources: [
+  "sources": [
     {
       "name": "rabbitmq",
       "type": "consul",
@@ -122,7 +122,7 @@ With the multitude of layering options, the sources are read from global down to
       "path": "",
       "bucket": "(optional)"
      }
-  ]
+  ],
   "properties": {
     "disks": "{{constant}}",
     "rabbit.nodes": "{{sources.rabbitmq.ipaddress}}"

@@ -109,7 +109,7 @@ With the multitude of layering options, the sources are read from global down to
 ```json
 {
   "version": 1.1,
-  "constant": 4
+  "constant": 4,
   "sources: [
     {
       "name": "rabbitmq",

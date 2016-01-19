@@ -1,7 +1,7 @@
 Class: Parser
 =============
 
-Parser is the class that will translate a strings into properties between storage and services
+Parser is the class that will translate strings (starting with yamal) into properties (json) between storage and services
 
 ## Interface
 

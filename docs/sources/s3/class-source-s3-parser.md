@@ -1,9 +1,9 @@
 ## Sources.S3.Parser
-Parser is the class that will translate strings (starting with yamal) into properties (json) between storage and services
+Parser is the module that will translate and flatten buffers into properties between storage (S3) and services.
 
 ### Methods
 * `constructor(properties)`
 
-* `toJson(properties)`
+* `getData(properties)`
   * `properties`: (`buffer`) unformatted buffer of properties
-  * returns the buffer of properties formatted in json that the services can read.
+  * returns a buffer of properties formatted and munged down to one level.

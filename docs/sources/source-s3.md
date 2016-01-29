@@ -13,7 +13,7 @@ The watcher component will be split into the following modules:
 
 ## Classes
 
-* [Sources.S3](sources/s3/class-source-s3.md)
-* [Sources.S3.Agent](sources/s3/class-source-s3-agent.md)
-* [Sources.S3.Store](sources/s3/class-source-s3-store.md)
-* [Sources.S3.Parser]()
+* [Sources.S3](s3/class-source-s3.md)
+* [Sources.S3.Agent](s3/class-source-s3-agent.md)
+* [Sources.S3.Store](s3/class-source-s3-store.md)
+* [Sources.S3.Parser](s3/class-source-s3-parser.md)

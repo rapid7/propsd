@@ -1,12 +1,12 @@
-import Store from './store';
 import Agent from './agent';
 import Parser from './parser';
+import EventEmitter from 'events';
 import EventBus from './../../utils/events';
 
 /**
  * S3 source bootstrap class
  */
-class S3 {
+class S3 extends EventEmitter {
   /**
    * @callback S3~Callback
    * @param options {Object}
@@ -18,12 +18,21 @@ class S3 {
    * @param interval {int}
    */
   constructor(bucket, path, interval) {
+    super();
+
     this._bucket = bucket;
     this._path = path;
     this._interval = interval;
 
-    this._store = new Store();
+    this._store = {};
     this._agent = new Agent(this._bucket, this._path);
+    this._status = 'OK';
+
+    this.on('error', (e) => {
+      this._status = 'ERR';
+    }).on('done', () => {
+      this._status = 'OK';
+    });
   }
 
   /**
@@ -48,42 +57,28 @@ class S3 {
    * @param args {Object}
    */
   fetch(callback = null, args = {}) {
-    const cb = (callback instanceof Function) ? callback : this.defaultFetch;
+    const cb = (callback instanceof Function) ? callback : () => {
+      const eTag = this._store['ETag'] || null;
+      const result = this._agent.fetch(eTag); // Promise
+
+      result.then((val) => {
+        this._store['ETag'] = val.ETag;
+
+        // Instantiate a `Sources.S3.Parser` and parse the Body from S3
+        let parser = new Parser(val.Body);
+
+        this.emit('done', this.getType(), this.getName(), parser.getData());
+      })
+      .catch((err) => {
+        // Emit an error event
+        if (err.code !== 'NotModified') {
+          this.emit('error', this.getType(), this.getName(), err);
+        }
+      });
+    };
+
     this._timer = setInterval(cb, this._interval, {
-      args: args,
-      agent: this._agent,
-      store: this._store,
-      source: {
-        name: this.getName(),
-        type: this.getType()
-      }
-    });
-  }
-
-  /**
-   * Default callback for `fetch()` if one isn't provided
-   * @param options
-   */
-  defaultFetch(options) {
-    const agent = options.agent;
-    const store = options.store;
-    const source = options.source;
-
-    const eTag = store.get('ETag') || null;
-    const result = agent.fetch(eTag); // Promise
-
-    result.then((val) => {
-      store.set('ETag', val.ETag);
-
-      // Instantiate a `Sources.S3.Parser` and parse the Body from S3
-      let parser = new Parser(val.Body);
-        EventBus.emit('source-done', source.type, source.name, parser.getData());
-    })
-    .catch((err) => {
-      // Emit an error event
-      if (err.code !== 'NotModified') {
-        EventBus.emit('source-err', source.type, source.name, err);
-      }
+      args: args
     });
   }
 
@@ -91,7 +86,7 @@ class S3 {
    * Return the status of the plugin (tbd what that means)
    */
   status() {
-
+    return this._status;
   }
 
   /**

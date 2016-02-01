@@ -1,7 +1,6 @@
 import Agent from './agent';
 import Parser from './parser';
 import EventEmitter from 'events';
-import EventBus from './../../utils/events';
 
 /**
  * S3 source bootstrap class
@@ -29,9 +28,15 @@ class S3 extends EventEmitter {
     this._status = 'OK';
 
     this.on('error', (e) => {
-      this._status = 'ERR';
+      this._status = {
+        status: 'ERR',
+        timestamp: Date.now()
+      };
     }).on('done', () => {
-      this._status = 'OK';
+      this._status = {
+        status: 'OK',
+        timestamp: Date.now()
+      };
     });
   }
 

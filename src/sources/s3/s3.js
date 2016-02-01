@@ -93,7 +93,7 @@ class S3 extends EventEmitter {
    * Shutdown method
    */
   shutdown() {
-    this._timer.clear();
+    clearInterval(this._timer);
   }
 }
 

@@ -1,6 +1,18 @@
 {
+  "environment": "node",
+  "globals": {
+    "Config": true,
+    "Log": true
+  },
   "plugins": [
     "rapid7"
   ],
-  "extends": "rapid7"
+  "extends": "rapid7",
+  "rules": {
+    "curly": 0,
+    "func-names": 0,
+    "new-cap": 0,
+    "newline-after-var": 0,
+    "no-unused-vars": 0
+  }
 }

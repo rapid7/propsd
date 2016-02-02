@@ -2,6 +2,12 @@
   "name": "propsd",
   "version": "0.0.1",
   "author": "Rapid7 <coreservices@rapid7.com>",
+  "contributors": [
+    "David Greene <dgreene@rapid7.com>",
+    "John Manero <jmanero@rapid7.com>",
+    "Frank Mitchell <fmitchell@rapid7.com>",
+    "Richard Van Buren <rvanburen@rapid7.com>"
+  ],
   "description": "A local properties management service",
   "main": "lib/index.js",
   "scripts": {

@@ -1,18 +1,20 @@
 #!/usr/bin/env node
-var Express = require('express');
-var HTTP = require('http');
+'use strict';
+
+const Express = require('express');
+const HTTP = require('http');
 
 require('../lib/config');
 require('../lib/logger');
 
-var app = Express();
-var server = HTTP.createServer(app);
+const app = Express();
+const server = HTTP.createServer(app);
 
 require('../lib/control/v1/core').attach(app);
 require('../lib/control/v1/conqueso').attach(app);
 
 require('../lib/storage').initialize();
 
-server.listen(Config.get('service:port'), Config.get('service:hostname'), function() {
+server.listen(Config.get('service:port'), Config.get('service:hostname'), function () {
   Log.info('Listening on ' + Config.get('service:hostname') + ':' + Config.get('service:port'));
 });

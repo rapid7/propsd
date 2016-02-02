@@ -21,7 +21,18 @@ class Squawk extends EventEmitter {
   static make() {
     return new this();
   }
+
+  static getter() {
+    return this.baz;
+  }
+
+  get muh() {
+    return 'shrug';
+  }
+
 }
+
+Squawk.Test = class Test {};
 
 Squawk.baz = 'quxx';
 
@@ -45,6 +56,7 @@ describe('ES6 Support', function() {
 
   it('Implements static methods correctly', function() {
     expect(Squawk.make()).to.be.an.instanceof(Squawk);
+    expect(Squawk.getter()).to.equal('quxx');
   });
 
   it('Inherits a parent class\' methods correctly', function(done) {
@@ -63,5 +75,9 @@ describe('ES6 Support', function() {
     });
 
     squawk.tweet('HOOT');
+  });
+
+  it('Implements instance getters and setters correctly', function() {
+    expect(squawk.muh).to.equal('shrug');
   });
 });

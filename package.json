@@ -10,7 +10,8 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
     "watch": "babel src --source-maps --out-dir lib -w",
-    "build": "babel src --source-maps --out-dir lib"
+    "build": "babel src --source-maps --out-dir lib",
+    "lint": "eslint src/**; exit 0"
   },
   "repository": {
     "type": "git",
@@ -30,15 +31,17 @@
     "babel-register": "^6.4.3",
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^3.1.0",
-    "eslint-config-rapid7": "git+ssh://git@github.com/rapid7/eslint-config-rapid7.git#master",
-    "eslint-plugin-rapid7": "git+ssh://git@github.com/rapid7/eslint-plugin-rapid7.git#package-json-fix",
+    "eslint-config-rapid7": "0.0.15",
+    "eslint-plugin-rapid7": "^5.0.1",
     "eslint-plugin-react": "^3.14.0",
     "mocha": "^2.3.4",
     "should": "^8.1.1"
   },
   "dependencies": {
     "aws-sdk": "^2.2.28",
+    "consul": "^0.23.0",
     "express": "^4.13.3",
+    "nconf": "^0.8.2",
     "winston": "^2.1.1"
   }
 }

@@ -2,19 +2,5 @@
   "plugins": [
     "rapid7"
   ],
-  "extends": "rapid7",
-  "rules": {
-    "static-magic-numbers": 0,
-    "static-screaming-snake": 0,
-    "rapid7/static-magic-numbers": [2, {
-        "ignore": [0, 1, 2, -1],
-        "detectObjects": true,
-        "enforceConst": true,
-        "allowStatic": true,
-        "detectClassProperties": true
-      }],
-    "rapid7/static-screaming-snake": [2, {
-      "ignore": ["propTypes", "defaultProps"]
-    }]
-  }
+  "extends": "rapid7"
 }

@@ -1,3 +1,5 @@
+'use strict';
+
 // var Metadata = require('../lib/source/metadata');
 //
 // var source = new Metadata();

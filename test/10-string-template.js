@@ -1,14 +1,16 @@
 /* eslint-disable camelcase, no-unused-expressions,  */
+'use strict';
+
 const StringTemplate = require('../lib/util/string-template');
 const expect = require('chai').expect;
 
 describe('Utilities: Class StringTemplate', function () {
-  let string = 'The {{ jumper.adjective }} {{ jumper.color }} {{ jumper.animal }}';
+  let string = 'The {{ jumper:adjective }} {{ jumper:color }} {{ jumper:animal }}';
   string += ' jumped {{ preposition }} the... What ever, I\'m hungery';
 
   const expected = 'The quick red fox jumped over the... What ever, I\'m hungery';
   const not_a_template = 'This isn\'t a template';
-  const undefined_substitution = 'This template references {{ an.invalid }} variable!';
+  const undefined_substitution = 'This template references {{ an:invalid }} variable!';
 
   const scope = {
     jumper: {

@@ -1,7 +1,7 @@
 Class: Source.Consul
 ======================
 
-Watch a Consul endpoint for changes. Uses a Consul (Watcher)[https://github.com/silas/node-consul#watch] to monitor an endpoint.
+Watch a Consul endpoint for changes. Uses a Consul [Watcher](https://github.com/silas/node-consul#watch) to monitor an endpoint.
 
 ### Constructor `(parser, params, update)`
 
@@ -10,15 +10,13 @@ Watch a Consul endpoint for changes. Uses a Consul (Watcher)[https://github.com/
   * `method`  {`Function`}  The Consul API method to watch
   * `options` {`Object`}    Parameters to pass to the API method
 
-
 ### Instance Attribute `state`
 
 A reference to the last resource document received from the Consul Watcher's `change` event
 
 ### Instance Attribute `_watcher`
 
-An instance of (`Consul.Watcher`)[https://github.com/silas/node-consul#watch]. On the watcher's `change` event, the new resource is compared to `state`. If changes have occurred, `state` is set to the new resource, and `_update` is called. This behavior is consistent with that implemented in the [`consul watch` CLI](https://github.com/hashicorp/consul/blob/master/watch/plan.go#L85).
-
+An instance of [`Consul.Watcher`](https://github.com/silas/node-consul#watch). On the watcher's `change` event, the new resource is compared to `state`. If changes have occurred, `state` is set to the new resource, and `_update` is called. This behavior is consistent with that implemented in the [`consul watch` CLI](https://github.com/hashicorp/consul/blob/master/watch/plan.go#L85).
 
 ## Class Consul.Health
 

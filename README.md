@@ -1,1 +1,4 @@
-# Propsd
+propsd
+======
+
+A local properties management service

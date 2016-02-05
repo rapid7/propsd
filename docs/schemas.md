@@ -1,69 +1,38 @@
 # Schemas
 
 ## Manifest file (index.yaml / index.json)
-Props.d will be configured to consume a manifest file (index.yaml) from the <s3 bucket name here> bucket.
-
-The format of this yaml file will dictate the ordering of the configuration layering.  They are as follows:
-
-##### index.yaml
+Props.d will be configured to consume a manifest file (index.yaml) from an S3 object, which will drive the configuration of properties sources. The `source` key must be an array of objects with keys `name`, `type`, and `parameters`:
 
 ```yaml
-- global
-- account
-- region
-- vpc
-- product
-  |- stack
-- service
-  |- version
-- asg
-- instance
+---
+version: 1.0
+sources:
+  - name: global
+    type: s3
+    parameters:
+      path: global.json
+
+  - name: account
+    type: s3
+    parameters:
+      path: account/{{ instance.account }}.json
+      bucket: 'a-different-s3-bucket'
+# ...
 ```
 
-The files will be stored in the <s3 bucket name here> bucket in the following structure:
-
-```
-- global
-- account
-- region
-  |- vpc
-  |- asg
-  |- instance
-- product
-  |- stack
-- service
-  | - version
-```
-
-## Github stored yaml configuration files
+## Github stored YAML configuration files
 The content of the template configuration file stored in Github should have the following structure:
 
 ##### 1.0 schema
 
 ```yaml
---- 
+---
 version: 1.0
 properties:
   foo: bar
 ```  
 
-##### Future proposed schema
-
-```yaml
----
-version: 1.1
-sources:
-  # This source will be coming from a consul lookup
-  # which is looking for rabbitmq nodes with the listed
-  # tags.
-  - name: rabbitmq
-    type: consul
-    tags: [tag,tag,...]
-properties:
-  foo: bar
-```  
-
-## S3 stored json configuration files
+## S3 stored JSON configuration files
 The content of the initial configuration file stored in S3 should have the following structure:
 
 ##### 1.0 Schema
@@ -77,6 +46,7 @@ The content of the initial configuration file stored in S3 should have the follo
   }
 }
 ```
+
 1.0 will get back the entire consul catalog of instances.
 
 ##### Proposed 1.1 Schema

@@ -109,8 +109,11 @@ conqueso.frontend.ips=10.0.0.1,10.0.0.2
 PUT and POST requests return an empty body and a 200 (OK) response code. They
 don't create or update any properties internally.
 
+OPTIONS requests return an empty body and a 200 (OK) response code. They include
+an `Allow: GET, POST, PUT, OPTIONS` header.
+
 Any other type of request returns a 405 (Method Not Allowed) response code and
-includes an `Allow: GET, PUT, POST` header.
+includes an `Allow: GET, POST, PUT, OPTIONS` header.
 
 ## Formatted JSON output ##
 

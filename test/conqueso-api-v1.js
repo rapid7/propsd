@@ -13,13 +13,14 @@ const conquesoProperties = {
     'meta.property.1': 'songs you have never heard of',
     'meta.property.2': 'artisanal cream cheese'
   },
-  properties: [{
+  properties: {
     name: 'hipster-mode-enabled',
     value: true,
-    type: 'BOOLEAN',
-    description: 'Are you wearing skinny jeans?'
-  }]
+    type: 'BOOLEAN'
+  }
 };
+
+const javaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN';
 
 /**
  * Create a new Express server for testing
@@ -29,7 +30,7 @@ const conquesoProperties = {
 function makeServer() {
   const app = require('express')();
 
-  require('../lib/control/v1/conqueso').attach(app);
+  require('../lib/control/v1/conqueso').attach(app, conquesoProperties);
   return app.listen(testServerPort);
 }
 
@@ -47,8 +48,9 @@ describe('Conqueso API v1', () => {
   it('acknowledges GET requests', (done) => {
     request(server)
       .get('/v1/conqueso/api/roles')
+      .set('Accept', 'text/plain')
       .expect('Content-Type', 'text/plain; charset=utf-8')
-      .expect(HTTP_OK, '', done);
+      .expect(HTTP_OK, javaProperties, done);
   });
 
   it('acknowledges POST requests', (done) => {

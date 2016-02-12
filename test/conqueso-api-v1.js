@@ -9,17 +9,17 @@ const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
 
 const conquesoProperties = {
-  "instanceMetaData": {
-    "meta.property.1": "songs you've never heard of",
-    "meta.property.2": "artisanal cream cheese"
+  instanceMetaData: {
+    'meta.property.1': 'songs you have never heard of',
+    'meta.property.2': 'artisanal cream cheese'
   },
-  "properties": [{
-    "name": "hipster-mode-enabled",
-    "value": "true",
-    "type": "BOOLEAN",
-    "description": "Are you wearing skinny jeans?"
+  properties: [{
+    name: 'hipster-mode-enabled',
+    value: true,
+    type: 'BOOLEAN',
+    description: 'Are you wearing skinny jeans?'
   }]
-}
+};
 
 /**
  * Create a new Express server for testing

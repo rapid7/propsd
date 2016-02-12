@@ -44,6 +44,13 @@ describe('Conqueso API v1', () => {
     server.close(done);
   });
 
+  it('acknowledges GET requests', (done) => {
+    request(server)
+      .get('/v1/conqueso/api/roles')
+      .expect('Content-Type', 'text/plain; charset=utf-8')
+      .expect(HTTP_OK, '', done);
+  });
+
   it('acknowledges POST requests', (done) => {
     request(server)
       .post('/v1/conqueso/api/roles/search/properties')

@@ -58,6 +58,13 @@ describe('Conqueso API v1', () => {
       .expect(HTTP_OK, '', done);
   });
 
+  it('acknowledges OPTIONS requests', (done) => {
+    request(server)
+      .options('/v1/conqueso')
+      .expect('Allow', 'POST,PUT')
+      .expect(HTTP_OK, '', done);
+  });
+
   it('rejects DELETE requests', (done) => {
     request(server)
       .delete('/v1/conqueso')

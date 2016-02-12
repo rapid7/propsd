@@ -61,14 +61,28 @@ describe('Conqueso API v1', () => {
   it('acknowledges OPTIONS requests', (done) => {
     request(server)
       .options('/v1/conqueso')
-      .expect('Allow', 'POST,PUT')
+      .expect('Allow', 'POST,PUT,OPTIONS')
       .expect(HTTP_OK, '', done);
   });
 
   it('rejects DELETE requests', (done) => {
     request(server)
       .delete('/v1/conqueso')
-      .expect('Allow', 'POST,PUT')
+      .expect('Allow', 'POST,PUT,OPTIONS')
+      .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
+  });
+
+  it('rejects TRACE requests', (done) => {
+    request(server)
+      .trace('/v1/conqueso')
+      .expect('Allow', 'POST,PUT,OPTIONS')
+      .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
+  });
+
+  it('rejects HEAD requests', (done) => {
+    request(server)
+      .head('/v1/conqueso')
+      .expect('Allow', 'POST,PUT,OPTIONS')
       .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
   });
 });

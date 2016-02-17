@@ -32,4 +32,25 @@ describe('Storage Engine', () => {
 
     storage.update();
   });
+
+  it('prevents update event spam', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+    const updateTimeoutMS = 1000;
+
+    let updateEventCount = 0;
+
+    emitter.on('update', (properties) => {
+      updateEventCount += 1;
+      should(properties).be.empty();
+    });
+
+    storage.update();
+    storage.update();
+
+    setTimeout(() => {
+      assert.equal(updateEventCount, 1, 'Too many Storage#update events sent');
+      done();
+    }, updateTimeoutMS);
+  });
 });

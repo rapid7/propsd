@@ -53,4 +53,104 @@ describe('Storage Engine', () => {
       done();
     }, updateTimeoutMS);
   });
+
+  it('ignores null when merging properites', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+
+    storage.register({
+      properties: null
+    });
+
+    storage.register({
+      properties: {
+        food: ['tacos', 'peanuts']
+      }
+    });
+
+    emitter.on('update', (properties) => {
+      should(properties).have.property('food');
+      should(properties.food).eql(['tacos', 'peanuts']);
+      done();
+    });
+
+    storage.update();
+  });
+
+  it('ignores Functions when merging properites', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+
+    storage.register({
+      properties: () => {
+        return {
+          food: 'cabbage'
+        };
+      }
+    });
+
+    storage.register({
+      properties: {
+        food: ['tacos', 'peanuts']
+      }
+    });
+
+    emitter.on('update', (properties) => {
+      should(properties).have.property('food');
+      should(properties.food).eql(['tacos', 'peanuts']);
+      done();
+    });
+
+    storage.update();
+  });
+
+  it('concatenates arrays when merging properites', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+
+    storage.register({
+      properties: {
+        food: ['tacos', 'peanuts']
+      }
+    });
+
+    storage.register({
+      properties: {
+        food: ['noodles']
+      }
+    });
+
+    emitter.on('update', (properties) => {
+      should(properties).have.property('food');
+      should(properties.food).eql(['tacos', 'peanuts', 'noodles']);
+      done();
+    });
+
+    storage.update();
+  });
+
+  it('lets the last plugin win when merging properties', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+
+    storage.register({
+      properties: {
+        food: ['tacos', 'peanuts']
+      }
+    });
+
+    storage.register({
+      properties: {
+        food: 'pizza'
+      }
+    });
+
+    emitter.on('update', (properties) => {
+      should(properties).have.property('food');
+      should(properties.food).eql('pizza');
+      done();
+    });
+
+    storage.update();
+  });
 });

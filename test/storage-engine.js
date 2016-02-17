@@ -18,7 +18,7 @@ describe('Storage Engine', () => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 
-    const updateTimeoutMS = 5000;
+    const updateTimeoutMS = 1000;
     const updateTimeout = setTimeout(() => {
       assert(false, 'Storage#update event never fired.');
       done();

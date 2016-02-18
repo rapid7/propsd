@@ -31,14 +31,14 @@ describe('Logging', () => {
     log.level.should.be.exactly('info');
   });
 
-  before((done) => {
-    log.log(config.get('log:level'), 'Test logging message');
-    done();
-  });
-
   it('writes to the correct file', (done) => {
-    fs.readFileSync(configFile, 'utf8').should.not.be.Error; // eslint-disable-line no-unused-expressions
-    fs.unlinkSync(configFile);
-    done();
+    log.log(config.get('log:level'), 'Test logging message');
+
+    log.on('logging', (transport, level, msg, meta) => {
+      transport.name.should.equal('file');
+      transport.filename.should.equal(configFile);
+      msg.should.equal('Test logging message');
+      done();
+    });
   });
 });

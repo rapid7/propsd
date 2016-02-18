@@ -59,12 +59,39 @@ describe('Storage Engine', () => {
     const storage = new Storage(emitter);
 
     storage.register({
-      properties: null
+      properties: {
+        food: ['tacos', 'peanuts']
+      }
     });
 
     storage.register({
       properties: {
+        food: null
+      }
+    });
+
+    emitter.on('update', (properties) => {
+      should(properties).have.property('food');
+      should(properties.food).eql(['tacos', 'peanuts']);
+      done();
+    });
+
+    storage.update();
+  });
+
+  it('ignores undefined when merging properites', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+
+    storage.register({
+      properties: {
         food: ['tacos', 'peanuts']
+      }
+    });
+
+    storage.register({
+      properties: {
+        food: undefined
       }
     });
 
@@ -82,16 +109,16 @@ describe('Storage Engine', () => {
     const storage = new Storage(emitter);
 
     storage.register({
-      properties: () => {
-        return {
-          food: 'cabbage'
-        };
+      properties: {
+        food: ['tacos', 'peanuts']
       }
     });
 
     storage.register({
       properties: {
-        food: ['tacos', 'peanuts']
+        food: () => {
+          return 'cabbage';
+        }
       }
     });
 
@@ -104,7 +131,7 @@ describe('Storage Engine', () => {
     storage.update();
   });
 
-  it('concatenates arrays when merging properites', (done) => {
+  it('overwrites arrays when merging properites', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 
@@ -122,14 +149,14 @@ describe('Storage Engine', () => {
 
     emitter.on('update', (properties) => {
       should(properties).have.property('food');
-      should(properties.food).eql(['tacos', 'peanuts', 'noodles']);
+      should(properties.food).eql(['noodles']);
       done();
     });
 
     storage.update();
   });
 
-  it('lets the last plugin win when merging properties', (done) => {
+  it('overwrite JSON types when merging properties', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 
@@ -148,6 +175,36 @@ describe('Storage Engine', () => {
     emitter.on('update', (properties) => {
       should(properties).have.property('food');
       should(properties.food).eql('pizza');
+      done();
+    });
+
+    storage.update();
+  });
+
+  it('recursive merge when merging properties', (done) => {
+    const emitter = new EventEmitter();
+    const storage = new Storage(emitter);
+
+    storage.register({
+      properties: {
+        food: {
+          likes: 'pizza'
+        }
+      }
+    });
+
+    storage.register({
+      properties: {
+        food: {
+          likes: 'tacos',
+          dislikes: 'gluten'
+        }
+      }
+    });
+
+    emitter.on('update', (properties) => {
+      should(properties).have.property('food');
+      should(properties.food).eql({likes: 'tacos', dislikes: 'gluten'});
       done();
     });
 

@@ -24,14 +24,17 @@ An example response from the health API is:
 ~~~json
 {
   "status": "okay",
+  "uptime": 1222101,
   "plugins": ["s3", "consul"]
 }
 ~~~
 
 The status field is a string with one of the following values: "okay",
-"warning", "fail". The okay status means all of the plugins are working. The
-warning status means some of the plugins are working. The fail status means none
+"warn", "fail". The okay status means all of the plugins are working. The
+warn status means some of the plugins are working. The fail status means none
 of the plugins are working.
+
+The uptime field is an integer representing the number of milliseconds propsd has been running.
 
 The plugins field is an array of strings listing all the installed plugins.
 
@@ -53,6 +56,8 @@ An example response from the status API is:
 ~~~json
 {
   "status": "okay",
+  "uptime": 1222101,
+  "index": "okay",
   "plugins": [{
     "type": "s3",
     "name": "global-properties",
@@ -69,7 +74,7 @@ An example response from the status API is:
 }
 ~~~
 
-The status field matches what's returned from the health API.
+The status and uptime fields matches what's returned from the health API. The index field provides the status of the index source.
 
 The plugins field is an array of plugin objects. A plugin object will always
 have the following fields: "name", "type", "status", "mtime". Some plugin

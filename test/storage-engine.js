@@ -54,6 +54,21 @@ describe('Storage Engine', () => {
     }, updateTimeoutMS);
   });
 
+  it('maintains an ordered list of active sources', () => {
+    const storage = new Storage();
+    const source1 = {properties: {food: ['tacos', 'peanuts']}};
+    const source2 = {properties: {food: null}};
+
+    should(storage).have.property('sources');
+    should(storage.sources).be.empty();
+
+    storage.register(source1);
+    should(storage.sources).eql([source1]);
+
+    storage.register(source2);
+    should(storage.sources).eql([source1, source2]);
+  });
+
   it('ignores null when merging properites', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);

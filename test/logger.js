@@ -2,7 +2,6 @@
 'use strict';
 
 require('should');
-const fs = require('fs');
 const Winston = require('winston');
 
 class ConfigLike {
@@ -34,7 +33,7 @@ describe('Logging', () => {
   it('writes to the correct file', (done) => {
     log.log(config.get('log:level'), 'Test logging message');
 
-    log.on('logging', (transport, level, msg, meta) => {
+    log.on('logging', (transport, level, msg) => {
       transport.name.should.equal('file');
       transport.filename.should.equal(configFile);
       msg.should.equal('Test logging message');

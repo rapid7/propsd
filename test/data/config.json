@@ -1,0 +1,23 @@
+{
+  "index": {
+    "path": "homepage.json",
+    "interval": 30,
+    "region": "Neptune-99"
+  },
+  "service": {
+    "port": 1006,
+    "hostname": "local"
+  },
+  "log": {
+    "level": "info"
+  },
+  "consul": {
+    "host": "196.198.10.10",
+    "port": 8500,
+    "secure": false
+  },
+  "power": {
+    "level": 9001,
+    "interval": 1
+  }
+}

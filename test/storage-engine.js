@@ -69,7 +69,7 @@ describe('Storage Engine', () => {
     should(storage.sources).eql([source1, source2]);
   });
 
-  it('ignores null when merging properites', (done) => {
+  it('ignores null when merging properties', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 
@@ -94,7 +94,7 @@ describe('Storage Engine', () => {
     storage.update();
   });
 
-  it('ignores undefined when merging properites', (done) => {
+  it('ignores undefined when merging properties', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 
@@ -119,7 +119,7 @@ describe('Storage Engine', () => {
     storage.update();
   });
 
-  it('ignores Functions when merging properites', (done) => {
+  it('ignores Functions when merging properties', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 
@@ -146,7 +146,7 @@ describe('Storage Engine', () => {
     storage.update();
   });
 
-  it('overwrites arrays when merging properites', (done) => {
+  it('overwrites arrays when merging properties', (done) => {
     const emitter = new EventEmitter();
     const storage = new Storage(emitter);
 

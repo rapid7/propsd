@@ -56,6 +56,7 @@ describe('Logging', () => {
   it('optionally logs to a file', () => {
     const configWithoutFile = new ConfigWithoutFile();
     const logger = require('../lib/logger').attach(configWithoutFile);
+
     Object.keys(logger.transports).should.eql(['console']);
   });
 });

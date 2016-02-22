@@ -27,6 +27,10 @@ An array of active Source instances
 
 Sources should call the `update` method to notify the Storage class when they have new properties.
 
+### Instance Method: `register(source)`
+
+Sources should register with the Storage class by calling the `register` method. The `register` method takes the source as an argument. Only registered sources' properties will be merged when `update` is called.
+
 ## Class: Storage.Index
 
 A Scheme for defining an ordered set of sources to be managed by the Storage module. This scheme will parse a JSON array of Source definitions:

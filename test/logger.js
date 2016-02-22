@@ -17,6 +17,18 @@ class ConfigLike {
   }
 }
 
+class ConfigWithoutFile {
+  constructor() {
+    this.data = {
+      'log:level': 'info'
+    };
+  }
+
+  get(str) {
+    return this.data[str];
+  }
+}
+
 describe('Logging', () => {
   const config = new ConfigLike();
   const log = require('../lib/logger').attach(config);
@@ -39,5 +51,11 @@ describe('Logging', () => {
       msg.should.equal('Test logging message');
       done();
     });
+  });
+
+  it('optionally logs to a file', () => {
+    const configWithoutFile = new ConfigWithoutFile();
+    const logger = require('../lib/logger').attach(configWithoutFile);
+    Object.keys(logger.transports).should.eql(['console']);
   });
 });

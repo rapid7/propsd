@@ -12,6 +12,9 @@ const port = config.get('service:port');
 const app = express();
 const server = http.createServer(app);
 
+require('./lib/control/v1/core').attach(app);
+require('./lib/control/v1/conqueso').attach(app);
+
 server.listen(port, host, () => {
   logger.info('Listening on ' + host + ':' + port);
 });

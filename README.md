@@ -39,7 +39,9 @@ supported values are "debug", "warn", and "error".
 ### log:filename
 
 Propsd logs to $STDOUT by default. This defines an additional file for logging
-so you can run propsd without terminal output.
+so you can run propsd without terminal output. Log files aren't rotated by
+propsd, so you'll want to configure something externally to handle that if
+you enable file logging.
 
 ### Example
 

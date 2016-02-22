@@ -1,10 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
+const args = require('yargs')
+  .usage('Usage: $0 [args]')
+  .option('cf', {
+    alias: 'config-file',
+    describe: 'path to a configuration file',
+    type: 'string'
+  })
+  .help('help')
+  .argv
+
 const express = require('express');
 const http = require('http');
 
-const config = require('./lib/config').load();
+const config = require('./lib/config').load(args.cf);
 const logger = require('./lib/logger').attach(config);
 
 const host = config.get('service:hostname');

@@ -1,5 +1,21 @@
 # Propsd
 
+## Usage
+
+The Propsd server runs under [Node.js][]. Run the following command to start it.
+
+~~~bash
+node server.js
+~~~
+
+This will start the [HTTP server][http-api] listening on port 127.0.0.1:9100. If
+you need to specify different server options, see the configuration section
+below. Inline help is available with the `--help` argument.
+
+~~~bash
+node server.js --help
+~~~
+
 ## Configuration
 
 Propsd reads its configuration from a JSON file. The `--config-file` argument
@@ -43,3 +59,7 @@ file logging is enabled.
   }
 }
 ~~~
+
+
+[Node.js]: https://nodejs.org/en/
+[http-api]: docs/http-api.md

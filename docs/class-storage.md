@@ -7,10 +7,6 @@ _In a future version, the Storage module should be able to discover new sources 
 
 ## Interface
 
-### Constructor
-
-The Storage class can be instantiated with an optional `EventEmitter`. If one's provided, "update" events will be emitted to it whenever merged properties are modified.
-
 ### Class Attribute: `properties`
 
 ```

@@ -27,6 +27,20 @@ describe('Storage Engine', () => {
     should(storage.sources).eql([source1, source2]);
   });
 
+  it('ignores sources without properties', () => {
+    const storage = new Storage();
+
+    storage.register(null);
+    storage.register(undefined);
+    storage.register(1.0);
+    storage.register('properties');
+    storage.register(() => {});
+    storage.register([]);
+    storage.register({});
+
+    should(storage.sources).eql([]);
+  });
+
   it('merges properites on demand', () => {
     const storage = new Storage();
 

@@ -9,7 +9,7 @@ const args = require('yargs')
     type: 'string'
   })
   .help('help')
-  .argv
+  .argv;
 
 const express = require('express');
 const http = require('http');

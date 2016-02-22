@@ -27,6 +27,20 @@ describe('Storage Engine', () => {
     should(storage.sources).eql([source1, source2]);
   });
 
+  it('merges properites on demand', () => {
+    const storage = new Storage();
+
+    storage.register({
+      properties: {
+        food: 'tacos'
+      }
+    });
+
+    should(storage.properties).not.have.property('food');
+    storage.update();
+    should(storage.properties).have.property('food');
+  });
+
   it('ignores null when merging properties', () => {
     const storage = new Storage();
 

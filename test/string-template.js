@@ -5,7 +5,7 @@ const should = require('should');
 const StringTemplate = require('../lib/string-template');
 
 describe('StringTemplate', () => {
-  let string = 'The {{ jumper:adjective }} {{ jumper:color }} {{ jumper:animal }}';
+  let string = 'The {{jumper:adjective}} {{ jumper:color }} {{jumper:animal}}';
 
   string += ' jumped {{ preposition }} the... What ever, I\'m hungery';
 
@@ -31,6 +31,10 @@ describe('StringTemplate', () => {
 
   it('detects invalid template strings', () => {
     StringTemplate.isTemplate(notATemplate).should.equal(false);
+  });
+
+  it('toJSON converts to a string correctly', () => {
+    template.toJSON().should.equal(expected);
   });
 
   it('substitutes values into a template string correctly', () => {

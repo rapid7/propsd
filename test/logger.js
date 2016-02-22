@@ -5,23 +5,8 @@ require('should');
 const Winston = require('winston');
 
 class ConfigLike {
-  constructor() {
-    this.data = {
-      'log:level': 'info',
-      'log:filename': 'tmp.log'
-    };
-  }
-
-  get(str) {
-    return this.data[str];
-  }
-}
-
-class ConfigWithoutFile {
-  constructor() {
-    this.data = {
-      'log:level': 'info'
-    };
+  constructor(data) {
+    this.data = data;
   }
 
   get(str) {
@@ -30,7 +15,10 @@ class ConfigWithoutFile {
 }
 
 describe('Logging', () => {
-  const config = new ConfigLike();
+  const config = new ConfigLike({
+    'log:level': 'info',
+    'log:filename': 'tmp.log'
+  });
   const log = require('../lib/logger').attach(config);
   const configFile = config.get('log:filename');
 
@@ -54,7 +42,9 @@ describe('Logging', () => {
   });
 
   it('optionally logs to a file', () => {
-    const configWithoutFile = new ConfigWithoutFile();
+    const configWithoutFile = new ConfigLike({
+      'log:level': 'info'
+    });
     const logger = require('../lib/logger').attach(configWithoutFile);
 
     Object.keys(logger.transports).should.eql(['console']);

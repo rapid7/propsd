@@ -25,11 +25,11 @@ An array of active Source instances
 
 ### Instance Method: `update()`
 
-Sources should call the `update` method to notify the Storage class when they have new properties.
+The PluginManager calls the `update` method to notify the Storage class when Source instances have updated properites.
 
 ### Instance Method: `register(source)`
 
-Sources should register with the Storage class by calling the `register` method. The `register` method takes the source as an argument. Only registered sources' properties will be merged when `update` is called.
+The PluginManager registers Sources with the Storage class by calling the `register` method. The `register` method takes the source as an argument. Only registered sources' properties will be merged when `update` is called.
 
 ## Class: Storage.Index
 

@@ -10,7 +10,8 @@
   "scripts": {
     "start": "./bin/server.js",
     "test": "mocha",
-    "lint": "eslint bin/** lib/** test/**"
+    "lint": "eslint bin/** lib/** test/**",
+    "coverage": "istanbul cover _mocha -- -R spec"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "eslint-config-rapid7": "0.0.15",
     "eslint-plugin-rapid7": "^5.0.1",
     "eslint-plugin-react": "^3.14.0",
+    "istanbul": "^0.4.2",
     "mocha": "^2.3.4",
     "should": "^8.1.1",
     "supertest": "^1.2.0"

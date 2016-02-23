@@ -28,11 +28,7 @@ describe('Metadata source plugin', () => {
   });
 
   afterEach(() => {
-    const status = this.m.status();
-
-    if (status.running) {
-      this.m.shutdown();
-    }
+    this.m.shutdown();
   });
 
   it('creates a Metadata source instance with a non-default timer interval', () => {
@@ -76,7 +72,7 @@ describe('Metadata source plugin', () => {
     this.m.on('shutdown', () => {
       const status = this.m.status();
 
-      status.running.should.be.false; // eslint-disable-line no-unused-expressions
+      status.running.should.be.false();
       done();
     });
 
@@ -122,8 +118,8 @@ describe('Metadata source plugin', () => {
       const status = this.m.status();
 
       err.code.should.equal('ECONNREFUSED');
-      status.ok.should.be.false; // eslint-disable-line no-unused-expressions
-      status.running.should.be.true; // eslint-disable-line no-unused-expressions
+      status.ok.should.be.false();
+      status.running.should.be.true();
       done();
     });
 

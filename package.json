@@ -8,8 +8,9 @@
     "bin": "bin"
   },
   "scripts": {
+    "start": "./bin/server.js",
     "test": "mocha",
-    "lint": "eslint *.js lib/** test/**"
+    "lint": "eslint bin/** lib/** test/**"
   },
   "repository": {
     "type": "git",

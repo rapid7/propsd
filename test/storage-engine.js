@@ -41,7 +41,7 @@ describe('Storage Engine', () => {
     should(storage.sources).eql([]);
   });
 
-  it('merges properites on demand', () => {
+  it('merges properties on demand', () => {
     const storage = new Storage();
 
     storage.register({

@@ -5,7 +5,7 @@
 The Propsd server runs under [Node.js][]. Run the following command to start it.
 
 ~~~bash
-node server.js
+node bin/server.js
 ~~~
 
 This will start the [HTTP server][http-api] listening on port 127.0.0.1:9100. If
@@ -13,7 +13,7 @@ you need to specify different server options, see the configuration section
 below. Inline help is available with the `--help` argument.
 
 ~~~bash
-node server.js --help
+node bin/server.js --help
 ~~~
 
 ## Configuration

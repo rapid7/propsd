@@ -181,4 +181,22 @@ describe('Storage Engine', () => {
     should(storage.properties).have.property('food');
     should(storage.properties.food).eql({likes: 'tacos', dislikes: 'gluten'});
   });
+
+  it('copy properties when merging them', () => {
+    const storage = new Storage();
+    const plugin = {
+      properties: {
+        food: 'pizza'
+      }
+    };
+
+    storage.register(plugin);
+    storage.update();
+
+    should(storage.properties.food).eql('pizza');
+    plugin.properties.food = 'tacos';
+    should(storage.properties.food).eql('pizza');
+    storage.update();
+    should(storage.properties.food).eql('tacos');
+  });
 });

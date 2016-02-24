@@ -8,8 +8,9 @@
     "bin": "bin"
   },
   "scripts": {
+    "start": "./bin/server.js",
     "test": "mocha",
-    "lint": "eslint lib/** test/**",
+    "lint": "eslint bin/** lib/** test/**",
     "coverage": "istanbul cover _mocha -- -R spec"
   },
   "repository": {
@@ -36,6 +37,7 @@
     "aws-sdk": "^2.2.28",
     "express": "^4.13.3",
     "nconf": "^0.8.4",
-    "winston": "^2.1.1"
+    "winston": "^2.1.1",
+    "yargs": "^4.1.0"
   }
 }

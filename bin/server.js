@@ -16,7 +16,7 @@ const args = require('yargs')
 const express = require('express');
 const http = require('http');
 
-global.Config = require('../lib/config').load(args.cf);
+global.Config = require('../lib/config').load(args.c);
 global.Log = require('../lib/logger').attach(global.Config);
 
 const host = Config.get('service:hostname');

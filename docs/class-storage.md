@@ -3,7 +3,7 @@ Class: Storage
 
 The `Storage` module is responsible for managing data sources and merging their properties into a single document in the correct order. In "Version 1", it will use a dedicated S3Watcher to fetch an index object from S3, and add/remove sources accoding to an array defined therein.
 
-_In a future version, the Storage module should be able to discover new sources from fetched objects, removing the need for an out-of-band definition of sources in an index. Instead, the Storage module would initialize its first source(s) from local configuration, and find additional sources recursivly from their own contents._
+_In a future version, the Storage module should be able to discover new sources from fetched objects, removing the need for an out-of-band definition of sources in an index. Instead, the Storage module would initialize its first source(s) from local configuration, and find additional sources recursively from their own contents._
 
 ## Interface
 
@@ -22,6 +22,14 @@ Storage.sources
 ```
 
 An array of active Source instances
+
+### Instance Method: `update()`
+
+The PluginManager calls the `update` method to notify the Storage class when Source instances have updated properites.
+
+### Instance Method: `register(source)`
+
+The PluginManager registers Sources with the Storage class by calling the `register` method. The `register` method takes the source as an argument. Only registered sources' properties will be merged when `update` is called.
 
 ## Class: Storage.Index
 

@@ -30,7 +30,10 @@
     "eslint-plugin-react": "^3.14.0",
     "istanbul": "^0.4.2",
     "mocha": "^2.3.4",
+    "proxyquire": "^1.7.4",
     "should": "^8.1.1",
+    "should-sinon": "0.0.5",
+    "sinon": "^1.17.3",
     "supertest": "^1.2.0"
   },
   "dependencies": {

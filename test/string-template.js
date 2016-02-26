@@ -46,4 +46,16 @@ describe('StringTemplate', () => {
 
     should.throws(() => throwsAnError.toString(), ReferenceError);
   });
+
+  it('correctly substitutes a template string if given valid properties', () => {
+    const t = StringTemplate.coerce('{{foo:bar}}', {foo: {bar: 'baz'}});
+
+    t.should.equal('baz');
+  });
+
+  it('returns the original string if it\'s not a valid template', () => {
+    const t = StringTemplate.coerce('foo:bar}}', {foo: 1});
+
+    t.should.equal('foo:bar}}');
+  });
 });

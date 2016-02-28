@@ -5,16 +5,6 @@
 const should = require('should');
 const Path = require('path');
 const fs = require('fs');
-const winston = require('winston');
-
-const server = require('./utils/test-metadata-server');
-
-server.start();
-
-global.Config = require('../lib/config').load(Path.resolve(__dirname, './data/config.json'));
-
-global.Log = require('../lib/logger').attach(global.Config);
-global.Log.remove(winston.transports.Console);
 
 const Metadata = require('../lib/source/metadata');
 const fakeMetadata = JSON.parse(fs.readFileSync(Path.resolve(__dirname, './data/test-metadata.json')));
@@ -123,7 +113,7 @@ describe('Metadata source plugin', () => {
   });
 
   it('exposes an error when one occurs but continues running', (done) => {
-    server.stop();
+    this.m.service.host = '0.0.0.0';
     this.m.on('error', (err) => {
       const status = this.m.status();
 
@@ -141,6 +131,6 @@ describe('Metadata source plugin', () => {
   });
 
   after(() => {
-    server.start();
+    this.m.service.host = '127.0.0.1:8080';
   });
 });

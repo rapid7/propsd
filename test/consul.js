@@ -1,8 +1,15 @@
 /* eslint-env mocha */
 'use strict';
 
-require('should');
+const path = require('path');
+const winston = require('winston');
 const Consul = require('../lib/source/consul');
+
+global.Config = require('../lib/config').load(path.resolve(__dirname, './data/config.json'));
+global.Log = require('../lib/logger').attach(global.Config);
+global.Log.remove(winston.transports.Console);
+
+require('should');
 
 describe('Consul source plugin', () => {
   it('has a type', () => {
@@ -21,5 +28,15 @@ describe('Consul source plugin', () => {
     const consul = new Consul({interval: nonDefaultTimerInterval});
 
     consul.interval.should.eql(nonDefaultTimerInterval);
+  });
+
+  it('', (done) => {
+    const consul = new Consul();
+
+    consul.on('update', () => {
+      done();
+    });
+
+    consul.initialize();
   });
 });

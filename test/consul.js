@@ -34,7 +34,13 @@ class MockConsul {
       return this.getOrCreateEmitter('catalog-service');
     }
     if (options.method === this.health.service) {
-      return this.getOrCreateEmitter(options.options.tag || options.options.service);
+      let name = options.options.service;
+
+      if (options.options.tag) {
+        name += '-' + options.options.tag;
+      }
+
+      return this.getOrCreateEmitter(name);
     }
     throw new Error('Unknown method: ' + options.method);
   }
@@ -201,8 +207,8 @@ describe('Consul source plugin', () => {
       updateCount += 1;
       if (updateCount === 2) {
         should(properties).eql({
-          production: {addresses: ['127.0.0.1']},
-          development: {addresses: ['10.0.0.0']}
+          'consul-production': {addresses: ['127.0.0.1']},
+          'consul-development': {addresses: ['10.0.0.0']}
         });
         done();
       }
@@ -210,10 +216,10 @@ describe('Consul source plugin', () => {
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: ['production', 'development']});
-    consul.mock.emitChange('production', [{
+    consul.mock.emitChange('consul-production', [{
       Service: {Address: '127.0.0.1'}
     }]);
-    consul.mock.emitChange('development', [{
+    consul.mock.emitChange('consul-development', [{
       Service: {Address: '10.0.0.0'}
     }]);
   });
@@ -226,8 +232,8 @@ describe('Consul source plugin', () => {
       updateCount += 1;
       if (updateCount === 2) {
         should(properties).eql({
-          'consul:production': {addresses: ['127.0.0.1']},
-          'elasticsearch:production': {addresses: ['10.0.0.0']}
+          'consul-production': {addresses: ['127.0.0.1']},
+          'elasticsearch-production': {addresses: ['10.0.0.0']}
         });
         done();
       }
@@ -238,10 +244,10 @@ describe('Consul source plugin', () => {
       consul: ['production'],
       elasticsearch: ['production']
     });
-    consul.mock.emitChange('consul:production', [{
+    consul.mock.emitChange('consul-production', [{
       Service: {Address: '127.0.0.1'}
     }]);
-    consul.mock.emitChange('elasticsearch:production', [{
+    consul.mock.emitChange('elasticsearch-production', [{
       Service: {Address: '10.0.0.0'}
     }]);
   });

@@ -217,4 +217,32 @@ describe('Consul source plugin', () => {
       Service: {Address: '10.0.0.0'}
     }]);
   });
+
+  it('avoids resolving similar tags to the same service', (done) => {
+    const consul = generateConsulStub();
+    let updateCount = 0;
+
+    consul.on('update', (properties) => {
+      updateCount += 1;
+      if (updateCount === 2) {
+        should(properties).eql({
+          'consul:production': {addresses: ['127.0.0.1']},
+          'elasticsearch:production': {addresses: ['10.0.0.0']}
+        });
+        done();
+      }
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {
+      consul: ['production'],
+      elasticsearch: ['production']
+    });
+    consul.mock.emitChange('consul:production', [{
+      Service: {Address: '127.0.0.1'}
+    }]);
+    consul.mock.emitChange('elasticsearch:production', [{
+      Service: {Address: '10.0.0.0'}
+    }]);
+  });
 });

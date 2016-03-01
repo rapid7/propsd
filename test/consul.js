@@ -11,7 +11,6 @@ global.Config = require('../lib/config').load(path.resolve(__dirname, './data/co
 global.Log = require('../lib/logger').attach(global.Config);
 global.Log.remove(winston.transports.Console);
 
-
 class MockConsul {
   constructor() {
     // Mock the catalog.service.list function.
@@ -55,11 +54,12 @@ class MockConsul {
 function generateConsulStub() {
   const mock = new MockConsul();
   const Consul = proxyquire('../lib/source/consul', {
-    'consul': function() {
+    consul() {
       return mock;
     }
   });
   const consul = new Consul();
+
   consul.mock = mock;
   return consul;
 }

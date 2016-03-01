@@ -121,6 +121,26 @@ describe('Consul source plugin', () => {
     consul.shutdown();
   });
 
+  it('avoids sending multiple startup events', () => {
+    const consul = generateConsulStub();
+    let startupCount = 0;
+
+    consul.on('startup', () => {
+      startupCount += 1;
+    });
+
+    consul.initialize();
+    consul.initialize();
+
+    return new Promise((resolve, reject) => {
+      if (startupCount !== 1) {
+        reject(new Error('Too many Consul#startup events sent'));
+      } else {
+        resolve(startupCount);
+      }
+    });
+  });
+
   it('bubbles errors from the Consul service/list API', (done) => {
     const consul = generateConsulStub();
 

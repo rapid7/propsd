@@ -66,6 +66,12 @@ function generateConsulStub() {
 }
 
 describe('Consul source plugin', () => {
+  it('has a type', () => {
+    const consul = generateConsulStub();
+
+    should(consul.type).eql('consul');
+  });
+
   it('reports as running after startup', (done) => {
     const consul = generateConsulStub();
 

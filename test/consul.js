@@ -239,7 +239,7 @@ describe('Consul source plugin', () => {
       should(consul.properties).eql(properties);
       updateCount += 1;
 
-      if (updateCount === 3) {
+      if (updateCount === 3) { // eslint-disable-line rapid7/static-magic-numbers
         should(properties).eql({
           'consul-production': {addresses: ['127.0.0.1']},
           'consul-development': {addresses: ['10.0.0.0']}
@@ -266,7 +266,7 @@ describe('Consul source plugin', () => {
       should(consul.properties).eql(properties);
       updateCount += 1;
 
-      if (updateCount === 3) {
+      if (updateCount === 3) { // eslint-disable-line rapid7/static-magic-numbers
         should(properties).eql({
           'consul-production': {addresses: ['127.0.0.1']},
           'elasticsearch-production': {addresses: ['10.0.0.0']}

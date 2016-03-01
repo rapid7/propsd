@@ -52,36 +52,21 @@ class MockConsul {
   }
 }
 
-function generateConsulStub(mock, options) {
+function generateConsulStub() {
+  const mock = new MockConsul();
   const Consul = proxyquire('../lib/source/consul', {
     'consul': function() {
       return mock;
     }
   });
-  return new Consul(options);
+  const consul = new Consul();
+  consul.mock = mock;
+  return consul;
 }
 
 describe('Consul source plugin', () => {
-  it('has a default timer interval', () => {
-    const defaultTimerInterval = 60000;
-    const mockConsul = new MockConsul();
-    const consul = generateConsulStub(mockConsul);
-
-    consul.interval.should.eql(defaultTimerInterval);
-  });
-
-  it('can be created with a non-default timer interval', () => {
-    const nonDefaultTimerInterval = 1000;
-    const mockConsul = new MockConsul();
-    const consul = generateConsulStub(mockConsul, {interval: nonDefaultTimerInterval});
-
-    consul.interval.should.eql(nonDefaultTimerInterval);
-  });
-
   it('emits an update event when properites change', (done) => {
-    const emitter = new EventEmitter();
-    const mockConsul = new MockConsul();
-    const consul = generateConsulStub(mockConsul);
+    const consul = generateConsulStub();
 
     consul.on('update', (properties) => {
       should(properties).eql({consul: {addresses: []}});
@@ -89,7 +74,7 @@ describe('Consul source plugin', () => {
     });
 
     consul.initialize();
-    mockConsul.emitChange('catalog-service', {consul: []});
-    mockConsul.emitChange('consul', {});
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', {});
   });
 });

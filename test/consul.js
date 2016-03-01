@@ -166,7 +166,7 @@ describe('Consul source plugin', () => {
     consul.mock.emitError('consul', new Error('Mock health/service error'));
   });
 
-  it('resolves empty an empty address list if no addresses are found', (done) => {
+  it('resolves an empty address list if no addresses are found', (done) => {
     const consul = generateConsulStub();
     let updateCount = 0;
 
@@ -206,6 +206,27 @@ describe('Consul source plugin', () => {
     }]);
   });
 
+  it('avoids resolving empty node addresses', (done) => {
+    const consul = generateConsulStub();
+    let updateCount = 0;
+
+    consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
+      updateCount += 1;
+
+      if (updateCount === 2) {
+        should(properties).eql({consul: {addresses: []}});
+        done();
+      }
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', [{
+      Node: {Address: ''}
+    }]);
+  });
+
   it('resolves addresses at the service level if defined', (done) => {
     const consul = generateConsulStub();
     let updateCount = 0;
@@ -225,6 +246,28 @@ describe('Consul source plugin', () => {
     consul.mock.emitChange('consul', [{
       Node: {Address: '10.0.0.0'},
       Service: {Address: '127.0.0.1'}
+    }]);
+  });
+
+  it('avoids resolving empty service addresses', (done) => {
+    const consul = generateConsulStub();
+    let updateCount = 0;
+
+    consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
+      updateCount += 1;
+
+      if (updateCount === 2) {
+        should(properties).eql({consul: {addresses: ['10.0.0.0']}});
+        done();
+      }
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', [{
+      Node: {Address: '10.0.0.0'},
+      Service: {Address: ''}
     }]);
   });
 

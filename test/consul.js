@@ -132,7 +132,7 @@ describe('Consul source plugin', () => {
     consul.mock.emitError('consul', new Error('Mock health/service error'));
   });
 
-  it('emits an update event when properites change', (done) => {
+  it('resolves empty an empty address list if no addresses are found', (done) => {
     const consul = generateConsulStub();
 
     consul.on('update', (properties) => {
@@ -142,6 +142,37 @@ describe('Consul source plugin', () => {
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
-    consul.mock.emitChange('consul', {});
+    consul.mock.emitChange('consul', []);
+  });
+
+  it('resolves addresses at the node level by default', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('update', (properties) => {
+      should(properties).eql({consul: {addresses: ['10.0.0.0']}});
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', [{
+      Node: {Address: '10.0.0.0'}
+    }]);
+  });
+
+  it('resolves addresses at the service level if defined', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('update', (properties) => {
+      should(properties).eql({consul: {addresses: ['127.0.0.1']}});
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', [{
+      Node: {Address: '10.0.0.0'},
+      Service: {Address: '127.0.0.1'}
+    }]);
   });
 });

@@ -65,6 +65,18 @@ function generateConsulStub() {
 }
 
 describe('Consul source plugin', () => {
+  it('reports as running after starttup', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('startup', () => {
+      should(consul.status().running).eql(true);
+      done();
+    });
+
+    should(consul.status().running).eql(false);
+    consul.initialize();
+  });
+
   it('emits an update event when properites change', (done) => {
     const consul = generateConsulStub();
 

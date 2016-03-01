@@ -142,6 +142,7 @@ describe('Consul source plugin', () => {
     const consul = generateConsulStub();
 
     consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
       should(properties).eql({consul: {addresses: []}});
       done();
     });
@@ -155,6 +156,7 @@ describe('Consul source plugin', () => {
     const consul = generateConsulStub();
 
     consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
       should(properties).eql({consul: {addresses: ['10.0.0.0']}});
       done();
     });
@@ -170,6 +172,7 @@ describe('Consul source plugin', () => {
     const consul = generateConsulStub();
 
     consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
       should(properties).eql({consul: {addresses: ['127.0.0.1']}});
       done();
     });
@@ -186,6 +189,7 @@ describe('Consul source plugin', () => {
     const consul = generateConsulStub();
 
     consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
       should(properties).eql({consul: {addresses: ['10.0.0.0', '127.0.0.1']}});
       done();
     });
@@ -204,6 +208,7 @@ describe('Consul source plugin', () => {
     let updateCount = 0;
 
     consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
       updateCount += 1;
       if (updateCount === 2) {
         should(properties).eql({
@@ -229,6 +234,7 @@ describe('Consul source plugin', () => {
     let updateCount = 0;
 
     consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
       updateCount += 1;
       if (updateCount === 2) {
         should(properties).eql({

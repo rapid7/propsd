@@ -72,6 +72,12 @@ describe('Consul source plugin', () => {
     should(consul.type).eql('consul');
   });
 
+  it('has a name', () => {
+    const consul = generateConsulStub();
+
+    should(consul.name).eql('consul');
+  });
+
   it('reports as running after startup', (done) => {
     const consul = generateConsulStub();
 

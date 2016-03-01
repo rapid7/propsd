@@ -29,10 +29,15 @@ class MockConsul {
     this.emitters = Object.create(null);
   }
 
+  get watching() {
+    return Object.keys(this.emitters).sort();
+  }
+
   watch(options) {
     if (options.method === this.catalog.service.list) {
       return this.getOrCreateEmitter('catalog-service');
     }
+
     if (options.method === this.health.service) {
       let name = options.options.service;
 
@@ -42,6 +47,7 @@ class MockConsul {
 
       return this.getOrCreateEmitter(name);
     }
+
     throw new Error('Unknown method: ' + options.method);
   }
 
@@ -56,7 +62,9 @@ class MockConsul {
   getOrCreateEmitter(name) {
     if (!this.emitters[name]) {
       this.emitters[name] = new EventEmitter();
-      this.emitters[name].end = () => {};
+      this.emitters[name].end = () => {
+        delete this.emitters[name];
+      };
     }
     return this.emitters[name];
   }
@@ -140,11 +148,16 @@ describe('Consul source plugin', () => {
 
   it('resolves empty an empty address list if no addresses are found', (done) => {
     const consul = generateConsulStub();
+    let updateCount = 0;
 
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
-      should(properties).eql({consul: {addresses: []}});
-      done();
+      updateCount += 1;
+
+      if (updateCount === 2) {
+        should(properties).eql({consul: {addresses: []}});
+        done();
+      }
     });
 
     consul.initialize();
@@ -154,11 +167,16 @@ describe('Consul source plugin', () => {
 
   it('resolves addresses at the node level by default', (done) => {
     const consul = generateConsulStub();
+    let updateCount = 0;
 
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
-      should(properties).eql({consul: {addresses: ['10.0.0.0']}});
-      done();
+      updateCount += 1;
+
+      if (updateCount === 2) {
+        should(properties).eql({consul: {addresses: ['10.0.0.0']}});
+        done();
+      }
     });
 
     consul.initialize();
@@ -170,11 +188,16 @@ describe('Consul source plugin', () => {
 
   it('resolves addresses at the service level if defined', (done) => {
     const consul = generateConsulStub();
+    let updateCount = 0;
 
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
-      should(properties).eql({consul: {addresses: ['127.0.0.1']}});
-      done();
+      updateCount += 1;
+
+      if (updateCount === 2) {
+        should(properties).eql({consul: {addresses: ['127.0.0.1']}});
+        done();
+      }
     });
 
     consul.initialize();
@@ -187,11 +210,16 @@ describe('Consul source plugin', () => {
 
   it('resolves multiple addresses for the same service', (done) => {
     const consul = generateConsulStub();
+    let updateCount = 0;
 
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
-      should(properties).eql({consul: {addresses: ['10.0.0.0', '127.0.0.1']}});
-      done();
+      updateCount += 1;
+
+      if (updateCount === 2) {
+        should(properties).eql({consul: {addresses: ['10.0.0.0', '127.0.0.1']}});
+        done();
+      }
     });
 
     consul.initialize();
@@ -210,7 +238,8 @@ describe('Consul source plugin', () => {
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
       updateCount += 1;
-      if (updateCount === 2) {
+
+      if (updateCount === 3) {
         should(properties).eql({
           'consul-production': {addresses: ['127.0.0.1']},
           'consul-development': {addresses: ['10.0.0.0']}
@@ -236,7 +265,8 @@ describe('Consul source plugin', () => {
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
       updateCount += 1;
-      if (updateCount === 2) {
+
+      if (updateCount === 3) {
         should(properties).eql({
           'consul-production': {addresses: ['127.0.0.1']},
           'elasticsearch-production': {addresses: ['10.0.0.0']}
@@ -256,5 +286,36 @@ describe('Consul source plugin', () => {
     consul.mock.emitChange('elasticsearch-production', [{
       Service: {Address: '10.0.0.0'}
     }]);
+  });
+
+  it('recreates health watchers when services are removed', (done) => {
+    const consul = generateConsulStub();
+    let updateCount = 0;
+
+    consul.on('update', (properties) => {
+      should(consul.properties).eql(properties);
+      updateCount += 1;
+
+      if (updateCount === 1) {
+        should(consul.mock.watching).eql(['catalog-service', 'consul-production', 'elasticsearch-production']);
+      }
+
+      if (updateCount === 2) {
+        should(consul.mock.watching).eql(['catalog-service', 'elasticsearch-production']);
+        done();
+      }
+    });
+
+    consul.initialize();
+    should(consul.mock.watching).eql(['catalog-service']);
+
+    consul.mock.emitChange('catalog-service', {
+      consul: ['production'],
+      elasticsearch: ['production']
+    });
+
+    consul.mock.emitChange('catalog-service', {
+      elasticsearch: ['production']
+    });
   });
 });

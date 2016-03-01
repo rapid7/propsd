@@ -43,6 +43,10 @@ class MockConsul {
     this.emitters[name].emit('change', data);
   }
 
+  emitError(name, error) {
+    this.emitters[name].emit('error', error);
+  }
+
   getOrCreateEmitter(name) {
     if (!this.emitters[name]) {
       this.emitters[name] = new EventEmitter();
@@ -101,6 +105,31 @@ describe('Consul source plugin', () => {
     consul.initialize();
     should(consul.status().running).eql(true);
     consul.shutdown();
+  });
+
+  it('bubbles errors from the Consul service/list API', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('error', (error) => {
+      should(error.message).eql('Mock service/list error');
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitError('catalog-service', new Error('Mock service/list error'));
+  });
+
+  it('bubbles errors from the Consul health/service API', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('error', (error) => {
+      should(error.message).eql('Mock health/service error');
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitError('consul', new Error('Mock health/service error'));
   });
 
   it('emits an update event when properites change', (done) => {

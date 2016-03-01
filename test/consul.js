@@ -175,4 +175,21 @@ describe('Consul source plugin', () => {
       Service: {Address: '127.0.0.1'}
     }]);
   });
+
+  it('resolves multiple addresses for the same service', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('update', (properties) => {
+      should(properties).eql({consul: {addresses: ['10.0.0.0', '127.0.0.1']}});
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', [{
+      Service: {Address: '127.0.0.1'}
+    },{
+      Node: {Address: '10.0.0.0'}
+    }]);
+  });
 });

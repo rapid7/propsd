@@ -166,16 +166,16 @@ describe('Consul source plugin', () => {
     consul.mock.emitError('consul', new Error('Mock health/service error'));
   });
 
-  it('resolves an empty address list if no addresses are found', (done) => {
+  it('resolves an empty object if no addresses are found', (done) => {
     const consul = generateConsulStub();
     let updateCount = 0;
 
     consul.on('update', (properties) => {
       should(consul.properties).eql(properties);
+      should(properties).eql({});
       updateCount += 1;
 
       if (updateCount === 2) {
-        should(properties).eql({consul: {addresses: []}});
         done();
       }
     });
@@ -377,8 +377,6 @@ describe('Consul source plugin', () => {
       elasticsearch: ['production']
     });
 
-    consul.mock.emitChange('catalog-service', {
-      elasticsearch: ['production']
-    });
+    consul.mock.emitChange('consul-production', []);
   });
 });

@@ -188,8 +188,33 @@ describe('Consul source plugin', () => {
     consul.mock.emitChange('catalog-service', {consul: []});
     consul.mock.emitChange('consul', [{
       Service: {Address: '127.0.0.1'}
-    },{
+    }, {
       Node: {Address: '10.0.0.0'}
+    }]);
+  });
+
+  it('resolves multiple tags as separate services', (done) => {
+    const consul = generateConsulStub();
+    let updateCount = 0;
+
+    consul.on('update', (properties) => {
+      updateCount += 1;
+      if (updateCount === 2) {
+        should(properties).eql({
+          production: {addresses: ['127.0.0.1']},
+          development: {addresses: ['10.0.0.0']}
+        });
+        done();
+      }
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: ['production', 'development']});
+    consul.mock.emitChange('production', [{
+      Service: {Address: '127.0.0.1'}
+    }]);
+    consul.mock.emitChange('development', [{
+      Service: {Address: '10.0.0.0'}
     }]);
   });
 });

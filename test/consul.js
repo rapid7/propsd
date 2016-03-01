@@ -46,6 +46,7 @@ class MockConsul {
   getOrCreateEmitter(name) {
     if (!this.emitters[name]) {
       this.emitters[name] = new EventEmitter();
+      this.emitters[name].end = () => {};
     }
     return this.emitters[name];
   }
@@ -65,7 +66,7 @@ function generateConsulStub() {
 }
 
 describe('Consul source plugin', () => {
-  it('reports as running after starttup', (done) => {
+  it('reports as running after startup', (done) => {
     const consul = generateConsulStub();
 
     consul.on('startup', () => {
@@ -75,6 +76,19 @@ describe('Consul source plugin', () => {
 
     should(consul.status().running).eql(false);
     consul.initialize();
+  });
+
+  it('reports as not running after shutdown', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('shutdown', () => {
+      should(consul.status().running).eql(false);
+      done();
+    });
+
+    consul.initialize();
+    should(consul.status().running).eql(true);
+    consul.shutdown();
   });
 
   it('emits an update event when properites change', (done) => {

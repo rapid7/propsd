@@ -170,19 +170,12 @@ describe('Consul source plugin', () => {
 
   it('resolves an empty object if no addresses are found', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      should(properties).eql({});
-      updateCount += 1;
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
     consul.mock.emitChange('consul', []);
 
-    return Promise.resolve(updateCount).should.eventually.eql(2);
+    return Promise.resolve(consul.properties).should.eventually.eql({});
   });
 
   it('resolves addresses at the node level by default', () => {

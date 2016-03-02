@@ -111,6 +111,18 @@ describe('Consul source plugin', () => {
     should(consul.host).eql('10.0.0.0');
   });
 
+  it('connects to a Consul agent on port 8500 by default', () => {
+    const consul = generateConsulStub();
+
+    should(consul.port).eql(8500);
+  });
+
+  it('allows overwriting the Consul agent port', () => {
+    const consul = generateConsulStub({port: 8600});
+
+    should(consul.port).eql(8600);
+  });
+
   it('reports as running after startup', (done) => {
     const consul = generateConsulStub();
 

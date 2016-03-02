@@ -168,7 +168,7 @@ describe('Consul source plugin', () => {
     consul.mock.emitError('consul', new Error('Mock health/service error'));
   });
 
-  it('resolves an empty object if no addresses are found', (done) => {
+  it('resolves an empty object if no addresses are found', () => {
     const consul = generateConsulStub();
     let updateCount = 0;
 
@@ -176,15 +176,13 @@ describe('Consul source plugin', () => {
       should(consul.properties).eql(properties);
       should(properties).eql({});
       updateCount += 1;
-
-      if (updateCount === 2) {
-        done();
-      }
     });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
     consul.mock.emitChange('consul', []);
+
+    return Promise.resolve(updateCount).should.eventually.eql(2);
   });
 
   it('resolves addresses at the node level by default', () => {
@@ -215,19 +213,8 @@ describe('Consul source plugin', () => {
     });
   });
 
-  it('resolves addresses at the service level if defined', (done) => {
+  it('resolves addresses at the service level if defined', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 2) {
-        should(properties).eql({consul: {addresses: ['127.0.0.1']}});
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
@@ -235,21 +222,14 @@ describe('Consul source plugin', () => {
       Node: {Address: '10.0.0.0'},
       Service: {Address: '127.0.0.1'}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      consul: {addresses: ['127.0.0.1']}
+    });
   });
 
-  it('avoids resolving empty service addresses', (done) => {
+  it('avoids resolving empty service addresses', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 2) {
-        should(properties).eql({consul: {addresses: ['10.0.0.0']}});
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
@@ -257,21 +237,14 @@ describe('Consul source plugin', () => {
       Node: {Address: '10.0.0.0'},
       Service: {Address: ''}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      consul: {addresses: ['10.0.0.0']}
+    });
   });
 
-  it('resolves multiple addresses for the same service', (done) => {
+  it('resolves multiple addresses for the same service', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 2) {
-        should(properties).eql({consul: {addresses: ['10.0.0.0', '127.0.0.1']}});
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
@@ -280,6 +253,10 @@ describe('Consul source plugin', () => {
     }, {
       Node: {Address: '10.0.0.0'}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      consul: {addresses: ['10.0.0.0', '127.0.0.1']}
+    });
   });
 
   it('resolves multiple tags as separate services', (done) => {

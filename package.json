@@ -12,7 +12,7 @@
     "test": "mocha",
     "lint": "eslint bin/** lib/** test/**",
     "coverage": "istanbul cover _mocha -- -R spec",
-    "metadata-server": "./test/bin/server.js"
+    "metadata-server": "./test/bin/metadata-server.js"
   },
   "repository": {
     "type": "git",

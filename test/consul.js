@@ -73,14 +73,14 @@ class MockConsul {
   }
 }
 
-function generateConsulStub() {
+function generateConsulStub(options) {
   const mock = new MockConsul();
   const Consul = proxyquire('../lib/source/consul', {
     consul() {
       return mock;
     }
   });
-  const consul = new Consul();
+  const consul = new Consul(options);
 
   consul.mock = mock;
   return consul;
@@ -97,6 +97,18 @@ describe('Consul source plugin', () => {
     const consul = generateConsulStub();
 
     should(consul.name).eql('consul');
+  });
+
+  it('connects to a Consul agent on localhost by default', () => {
+    const consul = generateConsulStub();
+
+    should(consul.host).eql('127.0.0.1');
+  });
+
+  it('allows overwriting the Consul agent host', () => {
+    const consul = generateConsulStub({host: '10.0.0.0'});
+
+    should(consul.host).eql('10.0.0.0');
   });
 
   it('reports as running after startup', (done) => {

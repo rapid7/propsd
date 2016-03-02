@@ -86,59 +86,47 @@ function generateConsulStub(options) {
   return consul;
 }
 
-describe('Consul source plugin', () => {
-  describe('#constructor', () => {
-    it('connects to a Consul agent on localhost by default', () => {
-      const consul = generateConsulStub();
-
-      should(consul.host).eql('127.0.0.1');
-    });
-
-    it('allows overwriting the Consul agent host', () => {
-      const consul = generateConsulStub({host: '10.0.0.0'});
-
-      should(consul.host).eql('10.0.0.0');
-    });
-
-    it('connects to a Consul agent on port 8500 by default', () => {
-      const defaultAgentPort = 8500;
-      const consul = generateConsulStub();
-
-      should(consul.port).eql(defaultAgentPort);
-    });
-
-    it('allows overwriting the Consul agent port', () => {
-      const explicitAgentPort = 8600;
-      const consul = generateConsulStub({port: explicitAgentPort});
-
-      should(consul.port).eql(explicitAgentPort);
-    });
-
-    it('connects to Consul on HTTPS by default', () => {
-      const consul = generateConsulStub();
-
-      should(consul.secure).eql(true);
-    });
-
-    it('allows enabling HTTP', () => {
-      const consul = generateConsulStub({secure: false});
-
-      should(consul.secure).eql(false);
-    });
-  });
-
-  it('identifies as a "consul" source plugin', () => {
+describe('Consulconstructor', () => {
+  it('connects to a Consul agent on localhost by default', () => {
     const consul = generateConsulStub();
 
-    should(consul.type).eql('consul');
+    should(consul.host).eql('127.0.0.1');
   });
 
-  it('has a name', () => {
+  it('allows overwriting the Consul agent host', () => {
+    const consul = generateConsulStub({host: '10.0.0.0'});
+
+    should(consul.host).eql('10.0.0.0');
+  });
+
+  it('connects to a Consul agent on port 8500 by default', () => {
+    const defaultAgentPort = 8500;
     const consul = generateConsulStub();
 
-    should(consul.name).eql('consul');
+    should(consul.port).eql(defaultAgentPort);
   });
 
+  it('allows overwriting the Consul agent port', () => {
+    const explicitAgentPort = 8600;
+    const consul = generateConsulStub({port: explicitAgentPort});
+
+    should(consul.port).eql(explicitAgentPort);
+  });
+
+  it('connects to Consul on HTTPS by default', () => {
+    const consul = generateConsulStub();
+
+    should(consul.secure).eql(true);
+  });
+
+  it('allows enabling HTTP', () => {
+    const consul = generateConsulStub({secure: false});
+
+    should(consul.secure).eql(false);
+  });
+});
+
+describe('Consul#status', () => {
   it('reports as running after startup', (done) => {
     const consul = generateConsulStub();
 
@@ -162,6 +150,20 @@ describe('Consul source plugin', () => {
     consul.initialize();
     should(consul.status().running).eql(true);
     consul.shutdown();
+  });
+});
+
+describe('Consul', () => {
+  it('identifies as a "consul" source plugin', () => {
+    const consul = generateConsulStub();
+
+    should(consul.type).eql('consul');
+  });
+
+  it('has a name', () => {
+    const consul = generateConsulStub();
+
+    should(consul.name).eql('consul');
   });
 
   it('avoids sending multiple startup events', () => {

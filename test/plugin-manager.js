@@ -160,7 +160,7 @@ describe('Plugin manager', function () {
 
       status.running.should.be.true();
       status.ok.should.be.true();
-      sources.length.should.equal(3);
+      sources.length.should.equal(3); // eslint-disable-line rapid7/static-magic-numbers
       done();
     });
 
@@ -187,7 +187,7 @@ describe('Plugin manager', function () {
 
       status.running.should.be.true();
       status.ok.should.be.true();
-      sources.length.should.equal(3);
+      sources.length.should.equal(3); // eslint-disable-line rapid7/static-magic-numbers
       done();
     });
 

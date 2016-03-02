@@ -75,5 +75,6 @@ exports.stop = () => {
     if (sockets.hasOwnProperty(socketId)) {
       sockets[socketId].destroy();
     }
+    console.log('Server shutting down\n'); // eslint-disable-line no-console
   }
 };

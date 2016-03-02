@@ -3,6 +3,8 @@
 
 const EventEmitter = require('events').EventEmitter;
 const path = require('path');
+const chai = require('chai');
+chai.use(require('chai-as-promised'));
 const should = require('should');
 const winston = require('winston');
 const proxyquire = require('proxyquire');
@@ -185,46 +187,32 @@ describe('Consul source plugin', () => {
     consul.mock.emitChange('consul', []);
   });
 
-  it('resolves addresses at the node level by default', (done) => {
+  it('resolves addresses at the node level by default', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 2) {
-        should(properties).eql({consul: {addresses: ['10.0.0.0']}});
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
     consul.mock.emitChange('consul', [{
       Node: {Address: '10.0.0.0'}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      consul: {addresses: ['10.0.0.0']}
+    });
   });
 
-  it('avoids resolving empty node addresses', (done) => {
+  it('avoids resolving empty node addresses', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 2) {
-        should(properties).eql({consul: {addresses: []}});
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: []});
     consul.mock.emitChange('consul', [{
       Node: {Address: ''}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      consul: {addresses: []}
+    });
   });
 
   it('resolves addresses at the service level if defined', (done) => {

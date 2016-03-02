@@ -2,7 +2,7 @@
 /* global Config */
 'use strict';
 
-require('should');
+const should = require('should');
 const Path = require('path');
 const fs = require('fs');
 const winston = require('winston');
@@ -83,6 +83,16 @@ describe('Metadata source plugin', () => {
   it('can only be initialized once', () => {
     this.m.initialize();
     this.m.should.deepEqual(this.m.initialize());
+  });
+
+  it('clears the sha1 signature when it\'s shutdown', (done) => {
+    this.m.on('shutdown', () => {
+      should(this.m.signature).be.null();
+      done();
+    });
+
+    this.m.initialize();
+    this.m.shutdown();
   });
 
   it('doesn\'t update data if the Metadata Service document is the same', (done) => {

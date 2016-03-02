@@ -1,0 +1,17 @@
+{
+  "version": 1.0,
+  "properties": {
+    "global": "global",
+    "account": "account",
+    "region": "region",
+    "vpc_id": "vpc",
+    "produce": "product",
+    "stack": "stack",
+    "service": "service",
+    "version": "version",
+    "asg": "asg",
+    "foo": "bar",
+    "test": true,
+    "maxCassandraConnects": 0
+  }
+}

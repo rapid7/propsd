@@ -54,7 +54,7 @@ const sockets = {};
 let nextSocketId = 0;
 
 server.on('listening', () => {
-  console.log(`listening for metadata requests at http://127.0.0.1:${DEFAULT_HTTP_PORT}`); // eslint-disable-line
+  console.log(`listening for metadata requests at http://127.0.0.1:${DEFAULT_HTTP_PORT}\n`); // eslint-disable-line
   // no-console
 });
 
@@ -77,4 +77,5 @@ exports.stop = () => {
     }
     console.log('Server shutting down\n'); // eslint-disable-line no-console
   }
+  console.log('Server shutting down\n'); // eslint-disable-line no-console
 };

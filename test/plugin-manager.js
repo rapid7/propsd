@@ -15,7 +15,7 @@ const DEFAULT_INTERVAL = 60000;
 
 const fakeIndexResponse = {
   ETag: 'ThisIsACoolEtag',
-  Body: new Buffer(JSON.stringify(require('./data/plugin-manager/index')))
+  Body: new Buffer(JSON.stringify(require('./data/s3/index')))
 };
 
 /* eslint-disable func-names, max-nested-callbacks */
@@ -73,7 +73,7 @@ describe('Plugin manager', function () {
   });
 
   it('handles being presented with data that will be parsed into a badly interpolated StringTemplate', function (done) {
-    const badIndex = require('./data/plugin-manager/index');
+    const badIndex = require('./data/s3/index');
 
     badIndex.sources[2].parameters.path = '{{ instance:foo-bar }}.json';
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {

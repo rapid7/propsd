@@ -10,6 +10,7 @@ const proxyquire = require('proxyquire');
 
 chai.use(require('chai-as-promised'));
 
+
 global.Config = require('../lib/config').load(path.resolve(__dirname, './data/config.json'));
 global.Log = require('../lib/logger').attach(global.Config);
 global.Log.remove(winston.transports.Console);
@@ -167,6 +168,28 @@ describe('Consul#status', () => {
     should(consul.status().okay).eql(true);
     consul.shutdown();
     should(consul.status().okay).eql(false);
+  });
+
+  it('reports as not okay after a Consul service/list API error', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('error', () => {
+      should(consul.status().okay).eql(false);
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitError('catalog-service', new Error('Mock service/list error'));
+  });
+
+  it('reports as okay after the Consul service/list API updates', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    consul.mock.emitError('catalog-service', new Error('Mock service/list error'));
+    consul.mock.emitChange('catalog-service', {consul: []});
+
+    return Promise.resolve(consul.status().okay).should.eventually.eql(true);
   });
 });
 

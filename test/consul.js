@@ -291,12 +291,17 @@ describe('Consul source plugin', () => {
     });
   });
 
-  it('registes health watchers when services are added', () => {
+  it('registers a watch on services when initialized', () => {
     const consul = generateConsulStub();
 
     consul.initialize();
     should(consul.mock.watching).eql(['catalog-service']);
+  });
 
+  it('registers health watchers when services are added', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
     consul.mock.emitChange('catalog-service', {
       consul: ['production'],
       elasticsearch: ['production']
@@ -311,13 +316,10 @@ describe('Consul source plugin', () => {
     const consul = generateConsulStub();
 
     consul.initialize();
-    should(consul.mock.watching).eql(['catalog-service']);
-
     consul.mock.emitChange('catalog-service', {
       consul: ['production'],
       elasticsearch: ['production']
     });
-
     consul.mock.emitChange('consul-production', []);
 
     return Promise.resolve(consul.mock.watching).should.eventually.eql(

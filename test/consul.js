@@ -87,7 +87,7 @@ function generateConsulStub() {
 }
 
 describe('Consul source plugin', () => {
-  it('has a type', () => {
+  it('identifies as a "consul" source plugin', () => {
     const consul = generateConsulStub();
 
     should(consul.type).eql('consul');

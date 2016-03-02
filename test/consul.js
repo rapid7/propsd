@@ -299,6 +299,14 @@ describe('Consul source plugin', () => {
     should(consul.mock.watching).eql(['catalog-service']);
   });
 
+  it('unregisters the watch on services when shutdown', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    consul.shutdown();
+    should(consul.mock.watching).eql([]);
+  });
+
   it('registers health watchers when services are added', () => {
     const consul = generateConsulStub();
 
@@ -326,5 +334,23 @@ describe('Consul source plugin', () => {
     return Promise.resolve(consul.mock.watching).should.eventually.eql(
       ['catalog-service', 'elasticsearch-production']
     );
+  });
+
+  it('unregisters health watchers when shutdown', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('update', () => {
+      should(consul.mock.watching).eql(['catalog-service', 'consul-production']);
+      consul.shutdown();
+      should(consul.mock.watching).eql([]);
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {
+      consul: ['production'],
+      elasticsearch: ['production']
+    });
+    consul.mock.emitChange('elasticsearch-production', []);
   });
 });

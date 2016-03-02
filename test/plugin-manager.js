@@ -3,41 +3,39 @@
 
 require('should');
 const sinon = require('sinon');
+const AWS = require('aws-sdk');
 
 require('should-sinon');
 
-const s3Stub = require('./utils/s3-stub');
-
+const S3 = require('../lib/source/s3');
 const PluginManager = require('../lib/plugin-manager');
 const StringTemplate = require('../lib/string-template');
 
-const DEFAULT_INTERVAL = 30000;
+const DEFAULT_INTERVAL = 60000;
 
-/* eslint-disable func-names */
-describe('Plugin manager', sinon.test(function () {
-  let S3,
-      manager,
+const fakeIndexResponse = {
+  ETag: 'ThisIsACoolEtag',
+  Body: new Buffer(JSON.stringify(require('./data/plugin-manager/index')))
+};
+
+/* eslint-disable func-names, max-nested-callbacks */
+describe('Plugin manager', function () {
+  const unknownEndpointErr = new Error('UnknownEndpoint');
+  const _S3 = AWS.S3;
+  let manager,
       storage;
 
   beforeEach(function () {
-    // Stub out all calls to AWS.S3.getObject
-    const fakeResponse = {
-      ETag: 'ThisIsACoolEtag',
-      Body: new Buffer(JSON.stringify(require('./data/plugin-manager/index')))
-    };
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
 
     storage = new (require('../lib/storage'))();
     manager = new PluginManager(storage);
-
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
-    });
-
     manager.index = new S3({
       interval: DEFAULT_INTERVAL,
       bucket: 'foo',
       path: 'bar'
     });
+
     manager.metadata.service.host = '127.0.0.1:8080';
   });
 
@@ -45,11 +43,12 @@ describe('Plugin manager', sinon.test(function () {
     manager.shutdown();
     manager = null;
     storage = null;
+    AWS.S3 = _S3;
   });
 
   it('fetches the index from S3 and gets a list of sources', function (done) {
-    manager.on('sources-generated', (sources) => {
-      const sourceObjs = sources.map((s) => { // eslint-disable-line max-nested-callbacks
+    manager.once('sources-generated', (sources) => {
+      const sourceObjs = sources.map((s) => {
         return {name: s.name, type: s.type};
       });
 
@@ -61,7 +60,7 @@ describe('Plugin manager', sinon.test(function () {
   });
 
   it('correctly merges data from the metadata plugin with stringtemplate strings from the index', function (done) {
-    manager.on('sources-generated', (sources) => {
+    manager.once('sources-generated', (sources) => {
       const amiPath = manager.index.properties.sources[2].parameters.path;
       const mergedAmiPath = sources[2].parameters.path;
       const t = StringTemplate.coerce(amiPath, manager.metadata.properties);
@@ -73,11 +72,33 @@ describe('Plugin manager', sinon.test(function () {
     manager.init();
   });
 
-  it('registers plugins with the storage engine', function (done) {
-    manager.on('sources-registered', () => {
-      const sourceNames = storage.sources.map((el) => {
-        return el.name;
+  it('handles being presented with data that will be parsed into a badly interpolated StringTemplate', function (done) {
+    const badIndex = require('./data/plugin-manager/index');
+
+    badIndex.sources[2].parameters.path = '{{ instance:foo-bar }}.json';
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+      ETag: 'ThisIsACoolEtag',
+      Body: new Buffer(JSON.stringify(badIndex))
+    });
+
+    manager.on('error', () => {
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+      manager.once('sources-generated', (sources) => {
+        const sourceObjs = sources.map((s) => {
+          return {name: s.name, type: s.type};
+        });
+
+        sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+        done();
       });
+    });
+    manager.updateDelay = 1;
+    manager.init();
+  });
+
+  it('registers plugins with the storage engine', function (done) {
+    manager.once('sources-registered', () => {
+      const sourceNames = storage.sources.map((el) => el.name); // eslint-disable-line max-nested-callbacks
 
       sourceNames.should.eql(['s3-foo-global.json', 's3-foo-account/12345.json', 's3-foo-ami-4aface7a.json']);
       done();
@@ -87,28 +108,148 @@ describe('Plugin manager', sinon.test(function () {
   });
 
   it('sets event handlers for plugin events', function (done) {
-    manager.once('sources-registered', () => {
-      storage.sources.forEach((source) => { // eslint-disable-line max-nested-callbacks
-        source.listeners('update').length.should.equal(1);
+    manager.once('source-instantiated', (instance) => {
+      const updateSpy = sinon.spy(instance, '_update');
+
+      instance.once('update', () => {
+        updateSpy.should.be.called();
+        done();
       });
+    });
+
+    manager.init();
+  });
+
+  it('handles source types that have not been implemented', function (done) {
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+      ETag: 'ThisIsACoolEtag',
+      Body: new Buffer(JSON.stringify({
+        version: 1.0,
+        sources: [
+          {name: 'global', type: 's3', parameters: {path: 'global.json'}},
+          {name: 'global', type: 'someBrandNewSourceType', parameters: {path: 'global.json'}}
+        ]
+      }))
+    });
+
+    manager.once('error', (err) => {
+      const status = manager.status();
+
+      err.message.should.equal('Source type someBrandNewSourceType not implemented');
+      status.ok.should.be.false();
       done();
     });
 
     manager.init();
   });
 
-  it('exposes an error when one occurs but continues running', function (done) {
-    // TODO: Figure out what makes a "running" PluginManager.
-    // Is a failure in either of its underlying sources enough to change it's status?
-    // What are the consequences of a non-running PluginManager?
-    manager.metadata.service.host = '0.0.0.0';
-    manager.on('error', (err) => {
+  it('retries Metadata source until it succeeds if the Metadata source fails', function (done) {
+    manager.once('error', (err) => {
+      const metadataStatus = manager.metadata.status();
+
       err.code.should.equal('ECONNREFUSED');
+      manager.status().should.eql({running: true, ok: false, sources: []});
+      metadataStatus.ok.should.be.false();
+      metadataStatus.running.should.be.true();
+
+      manager.metadata.service.host = '127.0.0.1:8080';
+    });
+
+    manager.once('sources-generated', (sources) => {
+      const status = manager.status();
+
+      status.running.should.be.true();
+      status.ok.should.be.true();
+      sources.length.should.equal(3);
+      done();
+    });
+
+    manager.metadata.service.host = '0.0.0.0';
+    manager.init();
+  });
+
+  it('retries S3 source until it succeeds if the S3 source fails', function (done) {
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
+
+    manager.once('error', (err) => {
+      const indexStatus = manager.index.status();
+
+      err.message.should.equal('UnknownEndpoint');
+      manager.status().should.eql({running: true, ok: false, sources: []});
+      indexStatus.ok.should.be.false();
+      indexStatus.running.should.be.true();
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+    });
+
+    manager.once('sources-generated', (sources) => {
+      const status = manager.status();
+
+      status.running.should.be.true();
+      status.ok.should.be.true();
+      sources.length.should.equal(3);
       done();
     });
 
     manager.init();
   });
-}));
+
+  // SECOND PULL REQUEST
+  /* it('rebuilds sources when the index is updated', function (done) {
+    // TODO: Rewrite this test
+    const updatedSource = {
+      ETag: 'ThisIsADifferentETag',
+      Body: new Buffer(JSON.stringify({
+        version: 1.0,
+        sources: [{name: 'global', type: 's3', parameters: {path: 'global.json'}}]
+      }))
+    };
+    let sources = [];
+
+    manager.on('sources-registered', (storageSources) => {
+      if (sources.length === 0) {
+        sources = storageSources;
+        AWS.S3.prototype.getObject = this.stub().callsArgWith(1, null, updatedSource);
+      } else {
+        done();
+      }
+      manager.update();
+    });
+
+    manager.index.on('update', () => {
+      console.log(`${Date.now()}: index updated`);
+    });
+
+    manager.init();
+  });
+
+  it('updates the storage engine when the index removes a source plugin', function (done) {
+    // TODO: Stub getObject to return an index that's missing one of the plugins, test that storage.sources contains
+    // the updated plugins
+    done();
+  });
+
+  it('updates the storage engine when the index adds a source plugin', function (done) {
+    // TODO: Stub getObject to return an index that's missing one of the plugins, test that storage.sources contains
+    // the updated plugins
+    done();
+  });
+
+  it('exposes an error from source plugins when one occurs but continues running', function (done) {
+    manager.once('source-instantiated', (instance) => {
+      instance.on('error', (err) => {
+        const status = manager.status();
+
+        err.message.should.equal('UnknownEndpoint');
+        status.running.should.be.true();
+        done();
+      });
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
+    });
+
+    manager.init();
+  }); */
+});
 
 /* eslint-enable func-names */

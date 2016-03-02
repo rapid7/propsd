@@ -259,22 +259,8 @@ describe('Consul source plugin', () => {
     });
   });
 
-  it('resolves multiple tags as separate services', (done) => {
+  it('resolves multiple tags as separate services', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 3) { // eslint-disable-line rapid7/static-magic-numbers
-        should(properties).eql({
-          'consul-production': {addresses: ['127.0.0.1']},
-          'consul-development': {addresses: ['10.0.0.0']}
-        });
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {consul: ['production', 'development']});
@@ -284,24 +270,15 @@ describe('Consul source plugin', () => {
     consul.mock.emitChange('consul-development', [{
       Service: {Address: '10.0.0.0'}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      'consul-production': {addresses: ['127.0.0.1']},
+      'consul-development': {addresses: ['10.0.0.0']}
+    });
   });
 
-  it('avoids resolving similar tags to the same service', (done) => {
+  it('avoids resolving similar tags to the same service', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 3) { // eslint-disable-line rapid7/static-magic-numbers
-        should(properties).eql({
-          'consul-production': {addresses: ['127.0.0.1']},
-          'elasticsearch-production': {addresses: ['10.0.0.0']}
-        });
-        done();
-      }
-    });
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {
@@ -314,25 +291,15 @@ describe('Consul source plugin', () => {
     consul.mock.emitChange('elasticsearch-production', [{
       Service: {Address: '10.0.0.0'}
     }]);
+
+    return Promise.resolve(consul.properties).should.eventually.eql({
+      'consul-production': {addresses: ['127.0.0.1']},
+      'elasticsearch-production': {addresses: ['10.0.0.0']}
+    });
   });
 
-  it('recreates health watchers when services are removed', (done) => {
+  it('unregisters health watchers when services are removed', () => {
     const consul = generateConsulStub();
-    let updateCount = 0;
-
-    consul.on('update', (properties) => {
-      should(consul.properties).eql(properties);
-      updateCount += 1;
-
-      if (updateCount === 1) {
-        should(consul.mock.watching).eql(['catalog-service', 'consul-production', 'elasticsearch-production']);
-      }
-
-      if (updateCount === 2) {
-        should(consul.mock.watching).eql(['catalog-service', 'elasticsearch-production']);
-        done();
-      }
-    });
 
     consul.initialize();
     should(consul.mock.watching).eql(['catalog-service']);
@@ -343,5 +310,9 @@ describe('Consul source plugin', () => {
     });
 
     consul.mock.emitChange('consul-production', []);
+
+    return Promise.resolve(consul.mock.watching).should.eventually.eql(
+      ['catalog-service', 'elasticsearch-production']
+    );
   });
 });

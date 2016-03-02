@@ -10,7 +10,6 @@ const proxyquire = require('proxyquire');
 
 chai.use(require('chai-as-promised'));
 
-
 global.Config = require('../lib/config').load(path.resolve(__dirname, './data/config.json'));
 global.Log = require('../lib/logger').attach(global.Config);
 global.Log.remove(winston.transports.Console);
@@ -188,6 +187,30 @@ describe('Consul#status', () => {
     consul.initialize();
     consul.mock.emitError('catalog-service', new Error('Mock service/list error'));
     consul.mock.emitChange('catalog-service', {consul: []});
+
+    return Promise.resolve(consul.status().okay).should.eventually.eql(true);
+  });
+
+  it('reports as not okay after a Consul health/service API error', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('error', () => {
+      should(consul.status().okay).eql(false);
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitError('consul', new Error('Mock health/service error'));
+  });
+
+  it('reports as okay after the Consul health/service API updates', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitError('consul', new Error('Mock health/service error'));
+    consul.mock.emitChange('consul', []);
 
     return Promise.resolve(consul.status().okay).should.eventually.eql(true);
   });

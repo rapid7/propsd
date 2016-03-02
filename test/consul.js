@@ -298,6 +298,22 @@ describe('Consul source plugin', () => {
     });
   });
 
+  it('registes health watchers when services are added', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    should(consul.mock.watching).eql(['catalog-service']);
+
+    consul.mock.emitChange('catalog-service', {
+      consul: ['production'],
+      elasticsearch: ['production']
+    });
+
+    return Promise.resolve(consul.mock.watching).should.eventually.eql(
+      ['catalog-service', 'consul-production', 'elasticsearch-production']
+    );
+  });
+
   it('unregisters health watchers when services are removed', () => {
     const consul = generateConsulStub();
 

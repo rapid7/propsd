@@ -188,4 +188,8 @@ describe('S3 source plugin', () => {
     this.s3.initialize();
     this.s3.should.deepEqual(this.s3.initialize());
   });
+
+  it('identifies as a \'s3\' source plugin', () => {
+    this.s3.type.should.equal('s3');
+  });
 });

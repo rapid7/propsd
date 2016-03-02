@@ -136,6 +136,10 @@ describe('Metadata source plugin', () => {
     this.m.initialize();
   });
 
+  it('identifies as a \'ec2-metadata\' source plugin', () => {
+    this.m.type.should.equal('ec2-metadata');
+  });
+
   after(() => {
     server.start();
   });

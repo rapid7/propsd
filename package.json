@@ -11,7 +11,8 @@
     "start": "./bin/server.js",
     "test": "mocha",
     "lint": "eslint bin/** lib/** test/**",
-    "coverage": "istanbul cover _mocha -- -R spec"
+    "coverage": "istanbul cover _mocha -- -R spec",
+    "metadata-server": "./test/bin/metadata-server.js"
   },
   "repository": {
     "type": "git",

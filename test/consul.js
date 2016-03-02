@@ -151,6 +151,23 @@ describe('Consul#status', () => {
     should(consul.status().running).eql(true);
     consul.shutdown();
   });
+
+  it('reports as not okay until initialized', () => {
+    const consul = generateConsulStub();
+
+    should(consul.status().okay).eql(false);
+    consul.initialize();
+    should(consul.status().okay).eql(true);
+  });
+
+  it('reports as not okay after shutdown', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    should(consul.status().okay).eql(true);
+    consul.shutdown();
+    should(consul.status().okay).eql(false);
+  });
 });
 
 describe('Consul', () => {

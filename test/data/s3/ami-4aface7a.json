@@ -1,0 +1,7 @@
+{
+  "version": 1.0,
+  "properties": {
+    "baz": 3,
+    "quiz": 4
+  }
+}

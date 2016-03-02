@@ -1,0 +1,26 @@
+{
+  "version": 1.0,
+  "sources": [
+    {
+      "name": "global",
+      "type": "s3",
+      "parameters": {
+        "path": "global.json"
+      }
+    },
+    {
+      "name": "account",
+      "type": "s3",
+      "parameters": {
+        "path": "account/12345.json"
+      }
+    },
+    {
+      "name": "ami",
+      "type": "s3",
+      "parameters": {
+        "path": "{{ instance:ami-id }}.json"
+      }
+    }
+  ]
+}

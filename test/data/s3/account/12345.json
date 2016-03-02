@@ -1,0 +1,16 @@
+{
+  "version": 1.0,
+  "properties": {
+    "global": "global",
+    "account": 123456789010,
+    "region": "region",
+    "vpc_id": "vpc",
+    "produce": "product",
+    "stack": "stack",
+    "service": "service",
+    "version": "version",
+    "asg": "asg",
+    "space": "spaz",
+    "maxCassandraConnects": 1
+  }
+}

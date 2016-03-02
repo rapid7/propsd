@@ -8,6 +8,7 @@ const sinon = require('sinon');
 require('should-sinon');
 
 const NON_DEFAULT_INTERVAL = 10000;
+const DEFAULT_INTERVAL = 60000;
 const DEFAULT_BUCKET = 'fake-bucket';
 const s3Stub = require('./utils/s3-stub');
 
@@ -29,7 +30,7 @@ describe('S3 source plugin', () => {
       getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
     });
 
-    this.s3 = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    this.s3 = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
     done();
   });
 
@@ -85,6 +86,22 @@ describe('S3 source plugin', () => {
 
     this.s3.initialize();
   });
+
+  it('returns a properly formed status object', sinon.test((done) => {
+    this.s3.on('update', () => {
+      const status = this.s3.status();
+
+      status.should.eql({
+        ok: true,
+        updated: new Date(),
+        interval: DEFAULT_INTERVAL,
+        running: true
+      });
+      done();
+    });
+
+    this.s3.initialize();
+  }));
 
   before(() => {
     S3 = s3Stub({

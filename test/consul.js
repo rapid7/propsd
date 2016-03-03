@@ -2,17 +2,11 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const path = require('path');
 const chai = require('chai');
 const should = require('should');
-const winston = require('winston');
 const proxyquire = require('proxyquire');
 
 chai.use(require('chai-as-promised'));
-
-global.Config = require('../lib/config').load(path.resolve(__dirname, './data/config.json'));
-global.Log = require('../lib/logger').attach(global.Config);
-global.Log.remove(winston.transports.Console);
 
 class MockConsul {
   constructor() {

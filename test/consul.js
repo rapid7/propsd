@@ -208,6 +208,17 @@ describe('Consul#status', () => {
 
     return Promise.resolve(consul.status().ok).should.eventually.eql(true);
   });
+
+  it('reports last update time', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    should(consul.status().updated).be.null();
+    consul.mock.emitChange('consul', []);
+
+    return Promise.resolve(consul.status().updated).should.eventually.eql(new Date());
+  });
 });
 
 describe('Consul#configure', () => {

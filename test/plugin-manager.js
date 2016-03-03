@@ -58,7 +58,7 @@ describe('Plugin manager', function () {
 
   it('correctly merges data from the metadata plugin with stringtemplate strings from the index', function (done) {
     manager.once('sources-generated', (sources) => {
-      const amiPath = manager.index.properties.sources[2].parameters.path;
+      const amiPath = manager.index.properties[2].parameters.path;
       const mergedAmiPath = sources[2].parameters.path;
       const t = StringTemplate.coerce(amiPath, manager.metadata.properties);
 

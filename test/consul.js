@@ -80,7 +80,7 @@ function generateConsulStub(options) {
   return consul;
 }
 
-describe('Consulconstructor', () => {
+describe('Consul#constructor', () => {
   it('connects to a Consul agent on localhost by default', () => {
     const consul = generateConsulStub();
 

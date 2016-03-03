@@ -29,14 +29,12 @@ describe('Plugin manager', function () {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
 
     storage = new (require('../lib/storage'))();
-    manager = new PluginManager(storage);
-    manager.index = new S3({
+    manager = new PluginManager(storage, {
       interval: DEFAULT_INTERVAL,
       bucket: 'foo',
-      path: 'bar'
+      path: 'bar',
+      metadataHost: '127.0.0.1:8080'
     });
-
-    manager.metadata.service.host = '127.0.0.1:8080';
   });
 
   afterEach(function () {

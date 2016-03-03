@@ -199,4 +199,36 @@ describe('Storage Engine', () => {
     storage.update();
     should(storage.properties.food).eql('tacos');
   });
+
+  it('clears a specific source', () => {
+    const storage = new Storage();
+    const source1 = {properties: {food: ['tacos', 'peanuts']}};
+    const source2 = {properties: {drink: ['coffee', 'hoppy IPA']}};
+
+    storage.register(source1);
+    storage.register(source2);
+    storage.update();
+    should(storage.sources.length).equal(2);
+
+    storage.unregister(source2);
+    storage.update();
+    should(storage.sources.length).equal(1);
+    should(storage.properties).eql({food: ['tacos', 'peanuts']});
+  });
+
+  it('clears all sources', () => {
+    const storage = new Storage();
+    const source1 = {properties: {food: ['tacos', 'peanuts']}};
+    const source2 = {properties: {drink: ['coffee', 'hoppy IPA']}};
+
+    storage.register(source1);
+    storage.register(source2);
+    storage.update();
+    should(storage.sources.length).equal(2);
+
+    storage.clear();
+    storage.update();
+    should(storage.sources.length).equal(0);
+    should(storage.properties).eql({});
+  });
 });

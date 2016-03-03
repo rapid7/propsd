@@ -210,6 +210,7 @@ describe('Consul#status', () => {
   });
 
   it('reports last update time', () => {
+    const start = new Date();
     const consul = generateConsulStub();
 
     consul.initialize();
@@ -217,7 +218,7 @@ describe('Consul#status', () => {
     should(consul.status().updated).be.null();
     consul.mock.emitChange('consul', []);
 
-    return Promise.resolve(consul.status().updated).should.eventually.eql(new Date());
+    return Promise.resolve(consul.status().updated.getTime()).should.eventually.be.aboveOrEqual(start.getTime());
   });
 });
 

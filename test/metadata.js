@@ -31,9 +31,7 @@ describe('Metadata source plugin', () => {
 
   it('initializes a timer with the set interval', (done) => {
     this.m.on('update', () => {
-      const status = this.m.status();
-
-      status.interval.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
+      this.m._timer.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
         '_onTimeout', '_repeat']);
       done();
     });

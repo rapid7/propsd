@@ -232,4 +232,14 @@ describe('S3 source plugin', () => {
 
     s3SampleData.initialize();
   });
+
+  it('can clear its properties', (done) => {
+    this.s3.on('update', () => {
+      this.s3.clear();
+      this.s3.properties.should.eql({});
+      done();
+    });
+
+    this.s3.initialize();
+  });
 });

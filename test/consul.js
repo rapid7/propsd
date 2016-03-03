@@ -506,4 +506,18 @@ describe('Consul', () => {
     consul.mock.emitChange('catalog-service', {elasticsearch: ['production']});
     consul.mock.emitChange('elasticsearch-production', []);
   });
+
+  it('can clear its properties', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('update', () => {
+      consul.clear();
+      should(consul.properties).eql({});
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {elasticsearch: ['production']});
+    consul.mock.emitChange('elasticsearch-production', []);
+  });
 });

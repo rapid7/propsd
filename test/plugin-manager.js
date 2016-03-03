@@ -7,7 +7,6 @@ const AWS = require('aws-sdk');
 
 require('should-sinon');
 
-const S3 = require('../lib/source/s3');
 const PluginManager = require('../lib/plugin-manager');
 const StringTemplate = require('../lib/string-template');
 

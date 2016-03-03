@@ -17,13 +17,14 @@ describe('S3 source plugin', () => {
       s3WithNoSuchKeyError,
       s3WithNotModifiedError,
       s3OtherError,
-      shutdownSpy;
+      shutdownSpy,
+      s3SampleData;
 
   beforeEach((done) => {
     // Stub out all calls to AWS.S3.getObject
     const fakeResponse = {
       ETag: 'ThisIsACoolEtag',
-      Body: new Buffer(JSON.stringify({a: 1, b: 'foo', c: {d: 0}}))
+      Body: new Buffer(JSON.stringify({properties: {a: 1, b: 'foo', c: {d: 0}}}))
     };
 
     S3 = s3Stub({
@@ -79,8 +80,8 @@ describe('S3 source plugin', () => {
   });
 
   it('parses a buffer from S3 to a JSON object', (done) => {
-    this.s3.on('update', () => {
-      this.s3.properties.should.deepEqual({a: 1, b: 'foo', c: {d: 0}});
+    this.s3.on('update', (source) => {
+      source.properties.should.deepEqual({a: 1, b: 'foo', c: {d: 0}});
       done();
     });
 
@@ -197,5 +198,38 @@ describe('S3 source plugin', () => {
 
   it('identifies as a \'s3\' source plugin', () => {
     this.s3.type.should.equal('s3');
+  });
+
+  before(() => {
+    const fakeResponse = {
+      ETag: 'ThisIsACoolEtag',
+      Body: new Buffer(JSON.stringify(require('./data/s3/global')))
+    };
+
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
+    });
+    s3SampleData = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
+  });
+  it('correctly parses a sample document', (done) => {
+    s3SampleData.once('update', (source) => {
+      source.properties.should.deepEqual({
+        global: 'global',
+        account: 'account',
+        region: 'region',
+        vpc_id: 'vpc',
+        produce: 'product',
+        stack: 'stack',
+        service: 'service',
+        version: 'version',
+        asg: 'asg',
+        foo: 'bar',
+        test: true,
+        maxCassandraConnects: 0
+      });
+      done();
+    });
+
+    s3SampleData.initialize();
   });
 });

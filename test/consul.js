@@ -149,25 +149,25 @@ describe('Consul#status', () => {
   it('reports as not okay until initialized', () => {
     const consul = generateConsulStub();
 
-    should(consul.status().okay).eql(false);
+    should(consul.status().ok).eql(false);
     consul.initialize();
-    should(consul.status().okay).eql(true);
+    should(consul.status().ok).eql(true);
   });
 
   it('reports as not okay after shutdown', () => {
     const consul = generateConsulStub();
 
     consul.initialize();
-    should(consul.status().okay).eql(true);
+    should(consul.status().ok).eql(true);
     consul.shutdown();
-    should(consul.status().okay).eql(false);
+    should(consul.status().ok).eql(false);
   });
 
   it('reports as not okay after a Consul service/list API error', (done) => {
     const consul = generateConsulStub();
 
     consul.on('error', () => {
-      should(consul.status().okay).eql(false);
+      should(consul.status().ok).eql(false);
       done();
     });
 
@@ -182,14 +182,14 @@ describe('Consul#status', () => {
     consul.mock.emitError('catalog-service', new Error('Mock service/list error'));
     consul.mock.emitChange('catalog-service', {consul: []});
 
-    return Promise.resolve(consul.status().okay).should.eventually.eql(true);
+    return Promise.resolve(consul.status().ok).should.eventually.eql(true);
   });
 
   it('reports as not okay after a Consul health/service API error', (done) => {
     const consul = generateConsulStub();
 
     consul.on('error', () => {
-      should(consul.status().okay).eql(false);
+      should(consul.status().ok).eql(false);
       done();
     });
 
@@ -206,7 +206,7 @@ describe('Consul#status', () => {
     consul.mock.emitError('consul', new Error('Mock health/service error'));
     consul.mock.emitChange('consul', []);
 
-    return Promise.resolve(consul.status().okay).should.eventually.eql(true);
+    return Promise.resolve(consul.status().ok).should.eventually.eql(true);
   });
 });
 

@@ -39,7 +39,7 @@ class MockConsul {
       let name = options.options.service;
 
       if (options.options.tag) {
-        name += '-' + options.options.tag;
+        name += `-${options.options.tag}`;
       }
 
       return this.getOrCreateEmitter(name);

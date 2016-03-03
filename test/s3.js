@@ -2,36 +2,18 @@
 /* global Config */
 'use strict';
 
-const Path = require('path');
-const winston = require('winston');
 const should = require('should');
 const sinon = require('sinon');
-const proxyquire = require('proxyquire');
 
 require('should-sinon');
 
-global.Config = require('../lib/config').load(Path.resolve(__dirname, './data/config.json'));
-
-global.Log = require('../lib/logger').attach(global.Config);
-global.Log.remove(winston.transports.Console);
-
 const NON_DEFAULT_INTERVAL = 10000;
+const DEFAULT_INTERVAL = 60000;
 const DEFAULT_BUCKET = 'fake-bucket';
-
-function generateProxy(stub) {
-  return proxyquire('../lib/source/s3', {
-    'aws-sdk': {
-      S3: function constructor() {
-        return {getObject: stub
-        };
-      }
-    }
-  });
-}
+const s3Stub = require('./utils/s3-stub');
 
 describe('S3 source plugin', () => {
   let S3,
-      getObjectStub,
       s3WithNoSuchKeyError,
       s3WithNotModifiedError,
       s3OtherError,
@@ -44,11 +26,16 @@ describe('S3 source plugin', () => {
       Body: new Buffer(JSON.stringify({a: 1, b: 'foo', c: {d: 0}}))
     };
 
-    getObjectStub = sinon.stub().callsArgWith(1, null, fakeResponse);
-    S3 = generateProxy(getObjectStub);
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
+    });
 
-    this.s3 = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    this.s3 = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
     done();
+  });
+
+  afterEach(() => {
+    this.s3.shutdown();
   });
 
   it('throws an error if instantiated without bucket or path', () => {
@@ -71,9 +58,7 @@ describe('S3 source plugin', () => {
 
   it('initializes a timer with the set interval', (done) => {
     this.s3.on('update', () => {
-      const status = this.s3.status();
-
-      status.interval.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
+      this.s3._timer.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
         '_onTimeout', '_repeat']);
       done();
     });
@@ -102,9 +87,26 @@ describe('S3 source plugin', () => {
     this.s3.initialize();
   });
 
+  it('returns a properly formed status object', sinon.test((done) => {
+    this.s3.on('update', () => {
+      const status = this.s3.status();
+
+      status.should.eql({
+        ok: true,
+        updated: new Date(),
+        interval: DEFAULT_INTERVAL,
+        running: true
+      });
+      done();
+    });
+
+    this.s3.initialize();
+  }));
+
   before(() => {
-    getObjectStub = sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null);
-    S3 = generateProxy(getObjectStub);
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)
+    });
 
     s3WithNoSuchKeyError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
   });
@@ -127,8 +129,9 @@ describe('S3 source plugin', () => {
   });
 
   before(() => {
-    getObjectStub = sinon.stub().callsArgWith(1, {code: 'NotModified'}, null);
-    S3 = generateProxy(getObjectStub);
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, {code: 'NotModified'}, null)
+    });
 
     s3WithNotModifiedError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
   });
@@ -153,8 +156,9 @@ describe('S3 source plugin', () => {
   before(() => {
     const errorObj = {code: 'BigTimeErrorCode', message: 'This is the error message'};
 
-    getObjectStub = sinon.stub().callsArgWith(1, errorObj, null);
-    S3 = generateProxy(getObjectStub);
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, errorObj, null)
+    });
 
     s3OtherError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
   });
@@ -169,6 +173,7 @@ describe('S3 source plugin', () => {
     });
 
     s3OtherError.initialize();
+    s3OtherError.shutdown();
   });
 
   it('can\'t shutdown a plugin that\'s already shut down', (done) => {
@@ -187,5 +192,10 @@ describe('S3 source plugin', () => {
   it('can only be initialized once', () => {
     this.s3.initialize();
     this.s3.should.deepEqual(this.s3.initialize());
+    this.s3.shutdown();
+  });
+
+  it('identifies as a \'s3\' source plugin', () => {
+    this.s3.type.should.equal('s3');
   });
 });

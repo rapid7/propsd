@@ -11,7 +11,9 @@
     "start": "./bin/server.js",
     "test": "mocha",
     "lint": "eslint bin/** lib/** test/**",
-    "coverage": "istanbul cover _mocha -- -R spec"
+    "coverage": "istanbul cover _mocha -- -R spec",
+    "metadata-server": "./test/bin/metadata-server.js",
+    "s3-server": "./test/bin/s3-server.js"
   },
   "repository": {
     "type": "git",
@@ -33,10 +35,13 @@
     "istanbul": "^0.4.2",
     "mocha": "^2.3.4",
     "proxyquire": "^1.7.4",
+    "rimraf": "^2.5.2",
+    "s3rver": "0.0.13",
     "should": "^8.1.1",
     "should-sinon": "0.0.5",
     "sinon": "^1.17.3",
-    "supertest": "^1.2.0"
+    "supertest": "^1.2.0",
+    "walk": "^2.3.9"
   },
   "dependencies": {
     "aws-sdk": "^2.2.28",

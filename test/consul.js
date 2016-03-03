@@ -210,6 +210,35 @@ describe('Consul#status', () => {
   });
 });
 
+describe('Consul#configure', () => {
+  it('changes the Consul agent address', () => {
+    const agentAddress = '10.0.0.0';
+    const consul = generateConsulStub();
+
+    should(consul.host).not.eql(agentAddress);
+    consul.configure({host: agentAddress});
+    should(consul.host).eql(agentAddress);
+  });
+
+  it('changes the Consul agent port', () => {
+    const agentPort = 8600;
+    const consul = generateConsulStub();
+
+    should(consul.port).not.eql(agentPort);
+    consul.configure({port: agentPort});
+    should(consul.port).eql(agentPort);
+  });
+
+  it('changes the Consul agent security', () => {
+    const agentSecurity = false;
+    const consul = generateConsulStub();
+
+    should(consul.secure).not.eql(agentSecurity);
+    consul.configure({secure: agentSecurity});
+    should(consul.secure).eql(agentSecurity);
+  });
+});
+
 describe('Consul', () => {
   it('identifies as a "consul" source plugin', () => {
     const consul = generateConsulStub();

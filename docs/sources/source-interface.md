@@ -9,6 +9,7 @@ All source plugins must expose the following:
 1. `Source#initialize()`
 1. `Source#status()`: (`Object`) Returns the plugin's status.
 1. `Source#shutdown()`: Cleans up any open handles (fs, timer, etc.) the plugin has open.
+1. `Source#clear()`: Clears the underlying `Source#properties` data.
 
 ## Properties
 1. `Source#interval`: (`Integer`) The interval between execution attempts.

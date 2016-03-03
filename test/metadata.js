@@ -131,4 +131,14 @@ describe('Metadata source plugin', () => {
   after(() => {
     this.m.service.host = '127.0.0.1:8080';
   });
+
+  it('can clear its properties', (done) => {
+    this.m.on('update', () => {
+      this.m.clear();
+      this.m.properties.should.eql({});
+      done();
+    });
+
+    this.m.initialize();
+  });
 });

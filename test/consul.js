@@ -481,4 +481,17 @@ describe('Consul', () => {
     });
     consul.mock.emitChange('elasticsearch-production', []);
   });
+
+  it('emits itself on update', (done) => {
+    const consul = generateConsulStub();
+
+    consul.on('update', (source) => {
+      should(consul).equal(source);
+      done();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {elasticsearch: ['production']});
+    consul.mock.emitChange('elasticsearch-production', []);
+  });
 });

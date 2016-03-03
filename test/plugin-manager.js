@@ -56,7 +56,7 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   it('correctly merges data from the metadata plugin with stringtemplate strings from the index', function (done) {
@@ -69,7 +69,7 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   it('handles being presented with data that will be parsed into a badly interpolated StringTemplate', function (done) {
@@ -93,7 +93,7 @@ describe('Plugin manager', function () {
       });
     });
     manager.updateDelay = 1;
-    manager.init();
+    manager.initialize();
   });
 
   it('registers plugins with the storage engine', function (done) {
@@ -104,7 +104,7 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   it('sets event handlers for plugin events', function (done) {
@@ -117,7 +117,7 @@ describe('Plugin manager', function () {
       });
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   it('handles source types that have not been implemented', function (done) {
@@ -140,7 +140,7 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   it('retries Metadata source until it succeeds if the Metadata source fails', function (done) {
@@ -165,7 +165,7 @@ describe('Plugin manager', function () {
     });
 
     manager.metadata.service.host = '0.0.0.0';
-    manager.init();
+    manager.initialize();
   });
 
   it('retries S3 source until it succeeds if the S3 source fails', function (done) {
@@ -191,7 +191,7 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   // SECOND PULL REQUEST
@@ -220,7 +220,7 @@ describe('Plugin manager', function () {
       console.log(`${Date.now()}: index updated`);
     });
 
-    manager.init();
+    manager.initialize();
   });
 
   it('updates the storage engine when the index removes a source plugin', function (done) {
@@ -248,7 +248,7 @@ describe('Plugin manager', function () {
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
     });
 
-    manager.init();
+    manager.initialize();
   }); */
 });
 

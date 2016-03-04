@@ -1,0 +1,7 @@
+{
+	"version": 1,
+	"properties": {
+		"foo": "bar",
+		"test": true
+	}
+}

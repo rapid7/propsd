@@ -148,7 +148,6 @@ describe('Plugin manager', function () {
       if (err.code === 'ECONNREFUSED') {
         const metadataStatus = manager.metadata.status();
 
-        err.code.should.equal('ECONNREFUSED');
         manager.status().should.eql({running: true, ok: false, sources: []});
         metadataStatus.ok.should.be.false();
         metadataStatus.running.should.be.true();
@@ -175,15 +174,16 @@ describe('Plugin manager', function () {
   it('retries S3 source until it succeeds if the S3 source fails', function (done) {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
 
-    manager.once('error', (err) => {
-      const indexStatus = manager.index.status();
+    manager.on('error', (err) => {
+      if (err.message === 'UnknownEndpoint') {
+        const indexStatus = manager.index.status();
 
-      err.message.should.equal('UnknownEndpoint');
-      manager.status().should.eql({running: true, ok: false, sources: []});
-      indexStatus.ok.should.be.false();
-      indexStatus.running.should.be.true();
+        manager.status().should.eql({running: true, ok: false, sources: []});
+        indexStatus.ok.should.be.false();
+        indexStatus.running.should.be.true();
 
-      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+        AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+      }
     });
 
     manager.once('sources-generated', (sources) => {
@@ -195,6 +195,8 @@ describe('Plugin manager', function () {
       done();
     });
 
+    manager.updateDelay = 1;
+    manager.index.interval = 1;
     manager.initialize();
   });
 

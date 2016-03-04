@@ -134,4 +134,17 @@ describe('Core API v1', () => {
         done();
       });
   });
+
+  it('responds correctly to a request to the /health endpoint', (done) => {
+    request(server)
+      .get(endpoints.health)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect(HTTP_OK)
+      .end((err, res) => {
+        res.body.should.have.properties({status: HTTP_OK, plugins: {s3: expectedStatusResponse.sources.length}});
+        res.body.should.have.property('uptime');
+        done();
+      });
+  });
 });

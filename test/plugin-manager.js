@@ -91,7 +91,6 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.updateDelay = 1;
     manager.index.interval = 1;
     manager.initialize();
   });
@@ -166,7 +165,6 @@ describe('Plugin manager', function () {
     });
 
     manager.metadata.service.host = '0.0.0.0';
-    manager.updateDelay = 1;
     manager.metadata.interval = 1;
     manager.initialize();
   });
@@ -195,7 +193,6 @@ describe('Plugin manager', function () {
       done();
     });
 
-    manager.updateDelay = 1;
     manager.index.interval = 1;
     manager.initialize();
   });

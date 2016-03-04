@@ -44,6 +44,7 @@ const nestedJavaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEA
 /**
  * Create a new Express server for testing
  *
+ * @param {Object} propsUnderTest
  * @return {http.Server}
  */
 function makeServer(propsUnderTest) {

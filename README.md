@@ -43,6 +43,53 @@ so you can run propsd without terminal output. Log files aren't rotated by
 propsd, so you'll want to configure something externally to handle that if
 you enable file logging.
 
+### properties
+
+The `properties` object can contain any arbitrary properties you want loaded into the `Metadata#properties` object when it's being used to interpolate sources from the index. 
+
+For example, a config file with the following `properties` object:
+
+~~~json
+{
+	...
+	"properties": {
+		"foo": "bar",
+		"baz": "s3"
+	}
+	...
+}	
+~~~
+
+When presented with the following index document:
+
+~~~json
+{
+	"version": 1.0,
+	"sources": [
+		{
+			"name": "foo",
+			"type": "{{ baz }}",
+			"parameters": {
+				"path": "{{ foo }}.json"
+			}
+		}
+	]
+}
+~~~
+
+Will yield this source:
+
+~~~json
+{
+	"name": "foo",
+	"type": "s3",
+	"parameters": {
+		"path": "bar.json"
+	}
+}
+~~~
+
+
 ### Example
 
 An example configuration file is shown below. The server's address is set to

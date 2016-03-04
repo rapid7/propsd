@@ -20,17 +20,36 @@ const conquesoProperties = {
   }
 };
 
+const nestedProperties = {
+  instanceMetaData: {
+    'meta.property.1': 'songs you have never heard of',
+    'meta.property.2': 'artisanal cream cheese'
+  },
+  properties: {
+    name: 'hipster-mode-enabled',
+    value: true,
+    type: 'BOOLEAN',
+    food: {
+      name: 'tacos',
+      value: true,
+      type: 'BOOLEAN'
+    }
+  }
+};
+
 const javaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN';
+const nestedJavaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN\nfood.name=tacos\n' +
+    'food.value=true\nfood.type=BOOLEAN';
 
 /**
  * Create a new Express server for testing
  *
  * @return {http.Server}
  */
-function makeServer() {
+function makeServer(propsUnderTest) {
   const app = require('express')();
 
-  require('../lib/control/v1/conqueso').attach(app, conquesoProperties);
+  require('../lib/control/v1/conqueso').attach(app, propsUnderTest);
   return app.listen(testServerPort);
 }
 
@@ -38,7 +57,7 @@ describe('Conqueso API v1', () => {
   let server = null;
 
   beforeEach(() => {
-    server = makeServer();
+    server = makeServer(conquesoProperties);
   });
 
   afterEach((done) => {
@@ -93,5 +112,24 @@ describe('Conqueso API v1', () => {
       .head('/v1/conqueso')
       .expect('Allow', 'GET,POST,PUT,OPTIONS')
       .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
+  });
+});
+
+// This is split out into a separate 'describe' group because of the way express binds ports
+describe('Conqueso API v1', () => {
+  let server;
+
+  before(() => {
+    server = makeServer(nestedProperties);
+  });
+  it('emits properly flattened data', (done) => {
+    request(server)
+      .get('/v1/conqueso/api/roles')
+      .set('Accept', 'text/plain')
+      .expect('Content-Type', 'text/plain; charset=utf-8')
+      .expect(HTTP_OK, nestedJavaProperties, done);
+  });
+  after((done) => {
+    server.close(done);
   });
 });

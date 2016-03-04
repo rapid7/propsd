@@ -80,16 +80,19 @@ describe('Plugin manager', function () {
 
     manager.once('error', () => {
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
-      manager.once('sources-generated', (sources) => {
-        const sourceObjs = sources.map((s) => {
-          return {name: s.name, type: s.type};
-        });
-
-        sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
-        done();
-      });
     });
+
+    manager.once('sources-generated', (sources) => {
+      const sourceObjs = sources.map((s) => {
+        return {name: s.name, type: s.type};
+      });
+
+      sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+      done();
+    });
+
     manager.updateDelay = 1;
+    manager.index.interval = 1;
     manager.initialize();
   });
 

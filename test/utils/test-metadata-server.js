@@ -77,5 +77,4 @@ exports.stop = () => {
     }
     console.log('Server shutting down\n'); // eslint-disable-line no-console
   }
-  console.log('Server shutting down\n'); // eslint-disable-line no-console
 };

@@ -78,7 +78,7 @@ describe('Plugin manager', function () {
       Body: new Buffer(JSON.stringify(badIndex))
     });
 
-    manager.on('error', () => {
+    manager.once('error', () => {
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
       manager.once('sources-generated', (sources) => {
         const sourceObjs = sources.map((s) => {

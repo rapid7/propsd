@@ -3,37 +3,64 @@
 
 const request = require('supertest');
 
+require('should');
+
 const testServerPort = 3000;
 const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
 
 const sourceStatus = () => {
-  return true;
+  return {
+    ok: true,
+    updated: 1,
+    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
+    running: true
+  };
 };
 
 const storage = {
+  sources: [{
+    name: 'foo-bar-baz.json',
+    type: 's3',
+    status: sourceStatus
+  }, {
+    name: 'foo-quiz-buzz.json',
+    type: 's3',
+    status: sourceStatus
+  }]
+};
+
+const pluginManager = {
   index: {
     status: sourceStatus
   },
-  sources: [{
-    name: '',
-    type: '',
+  metadata: {
     status: sourceStatus
-  }, {
-    name: '',
-    type: '',
-    status: sourceStatus
-  }],
-  config: {
-    get: () => {
-      return true;
-    }
   }
 };
 
 const endpoints = {
   health: '/v1/health',
   status: '/v1/status'
+};
+
+const expectedStatusResponse = {
+  status: HTTP_OK,
+  index: {
+    ok: true,
+    updated: 1,
+    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
+    running: true
+  },
+  sources: [{
+    name: 'foo-bar-baz.json',
+    type: 's3',
+    status: 'okay'
+  }, {
+    name: 'foo-quiz-buzz.json',
+    type: 's3',
+    status: 'okay'
+  }]
 };
 
 /**
@@ -44,7 +71,7 @@ const endpoints = {
 const makeServer = () => {
   const app = require('express')();
 
-  require('../lib/control/v1/core').attach(app, storage);
+  require('../lib/control/v1/core').attach(app, storage, pluginManager);
   return app.listen(testServerPort);
 };
 
@@ -67,11 +94,11 @@ describe('Core API v1', () => {
     /* eslint-disable no-loop-func */
     it(`acknowledges GET requests to the ${endpoint} endpoint`, (done) => {
       request(server)
-          .get(endpoints[endpoint])
-          .set('Accept', 'application/json')
-          .expect('Content-Type', 'application/json; charset=utf-8')
-          .expect(HTTP_OK)
-          .end(done);
+        .get(endpoints[endpoint])
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_OK)
+        .end(done);
     });
 
     it(`rejects all other request types to the ${endpoint} endpoint`, (done) => {
@@ -94,4 +121,30 @@ describe('Core API v1', () => {
 
     /* eslint-enable no-loop-func */
   }
+
+  it('responds correctly to a request to the /status endpoint', (done) => {
+    request(server)
+      .get(endpoints.status)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect(HTTP_OK)
+      .end((err, res) => {
+        res.body.should.have.properties(expectedStatusResponse);
+        res.body.should.have.property('uptime');
+        done();
+      });
+  });
+
+  it('responds correctly to a request to the /health endpoint', (done) => {
+    request(server)
+      .get(endpoints.health)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect(HTTP_OK)
+      .end((err, res) => {
+        res.body.should.have.properties({status: HTTP_OK, plugins: {s3: expectedStatusResponse.sources.length}});
+        res.body.should.have.property('uptime');
+        done();
+      });
+  });
 });

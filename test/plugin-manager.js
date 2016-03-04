@@ -78,18 +78,20 @@ describe('Plugin manager', function () {
       Body: new Buffer(JSON.stringify(badIndex))
     });
 
-    manager.on('error', () => {
+    manager.once('error', () => {
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
-      manager.once('sources-generated', (sources) => {
-        const sourceObjs = sources.map((s) => {
-          return {name: s.name, type: s.type};
-        });
-
-        sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
-        done();
-      });
     });
-    manager.updateDelay = 1;
+
+    manager.once('sources-generated', (sources) => {
+      const sourceObjs = sources.map((s) => {
+        return {name: s.name, type: s.type};
+      });
+
+      sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+      done();
+    });
+
+    manager.index.interval = 1;
     manager.initialize();
   });
 
@@ -141,15 +143,16 @@ describe('Plugin manager', function () {
   });
 
   it('retries Metadata source until it succeeds if the Metadata source fails', function (done) {
-    manager.once('error', (err) => {
-      const metadataStatus = manager.metadata.status();
+    manager.on('error', (err) => {
+      if (err.code === 'ECONNREFUSED') {
+        const metadataStatus = manager.metadata.status();
 
-      err.code.should.equal('ECONNREFUSED');
-      manager.status().should.eql({running: true, ok: false, sources: []});
-      metadataStatus.ok.should.be.false();
-      metadataStatus.running.should.be.true();
+        manager.status().should.eql({running: true, ok: false, sources: []});
+        metadataStatus.ok.should.be.false();
+        metadataStatus.running.should.be.true();
 
-      manager.metadata.service.host = '127.0.0.1:8080';
+        manager.metadata.service.host = '127.0.0.1:8080';
+      }
     });
 
     manager.once('sources-generated', (sources) => {
@@ -162,21 +165,23 @@ describe('Plugin manager', function () {
     });
 
     manager.metadata.service.host = '0.0.0.0';
+    manager.metadata.interval = 1;
     manager.initialize();
   });
 
   it('retries S3 source until it succeeds if the S3 source fails', function (done) {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
 
-    manager.once('error', (err) => {
-      const indexStatus = manager.index.status();
+    manager.on('error', (err) => {
+      if (err.message === 'UnknownEndpoint') {
+        const indexStatus = manager.index.status();
 
-      err.message.should.equal('UnknownEndpoint');
-      manager.status().should.eql({running: true, ok: false, sources: []});
-      indexStatus.ok.should.be.false();
-      indexStatus.running.should.be.true();
+        manager.status().should.eql({running: true, ok: false, sources: []});
+        indexStatus.ok.should.be.false();
+        indexStatus.running.should.be.true();
 
-      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+        AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+      }
     });
 
     manager.once('sources-generated', (sources) => {
@@ -188,6 +193,7 @@ describe('Plugin manager', function () {
       done();
     });
 
+    manager.index.interval = 1;
     manager.initialize();
   });
 

@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 'use strict';
 
+const generateConsulStub = require('./utils/consul-stub');
 const request = require('supertest');
 
 const testServerPort = 3000;
@@ -132,5 +133,41 @@ describe('Conqueso API v1', () => {
   });
   after((done) => {
     server.close(done);
+  });
+});
+
+describe('Conqueso API vi1', () => {
+  let consul = null;
+  let server = null;
+
+  before(() => {
+    consul = generateConsulStub();
+    server = makeServer(consul);
+    consul.initialize();
+  });
+
+
+  after((done) => {
+    consul.shutdown();
+    server.close(done);
+  });
+
+  it('formats IP addresses for untagged Consul services', (done) => {
+    consul.on('update', () => {
+      request(server)
+        .get('/v1/conqueso/api/roles')
+        .set('Accept', 'text/plain')
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect(HTTP_OK, 'elasticsearch.addresses=10.0.0.0,127.0.0.1', done);
+    });
+
+    consul.mock.emitChange('catalog-service', {
+      elasticsearch: []
+    });
+    consul.mock.emitChange('elasticsearch', [{
+      Service: {Address: '10.0.0.0'}
+    },{
+      Service: {Address: '127.0.0.1'}
+    }]);
   });
 });

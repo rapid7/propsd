@@ -1,5 +1,5 @@
 # Propsd
-
+[![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
 ## Usage
 
 The Propsd server runs under [Node.js][]. Run the following command to start it.
@@ -45,7 +45,7 @@ you enable file logging.
 
 ### properties
 
-The `properties` object can contain any arbitrary properties you want loaded into the `Metadata#properties` object when it's being used to interpolate sources from the index. 
+The `properties` object can contain any arbitrary properties you want loaded into the `Metadata#properties` object when it's being used to interpolate sources from the index.
 
 For example, a config file with the following `properties` object:
 
@@ -162,3 +162,7 @@ If an `endpoint` key is provided, the S3 source and it's underlying client will 
 
 [Node.js]: https://nodejs.org/en/
 [http-api]: docs/http-api.md
+[travis-image]: https://travis-ci.org/rapid7/propsd.svg?branch=master
+[travis-url]: https://travis-ci.org/rapid7/propsd
+[coveralls-image]: https://coveralls.io/repos/rapid7/propsd/badge.svg?branch=master&service=github
+[coveralls-url]: https://coveralls.io/github/rapid7/propsd?branch=master

@@ -64,7 +64,7 @@ class MockConsul {
 
 function generateConsulStub(options) {
   const mock = new MockConsul();
-  const Consul = proxyquire('../lib/source/consul', {
+  const Consul = proxyquire('../../lib/source/consul', {
     consul() {
       return mock;
     }

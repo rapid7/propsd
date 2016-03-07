@@ -253,7 +253,7 @@ describe('Consul', () => {
     consul.mock.emitChange('catalog-service', {consul: []});
     consul.mock.emitChange('consul', []);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({});
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({});
   });
 
   it('resolves addresses at the node level by default', () => {
@@ -265,7 +265,7 @@ describe('Consul', () => {
       Node: {Address: '10.0.0.0'}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       consul: {addresses: ['10.0.0.0']}
     });
   });
@@ -279,7 +279,7 @@ describe('Consul', () => {
       Node: {Address: ''}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       consul: {addresses: []}
     });
   });
@@ -294,7 +294,7 @@ describe('Consul', () => {
       Service: {Address: '127.0.0.1'}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       consul: {addresses: ['127.0.0.1']}
     });
   });
@@ -309,7 +309,7 @@ describe('Consul', () => {
       Service: {Address: ''}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       consul: {addresses: ['10.0.0.0']}
     });
   });
@@ -325,7 +325,7 @@ describe('Consul', () => {
       Node: {Address: '10.0.0.0'}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       consul: {addresses: ['10.0.0.0', '127.0.0.1']}
     });
   });
@@ -342,7 +342,7 @@ describe('Consul', () => {
       Service: {Address: '10.0.0.0'}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       'consul-production': {addresses: ['127.0.0.1']},
       'consul-development': {addresses: ['10.0.0.0']}
     });
@@ -363,7 +363,7 @@ describe('Consul', () => {
       Service: {Address: '10.0.0.0'}
     }]);
 
-    return Promise.resolve(consul.properties).should.eventually.eql({
+    return Promise.resolve(consul.properties.consul).should.eventually.eql({
       'consul-production': {addresses: ['127.0.0.1']},
       'elasticsearch-production': {addresses: ['10.0.0.0']}
     });
@@ -449,7 +449,7 @@ describe('Consul', () => {
 
     consul.on('update', () => {
       consul.clear();
-      should(consul.properties).eql({});
+      should(consul.properties.consul).eql({});
       done();
     });
 

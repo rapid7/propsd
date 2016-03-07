@@ -16,7 +16,15 @@ const args = require('yargs')
 const express = require('express');
 const http = require('http');
 
-global.Config = require('../lib/config').load(args.c);
+// Load nconf into the global namespace
+global.Config = require('nconf')
+    .env()
+    .argv();
+if (args.c) {
+  global.Config.file(args.c);
+}
+global.Config.defaults(require('../config/defaults.json'));
+
 global.Log = require('../lib/logger').attach(global.Config);
 const PluginManager = require('../lib/plugin-manager');
 

@@ -236,6 +236,16 @@ describe('Consul', () => {
     consul.mock.emitError('consul', new Error('Mock health/service error'));
   });
 
+  it('namespaces resolved properties within a "consul" group', () => {
+    const consul = generateConsulStub();
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', []);
+
+    return Promise.resolve(consul.properties).should.eventually.have.property('consul');
+  });
+
   it('resolves an empty object if no addresses are found', () => {
     const consul = generateConsulStub();
 

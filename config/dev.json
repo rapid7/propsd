@@ -1,8 +1,13 @@
 {
+  "index": {
+    "endpoint": "http://127.0.0.1:4569",
+    "bucket": "propsd-s3",
+    "path": "index.json"
+  },
   "metadata": {
     "host": "127.0.0.1:8080"
   },
   "log": {
-    "level": "info"
+    "level": "debug"
   }
 }

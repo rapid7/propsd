@@ -157,7 +157,7 @@ describe('Conqueso API vi1', () => {
         .get('/v1/conqueso/api/roles')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, 'elasticsearch.addresses=10.0.0.0,127.0.0.1', done);
+        .expect(HTTP_OK, 'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1', done);
     });
 
     consul.mock.emitChange('catalog-service', {

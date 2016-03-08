@@ -136,7 +136,7 @@ describe('Conqueso API v1', () => {
   });
 });
 
-describe('Conqueso API vi1', () => {
+describe('Conqueso API v1', () => {
   let consul = null,
       server = null;
 
@@ -164,6 +164,25 @@ describe('Conqueso API vi1', () => {
       elasticsearch: []
     });
     consul.mock.emitChange('elasticsearch', [{
+      Service: {Address: '10.0.0.0'}
+    }, {
+      Service: {Address: '127.0.0.1'}
+    }]);
+  });
+
+  it('formats IP addresses for tagged Consul services', (done) => {
+    consul.on('update', () => {
+      request(server)
+        .get('/v1/conqueso/api/roles')
+        .set('Accept', 'text/plain')
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect(HTTP_OK, 'conqueso.es-production.ips=10.0.0.0,127.0.0.1', done);
+    });
+
+    consul.mock.emitChange('catalog-service', {
+      elasticsearch: ['es-production']
+    });
+    consul.mock.emitChange('es-production', [{
       Service: {Address: '10.0.0.0'}
     }, {
       Service: {Address: '127.0.0.1'}

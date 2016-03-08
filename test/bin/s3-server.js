@@ -91,7 +91,7 @@ function copyFiles(bucket) {
   const walker = walk.walk(path);
 
   walker.on('file', (root, fileStats, next) => {
-    const pathToFile = `${Path.relative(path, root)}/${fileStats.name}`;
+    const pathToFile = Path.join(Path.relative(path, root), fileStats.name);
     const stream = fs.createReadStream(Path.join(path, pathToFile));
 
     awsClient.putObject({
@@ -128,6 +128,7 @@ function emptyBucket(bucket) {
 
 /**
  * Handles cleanup on app exit
+ * @param {Error} err
  */
 function exitHandler(err) {
   let code = 0;

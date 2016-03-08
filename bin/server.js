@@ -15,13 +15,14 @@ const args = require('yargs')
 
 const express = require('express');
 const http = require('http');
+const Path = require('path');
 
 // Load nconf into the global namespace
 global.Config = require('nconf')
     .env()
     .argv();
 if (args.c) {
-  global.Config.file(args.c);
+  global.Config.file(Path.resolve(process.cwd(), args.c));
 }
 global.Config.defaults(require('../config/defaults.json'));
 

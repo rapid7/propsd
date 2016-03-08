@@ -137,15 +137,14 @@ describe('Conqueso API v1', () => {
 });
 
 describe('Conqueso API vi1', () => {
-  let consul = null;
-  let server = null;
+  let consul = null,
+      server = null;
 
   before(() => {
     consul = generateConsulStub();
     server = makeServer(consul);
     consul.initialize();
   });
-
 
   after((done) => {
     consul.shutdown();
@@ -166,7 +165,7 @@ describe('Conqueso API vi1', () => {
     });
     consul.mock.emitChange('elasticsearch', [{
       Service: {Address: '10.0.0.0'}
-    },{
+    }, {
       Service: {Address: '127.0.0.1'}
     }]);
   });

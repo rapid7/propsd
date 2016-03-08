@@ -158,6 +158,7 @@ function createBucket(bucket) {
 function init() {
   fs.stat(path, (err, stats) => {
     if (err || !stats.isDirectory()) {
+      Log.error('Path is not a directory');
       process.exit(1);
     }
     const bucket = getBucketName(path);
@@ -172,6 +173,7 @@ function init() {
 
     client.run((serverErr, host, p) => {
       if (serverErr) {
+        Log.error(serverErr);
         process.exit(1);
       }
 

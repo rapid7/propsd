@@ -137,7 +137,9 @@ function exitHandler(err) {
     Log.error(err, err.stack);
     code = 1;
   }
-  Log.info('Cleaning up temp directory');
+  const tmpDirBucketPath = Path.resolve(os.tmpdir(), `propsd-temp-s3-server`);
+
+  Log.info(`Cleaning up temp directory: ${tmpDirBucketPath}`);
   cleanupTempDir();
   process.exit(code);
 }

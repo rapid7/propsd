@@ -170,22 +170,12 @@ describe('Conqueso API v1', () => {
     }]);
   });
 
-  it('formats IP addresses for tagged Consul services', (done) => {
-    consul.on('update', () => {
-      request(server)
-        .get('/v1/conqueso/api/roles')
-        .set('Accept', 'text/plain')
-        .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, 'conqueso.es-production.ips=10.0.0.0,127.0.0.1', done);
-    });
-
-    consul.mock.emitChange('catalog-service', {
-      elasticsearch: ['es-production']
-    });
-    consul.mock.emitChange('es-production', [{
-      Service: {Address: '10.0.0.0'}
-    }, {
-      Service: {Address: '127.0.0.1'}
-    }]);
-  });
+  /**
+   * The goal is that IP addresses for tagged services are named by their tag.
+   * So "consul.service-tag.addresses" becomes "conqueso.tag.ips". This may
+   * require some refactoring in the Consul plugin and tests so they don't use
+   * hyphens as delimiters (or just ensure that Consul tags aren't parsed with
+   * hyphens in their name).
+   */
+  it('formats IP addresses for tagged Consul services');
 });

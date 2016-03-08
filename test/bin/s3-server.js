@@ -92,7 +92,7 @@ function copyFiles(bucket) {
 
   walker.on('file', (root, fileStats, next) => {
     const pathToFile = `${Path.relative(path, root)}/${fileStats.name}`;
-    const stream = fs.createReadStream(`${path}/${pathToFile}`);
+    const stream = fs.createReadStream(Path.join(path, pathToFile));
 
     awsClient.putObject({
       Bucket: bucket,

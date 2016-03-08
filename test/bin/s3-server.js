@@ -129,10 +129,16 @@ function emptyBucket(bucket) {
 /**
  * Handles cleanup on app exit
  */
-function exitHandler() {
+function exitHandler(err) {
+  let code = 0;
+
+  if (err) {
+    Log.error(err);
+    code = 1;
+  }
   Log.info('Cleaning up temp directory');
   cleanupTempDir();
-  process.exit(0);
+  process.exit(code);
 }
 
 function createBucket(bucket) {
@@ -185,4 +191,6 @@ process.on('exit', exitHandler);
 process.on('SIGINT', exitHandler);
 
 // catches uncaught exceptions
-process.on('uncaughtException', exitHandler);
+process.on('uncaughtException', (err) => {
+  exitHandler(err);
+});

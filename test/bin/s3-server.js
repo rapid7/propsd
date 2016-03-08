@@ -100,7 +100,7 @@ function copyFiles(bucket) {
       Body: stream
     }, (err) => {
       if (err) {
-        Log.info(err, err.stack);
+        Log.error(err, err.stack);
       }
       next();
     });
@@ -133,7 +133,7 @@ function exitHandler(err) {
   let code = 0;
 
   if (err) {
-    Log.error(err);
+    Log.error(err, err.stack);
     code = 1;
   }
   Log.info('Cleaning up temp directory');
@@ -161,8 +161,12 @@ function createBucket(bucket) {
 
 function init() {
   fs.stat(path, (err, stats) => {
-    if (err || !stats.isDirectory()) {
-      Log.error('Path is not a directory');
+    if (err) {
+      Log.error(err, err.stack);
+      process.exit(1);
+    }
+    if (!stats.isDirectory()) {
+      Log.error(`${path} is not a directory`);
       process.exit(1);
     }
     const bucket = getBucketName(path);
@@ -177,7 +181,7 @@ function init() {
 
     client.run((serverErr, host, p) => {
       if (serverErr) {
-        Log.error(serverErr);
+        Log.error(serverErr, serverErr.stack);
         process.exit(1);
       }
 

@@ -141,6 +141,11 @@ function exitHandler(err) {
   process.exit(code);
 }
 
+function onFileChange(bucket) {
+  emptyBucket(bucket);
+  copyFiles(bucket);
+}
+
 function createBucket(bucket) {
   awsClient.createBucket({Bucket: bucket}, (createBucketErr) => {
     if (createBucketErr) {
@@ -148,10 +153,9 @@ function createBucket(bucket) {
     }
     copyFiles(bucket);
 
-    chokidar.watch(path, {persistent: true}).on('change', () => {
-      emptyBucket(bucket);
-      copyFiles(bucket);
-    });
+    // Watch for both change and unlink events.
+    chokidar.watch(path, {persistent: true}).on('change', () => onFileChange(bucket));
+    chokidar.watch(path, {persistent: true}).on('unlink', () => onFileChange(bucket));
   });
 }
 

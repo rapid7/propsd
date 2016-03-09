@@ -57,7 +57,7 @@ For example, a config file with the following `properties` object:
 		"baz": "s3"
 	}
 	...
-}	
+}
 ~~~
 
 When presented with the following index document:
@@ -159,6 +159,19 @@ The bucket the objects are served from is `propsd-<final directory in path>` and
 
 If an `endpoint` key is provided, the S3 source and it's underlying client will assume that you are serving data from another location and will ignore the `region` key, if provided.
 
+## Releasing
+To cut a release do the following:
+* [Bump the version][npm-version]
+* Build and upload a package
+* Create a new release on github.com
+
+This can be accomplished by running the following commands:
+~~~bash
+npm version minor
+rake clean package release
+~~~
+Then following the steps to create the release on github.com
+
 
 [Node.js]: https://nodejs.org/en/
 [http-api]: docs/http-api.md
@@ -166,3 +179,4 @@ If an `endpoint` key is provided, the S3 source and it's underlying client will 
 [travis-url]: https://travis-ci.org/rapid7/propsd
 [coveralls-image]: https://coveralls.io/repos/rapid7/propsd/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/rapid7/propsd?branch=master
+[npm-version]: https://docs.npmjs.com/cli/version

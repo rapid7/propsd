@@ -266,7 +266,10 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      consul: {addresses: ['10.0.0.0']}
+      consul: {
+        cluster: 'consul',
+        addresses: ['10.0.0.0']
+      }
     });
   });
 
@@ -280,7 +283,10 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      consul: {addresses: []}
+      consul: {
+        cluster: 'consul',
+        addresses: []
+      }
     });
   });
 
@@ -295,7 +301,10 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      consul: {addresses: ['127.0.0.1']}
+      consul: {
+        cluster: 'consul',
+        addresses: ['127.0.0.1']
+      }
     });
   });
 
@@ -310,7 +319,10 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      consul: {addresses: ['10.0.0.0']}
+      consul: {
+        cluster: 'consul',
+        addresses: ['10.0.0.0']
+      }
     });
   });
 
@@ -326,7 +338,10 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      consul: {addresses: ['10.0.0.0', '127.0.0.1']}
+      consul: {
+        cluster: 'consul',
+        addresses: ['10.0.0.0', '127.0.0.1']
+      }
     });
   });
 
@@ -343,8 +358,14 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      'consul-production': {addresses: ['127.0.0.1']},
-      'consul-development': {addresses: ['10.0.0.0']}
+      'consul-production': {
+        cluster: 'production',
+        addresses: ['127.0.0.1']
+      },
+      'consul-development': {
+        cluster: 'development',
+        addresses: ['10.0.0.0']
+      }
     });
   });
 
@@ -364,8 +385,14 @@ describe('Consul', () => {
     }]);
 
     return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      'consul-production': {addresses: ['127.0.0.1']},
-      'elasticsearch-production': {addresses: ['10.0.0.0']}
+      'consul-production': {
+        cluster: 'production',
+        addresses: ['127.0.0.1']
+      },
+      'elasticsearch-production': {
+        cluster: 'production',
+        addresses: ['10.0.0.0']
+      }
     });
   });
 

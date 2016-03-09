@@ -140,13 +140,13 @@ describe('Conqueso API v1', () => {
   let consul = null,
       server = null;
 
-  before(() => {
+  beforeEach(() => {
     consul = generateConsulStub();
     server = makeServer(consul);
     consul.initialize();
   });
 
-  after((done) => {
+  afterEach((done) => {
     consul.shutdown();
     server.close(done);
   });

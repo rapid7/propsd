@@ -152,12 +152,18 @@ describe('Conqueso API v1', () => {
   });
 
   it('formats IP addresses for untagged Consul services', (done) => {
+    const expectedBody = [
+      'consul.elasticsearch.addresses.0=10.0.0.0',
+      'consul.elasticsearch.addresses.1=127.0.0.1',
+      'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
+    ].join('\n');
+
     consul.on('update', () => {
       request(server)
         .get('/v1/conqueso/api/roles')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, 'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1', done);
+        .expect(HTTP_OK, expectedBody, done);
     });
 
     consul.mock.emitChange('catalog-service', {

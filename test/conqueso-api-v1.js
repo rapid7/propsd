@@ -155,6 +155,7 @@ describe('Conqueso API v1', () => {
     const expectedBody = [
       'consul.elasticsearch.addresses.0=10.0.0.0',
       'consul.elasticsearch.addresses.1=127.0.0.1',
+      'consul.elasticsearch.cluster=elasticsearch',
       'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
 
@@ -180,6 +181,7 @@ describe('Conqueso API v1', () => {
     const expectedBody = [
       'consul.elasticsearch-sweet-es-cluster.addresses.0=10.0.0.0',
       'consul.elasticsearch-sweet-es-cluster.addresses.1=127.0.0.1',
+      'consul.elasticsearch-sweet-es-cluster.cluster=sweet-es-cluster',
       'conqueso.sweet-es-cluster.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
 

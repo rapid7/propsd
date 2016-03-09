@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 'use strict';
 
+const generateConsulStub = require('./utils/consul-stub');
 const request = require('supertest');
 
 const testServerPort = 3000;
@@ -133,4 +134,54 @@ describe('Conqueso API v1', () => {
   after((done) => {
     server.close(done);
   });
+});
+
+describe('Conqueso API v1', () => {
+  let consul = null,
+      server = null;
+
+  before(() => {
+    consul = generateConsulStub();
+    server = makeServer(consul);
+    consul.initialize();
+  });
+
+  after((done) => {
+    consul.shutdown();
+    server.close(done);
+  });
+
+  it('formats IP addresses for untagged Consul services', (done) => {
+    const expectedBody = [
+      'consul.elasticsearch.addresses.0=10.0.0.0',
+      'consul.elasticsearch.addresses.1=127.0.0.1',
+      'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
+    ].join('\n');
+
+    consul.on('update', () => {
+      request(server)
+        .get('/v1/conqueso/api/roles')
+        .set('Accept', 'text/plain')
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect(HTTP_OK, expectedBody, done);
+    });
+
+    consul.mock.emitChange('catalog-service', {
+      elasticsearch: []
+    });
+    consul.mock.emitChange('elasticsearch', [{
+      Service: {Address: '10.0.0.0'}
+    }, {
+      Service: {Address: '127.0.0.1'}
+    }]);
+  });
+
+  /**
+   * The goal is that IP addresses for tagged services are named by their tag.
+   * So "consul.service-tag.addresses" becomes "conqueso.tag.ips". This may
+   * require some refactoring in the Consul plugin and tests so they don't use
+   * hyphens as delimiters (or just ensure that Consul tags aren't parsed with
+   * hyphens in their name).
+   */
+  it('formats IP addresses for tagged Consul services');
 });

@@ -14,7 +14,8 @@
     "coverage": "istanbul cover _mocha -- -R spec",
     "report-coverage": "npm run coverage && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "metadata-server": "./test/bin/metadata-server.js",
-    "s3-server": "./test/bin/s3-server.js"
+    "s3-server": "./test/bin/s3-server.js",
+    "dev-server": "npm run metadata-server & npm run s3-server -- -d test/data/s3 & npm start -- -c config/dev.json"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
     "coveralls": "^2.11.8",
+    "chokidar": "^1.4.3",
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^3.1.0",
     "eslint-config-rapid7": "0.0.15",

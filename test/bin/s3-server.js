@@ -9,6 +9,8 @@ const Path = require('path');
 const AWS = require('aws-sdk');
 const rmdir = require('rimraf');
 const walk = require('walk');
+const chokidar = require('chokidar');
+const nconf = require('nconf');
 
 const DEFAULT_HTTP_PORT = 4569;
 
@@ -39,10 +41,11 @@ const hostname = args.h;
 const port = args.p;
 const path = Path.resolve(__dirname, `../../${args.d}`);
 
+nconf.set('log:level', 'debug');
+const Log = require('../../lib/logger').attach(nconf);
+
 const awsConfig = {
   s3ForcePathStyle: true,
-  accessKeyId: 'ACCESS_KEY_ID',
-  secretAccessKey: 'SECRET_ACCESS_KEY',
   endpoint: new AWS.Endpoint(`http://${hostname}:${port}`)
 };
 const awsClient = new AWS.S3(awsConfig);
@@ -51,6 +54,9 @@ function getBucketName(p) {
   return `propsd-${Path.basename(p)}`;
 }
 
+/**
+ * Removes the "bucket" created in the temp folder
+ */
 function cleanupTempDir() {
   const tmpDirBucketPath = Path.resolve(os.tmpdir(), `propsd-temp-s3-server`);
 
@@ -61,6 +67,10 @@ function cleanupTempDir() {
   }
 }
 
+/**
+ * Creates a directory for the "bucket" in the temp folder
+ * @returns {String}
+ */
 function createTempDirForBucket() {
   const tmpDirBucketPath = Path.resolve(os.tmpdir(), `propsd-temp-s3-server`);
 
@@ -73,54 +83,119 @@ function createTempDirForBucket() {
   return tmpDirBucketPath;
 }
 
-/* eslint-disable max-nested-callbacks */
-fs.stat(path, (err, stats) => {
-  if (err || !stats.isDirectory()) {
-    process.exit(1);
-  }
-  const bucket = getBucketName(path);
-  const tmpDir = createTempDirForBucket();
+/**
+ * Copies files from the watched folder the the "bucket"
+ * @param {String} bucket
+ */
+function copyFiles(bucket) {
+  const walker = walk.walk(path);
 
-  const client = new S3rver({
-    port,
-    hostname,
-    silent: false,
-    directory: tmpDir
-  });
+  walker.on('file', (root, fileStats, next) => {
+    const pathToFile = Path.join(Path.relative(path, root), fileStats.name);
+    const stream = fs.createReadStream(Path.join(path, pathToFile));
 
-  client.run((serverErr, host, p) => {
-    if (serverErr) {
-      process.exit(1);
-    }
-
-    awsClient.createBucket({Bucket: bucket}, (createBucketErr) => {
-      if (createBucketErr) {
-        throw createBucketErr;
+    awsClient.putObject({
+      Bucket: bucket,
+      Key: pathToFile,
+      Body: stream
+    }, (err) => {
+      if (err) {
+        Log.error(err, err.stack);
       }
+      next();
+    });
+  });
+}
 
-      const walker = walk.walk(path);
-
-      walker.on('file', (root, fileStats, next) => {
-        awsClient.putObject({Bucket: bucket, Key: `${Path.relative(path, root)}/${fileStats.name}`}, (putObjectErr) => {
-          if (putObjectErr) {
-            console.log(err, err.stack); // eslint-disable-line no-console
-          }
-          next();
-        });
+/**
+ * Deletes the contents of the "bucket"
+ * @param {String} bucket
+ */
+function emptyBucket(bucket) {
+  awsClient.listObjects({Bucket: bucket}, (listErr, listData) => {
+    if (listErr) {
+      throw listErr;
+    }
+    listData.Contents.forEach((el) => {
+      awsClient.deleteObject({Bucket: bucket, Key: el.Key}, (deleteErr) => {
+        if (deleteErr) {
+          throw deleteErr;
+        }
       });
     });
-
-    console.log(`listening for S3 requests at http://${host}:${p}`); // eslint-disable-line no-console
   });
-});
-
-/* eslint-enable max-nested-callbacks */
-
-function exitHandler() {
-  console.log('Cleaning up temp directory'); // eslint-disable-line no-console
-  cleanupTempDir();
-  process.exit(0);
 }
+
+/**
+ * Handles cleanup on app exit
+ * @param {Error} err
+ */
+function exitHandler(err) {
+  let code = 0;
+
+  if (err) {
+    Log.error(err, err.stack);
+    code = 1;
+  }
+  const tmpDirBucketPath = Path.resolve(os.tmpdir(), `propsd-temp-s3-server`);
+
+  Log.info(`Cleaning up temp directory: ${tmpDirBucketPath}`);
+  cleanupTempDir();
+  process.exit(code);
+}
+
+function onFileChange(bucket) {
+  emptyBucket(bucket);
+  copyFiles(bucket);
+}
+
+function createBucket(bucket) {
+  awsClient.createBucket({Bucket: bucket}, (createBucketErr) => {
+    if (createBucketErr) {
+      throw createBucketErr;
+    }
+    copyFiles(bucket);
+
+    // Watch for both change and unlink events.
+    chokidar.watch(path, {persistent: true}).on('change', () => onFileChange(bucket));
+    chokidar.watch(path, {persistent: true}).on('unlink', () => onFileChange(bucket));
+  });
+}
+
+function init() {
+  fs.stat(path, (err, stats) => {
+    if (err) {
+      Log.error(err, err.stack);
+      process.exit(1);
+    }
+    if (!stats.isDirectory()) {
+      Log.error(`${path} is not a directory`);
+      process.exit(1);
+    }
+    const bucket = getBucketName(path);
+    const tmpDir = createTempDirForBucket();
+
+    const client = new S3rver({
+      port,
+      hostname,
+      silent: false,
+      directory: tmpDir
+    });
+
+    client.run((serverErr, host, p) => {
+      if (serverErr) {
+        Log.error(serverErr, serverErr.stack);
+        process.exit(1);
+      }
+
+      createBucket(bucket);
+
+      Log.info(`listening for S3 requests at http://${host}:${p}`);
+    });
+  });
+}
+
+init();
 
 // do something when app is closing
 process.on('exit', exitHandler);
@@ -129,4 +204,6 @@ process.on('exit', exitHandler);
 process.on('SIGINT', exitHandler);
 
 // catches uncaught exceptions
-process.on('uncaughtException', exitHandler);
+process.on('uncaughtException', (err) => {
+  exitHandler(err);
+});

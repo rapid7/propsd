@@ -57,7 +57,7 @@ For example, a config file with the following `properties` object:
 		"baz": "s3"
 	}
 	...
-}	
+}
 ~~~
 
 When presented with the following index document:
@@ -112,6 +112,8 @@ file logging is enabled.
 ### Development
 
 To run Propsd locally without dependencies on the AWS Instance Metadata Service or AWS S3, you can run local test versions of both. Currently these services are only tested on OS X.
+
+The services listed below are wrapped up in an npm task which allows you to get up and running quickly. Simply clone the repository, run `npm install` and run `npm run dev-server`. That's it!
 
 #### Metadata Service
 

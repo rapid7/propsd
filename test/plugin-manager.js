@@ -4,6 +4,7 @@
 require('should');
 const sinon = require('sinon');
 const AWS = require('aws-sdk');
+const generateConsulStub = require('./utils/consul-stub');
 
 require('should-sinon');
 
@@ -26,13 +27,15 @@ describe('Plugin manager', function () {
 
   beforeEach(function () {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
+    const consul = generateConsulStub();
 
     storage = new (require('../lib/storage'))();
     manager = new PluginManager(storage, {
       interval: DEFAULT_INTERVAL,
       bucket: 'foo',
       path: 'bar',
-      metadataHost: '127.0.0.1:8080'
+      metadataHost: '127.0.0.1:8080',
+      consul
     });
   });
 
@@ -146,8 +149,10 @@ describe('Plugin manager', function () {
     manager.on('error', (err) => {
       if (err.code === 'ECONNREFUSED') {
         const metadataStatus = manager.metadata.status();
+        const managerStatus = manager.status();
 
-        manager.status().should.eql({running: true, ok: false, sources: []});
+        managerStatus.running.should.be.true();
+        managerStatus.ok.should.be.false();
         metadataStatus.ok.should.be.false();
         metadataStatus.running.should.be.true();
 
@@ -175,8 +180,10 @@ describe('Plugin manager', function () {
     manager.on('error', (err) => {
       if (err.message === 'UnknownEndpoint') {
         const indexStatus = manager.index.status();
+        const managerStatus = manager.status();
 
-        manager.status().should.eql({running: true, ok: false, sources: []});
+        managerStatus.running.should.be.true();
+        managerStatus.ok.should.be.false();
         indexStatus.ok.should.be.false();
         indexStatus.running.should.be.true();
 

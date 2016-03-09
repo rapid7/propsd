@@ -18,6 +18,18 @@ def name
   package_json['name']
 end
 
+def install_dir
+  ::File.join('pkg', 'opt', name)
+end
+
+def bin_dir
+  ::File.join('pkg', 'usr', 'bin')
+end
+
+def base_dir
+  @base_dir ||= File.dirname(File.expand_path(__FILE__))
+end
+
 task :install do
   sh 'npm install --only=prod'
 end
@@ -38,31 +50,26 @@ task :release => [:install, :shrinkwrap, :pack] do
   puts 'Make sure you add release notes!'
 end
 
-task :package_dirs => [:base_dir] do
-  mkdir_p ::File.join(@base_dir, 'pkg/opt/props.d')
-  mkdir_p ::File.join(@base_dir,'pkg/usr/bin')
+task :package_dirs do
+  mkdir_p ::File.join(base_dir, install_dir)
+  mkdir_p ::File.join(base_dir, bin_dir)
 end
 
-task :node_bin => [:base_dir] do
+task :node_bin do
   node = find_executable('node')
   node = File.realdirpath(node)
-  cp node, ::File.join(@base_dir,'pkg/usr/bin')
+  cp node, ::File.join(base_dir, bin_dir)
 end
 
-task :propsd_source => [:base_dir, :install] do
-  [
-    ['bin/', 'pkg/opt/props.d'],
-    ['lib/', 'pkg/opt/props.d'],
-    ['node_modules/', 'pkg/opt/props.d'],
-    ['LICENSE', 'pkg/opt/props.d']
-  ].each do |src, dst|
-    cp_r ::File.join(@base_dir, src), ::File.join(@base_dir, dst)
+task :propsd_source => [:install] do
+  ['bin/', 'lib/', 'node_modules/', 'LICENSE'].each do |src|
+    cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
   end 
 end
 
 
-task :chdir_pkg => [:package_dirs, :base_dir] do
-  cd ::File.join(@base_dir, 'pkg')
+task :chdir_pkg => [:package_dirs] do
+  cd ::File.join(base_dir, 'pkg')
 end
 
 task :deb => [:chdir_pkg, :node_bin, :propsd_source] do

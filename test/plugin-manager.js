@@ -241,13 +241,52 @@ describe('Plugin manager', function () {
     });
 
     manager.initialize();
-  });
+  }); */
 
   it('updates the storage engine when the index removes a source plugin', function (done) {
-    // TODO: Stub getObject to return an index that's missing one of the plugins, test that storage.sources contains
-    // the updated plugins
-    done();
-  }); */
+    let s3Sources = [{
+      name: 'global', type: 's3', parameters: {path: 'global.json'}
+    }, {
+      name: 'local', type: 's3', parameters: {path: 'local.json'}
+    }];
+
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+      ETag: `v${s3Sources.length}`,
+      Body: new Buffer(JSON.stringify({version: 1.0, sources: s3Sources}))
+    });
+
+    function removeS3Source(name) {
+      s3Sources = s3Sources.filter((source) => {
+        return source.name !== name;
+      });
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+        ETag: `v${s3Sources.length}`,
+        Body: new Buffer(JSON.stringify({version: 1.0, sources: s3Sources}))
+      });
+    }
+
+    function onSourcesRegistered(storageSources) {
+      if (storageSources.length === 2) {
+        storageSources.map((source) => {
+          return source.name;
+        }).sort().should.eql(['s3-foo-global.json', 's3-foo-local.json']);
+        removeS3Source('local');
+      }
+
+      if (storageSources.length === 1) {
+        manager.removeListener('sources-registered', onSourcesRegistered);
+        storageSources.map((source) => {
+          return source.name;
+        }).sort().should.eql(['s3-foo-global.json']);
+        done();
+      }
+    }
+
+    manager.on('sources-registered', onSourcesRegistered);
+    manager.index.interval = 1;
+    manager.initialize();
+  });
 
   it('updates the storage engine when the index adds a source plugin', function (done) {
     const s3Sources = [];

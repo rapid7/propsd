@@ -237,7 +237,7 @@ describe('Storage Engine', () => {
 
     plugin.shutdown = () => {
       done();
-    }
+    };
 
     storage.register(plugin);
     storage.update();

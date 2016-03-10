@@ -27,15 +27,13 @@ describe('Plugin manager', function () {
 
   beforeEach(function () {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
-    const consul = generateConsulStub();
 
     storage = new (require('../lib/storage'))();
     manager = new PluginManager(storage, {
       interval: DEFAULT_INTERVAL,
       bucket: 'foo',
       path: 'bar',
-      metadataHost: '127.0.0.1:8080',
-      consul
+      metadataHost: '127.0.0.1:8080'
     });
   });
 
@@ -52,7 +50,12 @@ describe('Plugin manager', function () {
         return {name: s.name, type: s.type};
       });
 
-      sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+      sourceObjs.should.eql([
+        {name: 'global', type: 's3'},
+        {name: 'account', type: 's3'},
+        {name: 'ami', type: 's3'},
+        {name: 'consul', type: 'consul'}
+      ]);
       done();
     });
 
@@ -90,7 +93,12 @@ describe('Plugin manager', function () {
         return {name: s.name, type: s.type};
       });
 
-      sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+      sourceObjs.should.eql([
+        {name: 'global', type: 's3'},
+        {name: 'account', type: 's3'},
+        {name: 'ami', type: 's3'},
+        {name: 'consul', type: 'consul'}
+      ]);
       done();
     });
 
@@ -102,7 +110,7 @@ describe('Plugin manager', function () {
     manager.once('sources-registered', () => {
       const sourceNames = storage.sources.map((el) => el.name); // eslint-disable-line max-nested-callbacks
 
-      sourceNames.should.eql(['s3-foo-global.json', 's3-foo-account/12345.json', 's3-foo-ami-4aface7a.json']);
+      sourceNames.should.eql(['s3-foo-global.json', 's3-foo-account/12345.json', 's3-foo-ami-4aface7a.json', 'consul']);
       done();
     });
 
@@ -165,7 +173,7 @@ describe('Plugin manager', function () {
 
       status.running.should.be.true();
       status.ok.should.be.true();
-      sources.length.should.equal(3); // eslint-disable-line rapid7/static-magic-numbers
+      sources.length.should.equal(4); // eslint-disable-line rapid7/static-magic-numbers
       done();
     });
 
@@ -196,11 +204,44 @@ describe('Plugin manager', function () {
 
       status.running.should.be.true();
       status.ok.should.be.true();
-      sources.length.should.equal(3); // eslint-disable-line rapid7/static-magic-numbers
+      sources.length.should.equal(4); // eslint-disable-line rapid7/static-magic-numbers
       done();
     });
 
     manager.index.interval = 1;
+    manager.initialize();
+  });
+
+  it('only allows one instance of the consul source', (done) => {
+    const indexWithMultipleConsulSources = JSON.parse(fakeIndexResponse.Body.toString());
+
+    // Add a bunch of consul sources
+    for (let i = 0; i < 10; i++) { // eslint-disable-line rapid7/static-magic-numbers
+      indexWithMultipleConsulSources.sources.push({name: 'consul', type: 'consul'});
+    }
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+      ETag: 'ThisIsADifferentETag',
+      Body: new Buffer(JSON.stringify(indexWithMultipleConsulSources))
+    });
+
+    manager.on('source-registered', (instance) => {
+      if (instance.type === 'consul') {
+        // We need to stub all consul sources
+        manager.storage.sources.forEach((el, i) => {
+          if (el.type === 'consul') {
+            manager.storage.sources[i] = generateConsulStub();
+          }
+        });
+      }
+    });
+
+    manager.once('sources-registered', (sources) => {
+      const sourceTypes = sources.filter((el) => el.type === 'consul');
+
+      sourceTypes.length.should.equal(1);
+      done();
+    });
+
     manager.initialize();
   });
 

@@ -42,6 +42,7 @@ describe('Plugin manager', function () {
   afterEach(function () {
     manager.shutdown();
     manager.listenerCount('error').should.eql(0);
+    manager.listenerCount('sources-registered').should.eql(0);
     manager = null;
     storage = null;
     AWS.S3 = _S3;

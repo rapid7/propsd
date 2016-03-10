@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 'use strict';
 
+const Storage = require('../lib/storage');
 const generateConsulStub = require('./utils/consul-stub');
 const chai = require('chai');
 const should = require('should');
@@ -483,5 +484,31 @@ describe('Consul', () => {
     consul.initialize();
     consul.mock.emitChange('catalog-service', {elasticsearch: ['production']});
     consul.mock.emitChange('elasticsearch-production', []);
+  });
+});
+
+describe('Storage engine', () => {
+  it('can merge properties from Consul plugin', () => {
+    const consul = generateConsulStub();
+    const storage = new Storage();
+
+    storage.register(consul);
+
+    consul.once('update', () => {
+      storage.update();
+    });
+
+    consul.initialize();
+    consul.mock.emitChange('catalog-service', {consul: []});
+    consul.mock.emitChange('consul', [{
+      Node: {Address: '10.0.0.0'}
+    }]);
+
+    return Promise.resolve(storage.properties).should.eventually.eql({
+      consul: {
+        cluster: 'consul',
+        addresses: ['10.0.0.0']
+      }
+    });
   });
 });

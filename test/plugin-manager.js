@@ -252,23 +252,26 @@ describe('Plugin manager', function () {
     // TODO: Stub getObject to return an index that's missing one of the plugins, test that storage.sources contains
     // the updated plugins
     done();
-  });
+  }); */
 
   it('exposes an error from source plugins when one occurs but continues running', function (done) {
     manager.once('source-instantiated', (instance) => {
-      instance.on('error', (err) => {
-        const status = manager.status();
+      function onUnknownEndpoint(err) {
+        if (err.message === 'UnknownEndpoint') {
+          instance.removeListener('error', onUnknownEndpoint);
 
-        err.message.should.equal('UnknownEndpoint');
-        status.running.should.be.true();
-        done();
-      });
+          manager.status().running.should.be.true();
+          done();
+        }
+      }
+
+      instance.on('error', onUnknownEndpoint);
 
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
     });
 
     manager.initialize();
-  }); */
+  });
 });
 
 /* eslint-enable func-names */

@@ -212,7 +212,7 @@ describe('Plugin manager', function () {
     manager.initialize();
   });
 
-  before(() => {
+  it('only allows one instance of the consul source', (done) => {
     const indexWithMultipleConsulSources = JSON.parse(fakeIndexResponse.Body.toString());
 
     // Add a bunch of consul sources
@@ -223,8 +223,7 @@ describe('Plugin manager', function () {
       ETag: 'ThisIsADifferentETag',
       Body: new Buffer(JSON.stringify(indexWithMultipleConsulSources))
     });
-  });
-  it('only allows one instance of the consul source', (done) => {
+
     manager.on('source-registered', (instance) => {
       if (instance.type === 'consul') {
         // We need to stub all consul sources
@@ -244,9 +243,6 @@ describe('Plugin manager', function () {
     });
 
     manager.initialize();
-  });
-  after(() => {
-    AWS.S3 = _S3;
   });
 
   // SECOND PULL REQUEST

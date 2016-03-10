@@ -52,7 +52,12 @@ describe('Plugin manager', function () {
         return {name: s.name, type: s.type};
       });
 
-      sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+      sourceObjs.should.eql([
+        {name: 'global', type: 's3'},
+        {name: 'account', type: 's3'},
+        {name: 'ami', type: 's3'},
+        {name: 'consul', type: 'consul'}
+      ]);
       done();
     });
 
@@ -90,7 +95,12 @@ describe('Plugin manager', function () {
         return {name: s.name, type: s.type};
       });
 
-      sourceObjs.should.eql([{name: 'global', type: 's3'}, {name: 'account', type: 's3'}, {name: 'ami', type: 's3'}]);
+      sourceObjs.should.eql([
+        {name: 'global', type: 's3'},
+        {name: 'account', type: 's3'},
+        {name: 'ami', type: 's3'},
+        {name: 'consul', type: 'consul'}
+      ]);
       done();
     });
 
@@ -102,7 +112,7 @@ describe('Plugin manager', function () {
     manager.once('sources-registered', () => {
       const sourceNames = storage.sources.map((el) => el.name); // eslint-disable-line max-nested-callbacks
 
-      sourceNames.should.eql(['s3-foo-global.json', 's3-foo-account/12345.json', 's3-foo-ami-4aface7a.json']);
+      sourceNames.should.eql(['s3-foo-global.json', 's3-foo-account/12345.json', 's3-foo-ami-4aface7a.json', 'consul']);
       done();
     });
 
@@ -165,7 +175,7 @@ describe('Plugin manager', function () {
 
       status.running.should.be.true();
       status.ok.should.be.true();
-      sources.length.should.equal(3); // eslint-disable-line rapid7/static-magic-numbers
+      sources.length.should.equal(4); // eslint-disable-line rapid7/static-magic-numbers
       done();
     });
 
@@ -196,7 +206,7 @@ describe('Plugin manager', function () {
 
       status.running.should.be.true();
       status.ok.should.be.true();
-      sources.length.should.equal(3); // eslint-disable-line rapid7/static-magic-numbers
+      sources.length.should.equal(4); // eslint-disable-line rapid7/static-magic-numbers
       done();
     });
 

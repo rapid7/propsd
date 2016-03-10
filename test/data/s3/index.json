@@ -21,6 +21,10 @@
       "parameters": {
         "path": "{{ instance:ami-id }}.json"
       }
+    },
+    {
+      "name": "consul",
+      "type": "consul"
     }
   ]
 }

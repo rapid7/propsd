@@ -246,13 +246,44 @@ describe('Plugin manager', function () {
     // TODO: Stub getObject to return an index that's missing one of the plugins, test that storage.sources contains
     // the updated plugins
     done();
-  });
+  }); */
 
   it('updates the storage engine when the index adds a source plugin', function (done) {
-    // TODO: Stub getObject to return an index that's missing one of the plugins, test that storage.sources contains
-    // the updated plugins
-    done();
-  }); */
+    const s3Sources = [];
+
+    function addS3Source(name) {
+      s3Sources.push({
+        name, type: 's3', parameters: {path: `${name}.json`}
+      });
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+        ETag: `v${s3Sources.length}`,
+        Body: new Buffer(JSON.stringify({version: 1.0, sources: s3Sources}))
+      });
+    }
+
+    function onSourcesRegistered(storageSources) {
+      if (storageSources.length === 1) {
+        storageSources.map((source) => {
+          return source.name;
+        }).should.containEql('s3-foo-global.json');
+        addS3Source('local');
+      }
+
+      if (storageSources.length === 2) {
+        manager.removeListener('sources-registered', onSourcesRegistered);
+        storageSources.map((source) => {
+          return source.name;
+        }).should.containEql('s3-foo-local.json');
+        done();
+      }
+    }
+
+    addS3Source('global');
+    manager.on('sources-registered', onSourcesRegistered);
+    manager.index.interval = 1;
+    manager.initialize();
+  });
 
   it('exposes an error from source plugins when one occurs but continues running', function (done) {
     function onUnknownEndpoint(err) {

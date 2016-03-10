@@ -27,15 +27,13 @@ describe('Plugin manager', function () {
 
   beforeEach(function () {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
-    const consul = generateConsulStub();
 
     storage = new (require('../lib/storage'))();
     manager = new PluginManager(storage, {
       interval: DEFAULT_INTERVAL,
       bucket: 'foo',
       path: 'bar',
-      metadataHost: '127.0.0.1:8080',
-      consul
+      metadataHost: '127.0.0.1:8080'
     });
   });
 
@@ -212,6 +210,43 @@ describe('Plugin manager', function () {
 
     manager.index.interval = 1;
     manager.initialize();
+  });
+
+  before(() => {
+    const indexWithMultipleConsulSources = JSON.parse(fakeIndexResponse.Body.toString());
+
+    // Add a bunch of consul sources
+    for (let i = 0; i < 10; i++) { // eslint-disable-line rapid7/static-magic-numbers
+      indexWithMultipleConsulSources.sources.push({name: 'consul', type: 'consul'});
+    }
+    AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+      ETag: 'ThisIsADifferentETag',
+      Body: new Buffer(JSON.stringify(indexWithMultipleConsulSources))
+    });
+  });
+  it('only allows one instance of the consul source', (done) => {
+    manager.on('source-registered', (instance) => {
+      if (instance.type === 'consul') {
+        // We need to stub all consul sources
+        manager.storage.sources.forEach((el, i) => {
+          if (el.type === 'consul') {
+            manager.storage.sources[i] = generateConsulStub();
+          }
+        });
+      }
+    });
+
+    manager.once('sources-registered', (sources) => {
+      const sourceTypes = sources.filter((el) => el.type === 'consul');
+
+      sourceTypes.length.should.equal(1);
+      done();
+    });
+
+    manager.initialize();
+  });
+  after(() => {
+    AWS.S3 = _S3;
   });
 
   // SECOND PULL REQUEST

@@ -50,5 +50,5 @@ require('../lib/control/v1/core').attach(app, storage, manager);
 require('../lib/control/v1/conqueso').attach(app, storage);
 
 server.listen(port, host, () => {
-  Log.info('Listening on ' + host + ':' + port);
+  Log.info(`Listening on ${host}:${port}`);
 });

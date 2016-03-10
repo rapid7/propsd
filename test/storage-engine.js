@@ -227,7 +227,6 @@ describe('Storage Engine', () => {
     should(storage.sources.length).equal(2);
 
     storage.clear();
-    storage.update();
     should(storage.sources.length).equal(0);
     should(storage.properties).eql({});
   });

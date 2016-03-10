@@ -231,4 +231,17 @@ describe('Storage Engine', () => {
     should(storage.sources.length).equal(0);
     should(storage.properties).eql({});
   });
+
+  it('shuts down plugins when unregistered', (done) => {
+    const storage = new Storage();
+    const plugin = {properties: {food: ['tacos', 'peanuts']}};
+
+    plugin.shutdown = () => {
+      done();
+    }
+
+    storage.register(plugin);
+    storage.update();
+    storage.unregister(plugin);
+  });
 });

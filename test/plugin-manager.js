@@ -41,6 +41,7 @@ describe('Plugin manager', function () {
 
   afterEach(function () {
     manager.shutdown();
+    manager.listenerCount('error').should.eql(0);
     manager = null;
     storage = null;
     AWS.S3 = _S3;
@@ -146,8 +147,10 @@ describe('Plugin manager', function () {
   });
 
   it('retries Metadata source until it succeeds if the Metadata source fails', function (done) {
-    manager.on('error', (err) => {
+    function onConnectionRefused(err) {
       if (err.code === 'ECONNREFUSED') {
+        manager.removeListener('error', onConnectionRefused);
+
         const metadataStatus = manager.metadata.status();
         const managerStatus = manager.status();
 
@@ -158,7 +161,9 @@ describe('Plugin manager', function () {
 
         manager.metadata.service.host = '127.0.0.1:8080';
       }
-    });
+    }
+
+    manager.on('error', onConnectionRefused);
 
     manager.once('sources-generated', (sources) => {
       const status = manager.status();

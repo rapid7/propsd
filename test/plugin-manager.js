@@ -182,8 +182,10 @@ describe('Plugin manager', function () {
   it('retries S3 source until it succeeds if the S3 source fails', function (done) {
     AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
 
-    manager.on('error', (err) => {
+    function onUnknownEndpoint(err) {
       if (err.message === 'UnknownEndpoint') {
+        manager.removeListener('error', onUnknownEndpoint);
+
         const indexStatus = manager.index.status();
         const managerStatus = manager.status();
 
@@ -194,7 +196,9 @@ describe('Plugin manager', function () {
 
         AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
       }
-    });
+    }
+
+    manager.on('error', onUnknownEndpoint);
 
     manager.once('sources-generated', (sources) => {
       const status = manager.status();

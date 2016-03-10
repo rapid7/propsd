@@ -217,34 +217,31 @@ describe('Plugin manager', function () {
     manager.initialize();
   });
 
-  // SECOND PULL REQUEST
-  /* it('rebuilds sources when the index is updated', function (done) {
-    // TODO: Rewrite this test
-    const updatedSource = {
-      ETag: 'ThisIsADifferentETag',
-      Body: new Buffer(JSON.stringify({
-        version: 1.0,
-        sources: [{name: 'global', type: 's3', parameters: {path: 'global.json'}}]
-      }))
-    };
-    let sources = [];
+  it('rebuilds sources when the index is updated', function (done) {
+    const s3Sources = [];
 
-    manager.on('sources-registered', (storageSources) => {
-      if (sources.length === 0) {
-        sources = storageSources;
-        AWS.S3.prototype.getObject = this.stub().callsArgWith(1, null, updatedSource);
-      } else {
+    function addS3Source(name) {
+      s3Sources.push({
+        name, type: 's3', parameters: {path: `${name}.json`}
+      });
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+        ETag: `v${s3Sources.length}`,
+        Body: new Buffer(JSON.stringify({version: 1.0, sources: s3Sources}))
+      });
+    }
+
+    manager.once('sources-registered', (storageSources) => {
+      storageSources[0].on('shutdown', () => {
         done();
-      }
-      manager.update();
+      });
+      addS3Source('local');
     });
 
-    manager.index.on('update', () => {
-      console.log(`${Date.now()}: index updated`);
-    });
-
+    addS3Source('global');
+    manager.index.interval = 1;
     manager.initialize();
-  }); */
+  });
 
   it('updates the storage engine when the index removes a source plugin', function (done) {
     let s3Sources = [{

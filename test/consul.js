@@ -504,7 +504,7 @@ describe('Storage engine', () => {
       Node: {Address: '10.0.0.0'}
     }]);
 
-    return Promise.resolve(storage.properties).should.eventually.eql({
+    return Promise.resolve(storage.properties.consul).should.eventually.eql({
       consul: {
         cluster: 'consul',
         addresses: ['10.0.0.0']

@@ -255,18 +255,18 @@ describe('Plugin manager', function () {
   }); */
 
   it('exposes an error from source plugins when one occurs but continues running', function (done) {
-    manager.once('source-instantiated', (instance) => {
-      function onUnknownEndpoint(err) {
-        if (err.message === 'UnknownEndpoint') {
-          instance.removeListener('error', onUnknownEndpoint);
+    function onUnknownEndpoint(err) {
+      if (err.message === 'UnknownEndpoint') {
+        manager.removeListener('error', onUnknownEndpoint);
 
-          manager.status().running.should.be.true();
-          done();
-        }
+        manager.status().running.should.be.true();
+        done();
       }
+    }
 
-      instance.on('error', onUnknownEndpoint);
+    manager.on('error', onUnknownEndpoint);
 
+    manager.once('source-instantiated', () => {
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
     });
 

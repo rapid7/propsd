@@ -26,6 +26,10 @@ def bin_dir
   ::File.join('pkg', 'usr', 'bin')
 end
 
+def config_dir
+  ::File.join(install_dir, 'config')
+end
+
 def base_dir
   @base_dir ||= File.dirname(File.expand_path(__FILE__))
 end
@@ -53,6 +57,7 @@ end
 task :package_dirs do
   mkdir_p ::File.join(base_dir, install_dir)
   mkdir_p ::File.join(base_dir, bin_dir)
+  mkdir_p ::File.join(base_dir, config_dir)
 end
 
 task :node_bin do
@@ -64,7 +69,8 @@ end
 task :propsd_source => [:install] do
   ['bin/', 'lib/', 'node_modules/', 'LICENSE'].each do |src|
     cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
-  end 
+  end
+  cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
 end
 
 

@@ -22,10 +22,6 @@ def install_dir
   ::File.join('pkg', 'opt', name)
 end
 
-def bin_dir
-  ::File.join('pkg', 'usr', 'bin')
-end
-
 def config_dir
   ::File.join(install_dir, 'config')
 end
@@ -56,14 +52,7 @@ end
 
 task :package_dirs do
   mkdir_p ::File.join(base_dir, install_dir)
-  mkdir_p ::File.join(base_dir, bin_dir)
   mkdir_p ::File.join(base_dir, config_dir)
-end
-
-task :node_bin do
-  node = find_executable('node')
-  node = File.realdirpath(node)
-  cp node, ::File.join(base_dir, bin_dir)
 end
 
 task :propsd_source => [:install] do
@@ -78,8 +67,8 @@ task :chdir_pkg => [:package_dirs] do
   cd ::File.join(base_dir, 'pkg')
 end
 
-task :deb => [:chdir_pkg, :node_bin, :propsd_source] do
-  sh "fpm --deb-no-default-config-files -s dir -t deb -n \"#{name}\" -v #{version} opt/ usr/"
+task :deb => [:chdir_pkg, :propsd_source] do
+  sh "fpm --deb-no-default-config-files --deb-recommends nodejs -s dir -t deb -n \"#{name}\" -v #{version} opt/"
   mkdir 'copy_to_s3'
   deb = Dir["#{name}_#{version}_*.deb"].first
   cp deb, 'copy_to_s3/'

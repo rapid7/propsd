@@ -22,10 +22,6 @@ def install_dir
   ::File.join('pkg', 'opt', name)
 end
 
-def bin_dir
-  ::File.join('pkg', 'usr', 'bin')
-end
-
 def config_dir
   ::File.join(install_dir, 'config')
 end
@@ -56,14 +52,7 @@ end
 
 task :package_dirs do
   mkdir_p ::File.join(base_dir, install_dir)
-  mkdir_p ::File.join(base_dir, bin_dir)
   mkdir_p ::File.join(base_dir, config_dir)
-end
-
-task :node_bin do
-  node = find_executable('node')
-  node = File.realdirpath(node)
-  cp node, ::File.join(base_dir, bin_dir)
 end
 
 task :propsd_source => [:install] do

@@ -6,6 +6,7 @@ const request = require('supertest');
 
 const testServerPort = 3000;
 const fixedDate = new Date();
+const fixedRegex = /ab+c/i;
 
 const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
@@ -17,6 +18,7 @@ const conquesoProperties = {
   },
   properties: {
     date: fixedDate,
+    regex: fixedRegex,
     name: 'hipster-mode-enabled',
     value: true,
     type: 'BOOLEAN'
@@ -42,6 +44,7 @@ const nestedProperties = {
 
 const javaProperties = [
   `date=${fixedDate}`,
+  'regex=/ab+c/i',
   'name=hipster-mode-enabled',
   'value=true',
   'type=BOOLEAN'

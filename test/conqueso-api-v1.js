@@ -246,5 +246,4 @@ describe('Conqueso API v1', () => {
       Service: {Address: '127.0.0.1'}
     }]);
   });
-
 });

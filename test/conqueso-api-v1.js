@@ -156,12 +156,29 @@ describe('Conqueso API v1', () => {
       'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
 
+    function checkConsulProperties(err) {
+      if (err) {
+        return done(err);
+      }
+
+      consul.properties.should.eql({
+        consul: {
+          'elasticsearch': {
+            addresses: ['10.0.0.0', '127.0.0.1'],
+            cluster: 'elasticsearch'
+          }
+        }
+      });
+
+      done();
+    }
+
     consul.on('update', () => {
       request(server)
         .get('/v1/conqueso/api/roles')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, expectedBody, done);
+        .expect(HTTP_OK, expectedBody, checkConsulProperties);
     });
 
     consul.mock.emitChange('catalog-service', {
@@ -179,12 +196,29 @@ describe('Conqueso API v1', () => {
       'conqueso.sweet-es-cluster.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
 
+    function checkConsulProperties(err) {
+      if (err) {
+        return done(err);
+      }
+
+      consul.properties.should.eql({
+        consul: {
+          'elasticsearch-sweet-es-cluster': {
+            addresses: ['10.0.0.0', '127.0.0.1'],
+            cluster: 'sweet-es-cluster'
+          }
+        }
+      });
+
+      done();
+    }
+
     consul.on('update', () => {
       request(server)
         .get('/v1/conqueso/api/roles')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, expectedBody, done);
+        .expect(HTTP_OK, expectedBody, checkConsulProperties);
     });
 
     consul.mock.emitChange('catalog-service', {

@@ -1,7 +1,7 @@
 # Schemas
 
 ## Manifest file (index.yaml / index.json)
-Props.d will be configured to consume a manifest file (index.yaml) from the <s3 bucket name here> bucket.
+Propsd will be configured to consume a manifest file (index.yaml) from the <s3 bucket name here> bucket.
 
 The format of this yaml file will dictate the ordering of the configuration layering.  They are as follows:
 

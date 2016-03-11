@@ -163,7 +163,7 @@ describe('Conqueso API v1', () => {
 
       consul.properties.should.eql({
         consul: {
-          'elasticsearch': {
+          elasticsearch: {
             addresses: ['10.0.0.0', '127.0.0.1'],
             cluster: 'elasticsearch'
           }

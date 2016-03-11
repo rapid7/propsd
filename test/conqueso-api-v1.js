@@ -5,6 +5,8 @@ const generateConsulStub = require('./utils/consul-stub');
 const request = require('supertest');
 
 const testServerPort = 3000;
+const fixedDate = new Date();
+const fixedRegex = /ab+c/i;
 
 const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
@@ -15,6 +17,8 @@ const conquesoProperties = {
     'meta.property.2': 'artisanal cream cheese'
   },
   properties: {
+    date: fixedDate,
+    regex: fixedRegex,
     name: 'hipster-mode-enabled',
     value: true,
     type: 'BOOLEAN'
@@ -38,9 +42,21 @@ const nestedProperties = {
   }
 };
 
-const javaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN';
-const nestedJavaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN\nfood.name=tacos\n' +
-    'food.value=true\nfood.type=BOOLEAN';
+const javaProperties = [
+  `date=${fixedDate}`,
+  'regex=/ab+c/i',
+  'name=hipster-mode-enabled',
+  'value=true',
+  'type=BOOLEAN'
+].join('\n');
+const nestedJavaProperties = [
+  'name=hipster-mode-enabled',
+  'value=true',
+  'type=BOOLEAN',
+  'food.name=tacos',
+  'food.value=true',
+  'food.type=BOOLEAN'
+].join('\n');
 
 /**
  * Create a new Express server for testing
@@ -153,18 +169,32 @@ describe('Conqueso API v1', () => {
 
   it('formats IP addresses for untagged Consul services', (done) => {
     const expectedBody = [
-      'consul.elasticsearch.addresses.0=10.0.0.0',
-      'consul.elasticsearch.addresses.1=127.0.0.1',
-      'consul.elasticsearch.cluster=elasticsearch',
       'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
+
+    function checkConsulProperties(err) {
+      if (err) {
+        return done(err);
+      }
+
+      consul.properties.should.eql({
+        consul: {
+          elasticsearch: {
+            addresses: ['10.0.0.0', '127.0.0.1'],
+            cluster: 'elasticsearch'
+          }
+        }
+      });
+
+      done();
+    }
 
     consul.on('update', () => {
       request(server)
         .get('/v1/conqueso/api/roles')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, expectedBody, done);
+        .expect(HTTP_OK, expectedBody, checkConsulProperties);
     });
 
     consul.mock.emitChange('catalog-service', {
@@ -179,18 +209,32 @@ describe('Conqueso API v1', () => {
 
   it('formats IP addresses for tagged Consul services', (done) => {
     const expectedBody = [
-      'consul.elasticsearch-sweet-es-cluster.addresses.0=10.0.0.0',
-      'consul.elasticsearch-sweet-es-cluster.addresses.1=127.0.0.1',
-      'consul.elasticsearch-sweet-es-cluster.cluster=sweet-es-cluster',
       'conqueso.sweet-es-cluster.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
+
+    function checkConsulProperties(err) {
+      if (err) {
+        return done(err);
+      }
+
+      consul.properties.should.eql({
+        consul: {
+          'elasticsearch-sweet-es-cluster': {
+            addresses: ['10.0.0.0', '127.0.0.1'],
+            cluster: 'sweet-es-cluster'
+          }
+        }
+      });
+
+      done();
+    }
 
     consul.on('update', () => {
       request(server)
         .get('/v1/conqueso/api/roles')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, expectedBody, done);
+        .expect(HTTP_OK, expectedBody, checkConsulProperties);
     });
 
     consul.mock.emitChange('catalog-service', {

@@ -1,29 +1,26 @@
 #!/usr/bin/env node
-
-/* eslint-disable curly, func-names, no-param-reassign, no-unused-func,
-                  newline-after-var, no-var, one-var, vars-on-top, no-unused-vars,
-                  no-bitwise, no-console, wrap-iife, max-nested-callbacks
-*/
+'use strict';
 
 /**
  * Poll Conqueso and propsd to test for interface inconsistencies
  */
-var HTTP = require('http');
+const HTTP = require('http');
 const ONE_MINUTE = 60000;
 
 function requestProperties(uri, callback) {
   console.log('Polling ' + uri);
-  var req = HTTP.get(uri, function (res) {
+  const req = HTTP.get(uri, (res) => {
     res.setEncoding('utf8');
 
-    var data = '';
-    res.on('data', function (d) {
+    let data = '';
+
+    res.on('data', (d) => {
       data += d;
     });
 
     res.on('error', callback);
 
-    res.on('end', function (d) {
+    res.on('end', (d) => {
       if (d) data += d;
       callback(null, data.split(/\n/g));
     });
@@ -33,19 +30,25 @@ function requestProperties(uri, callback) {
 }
 
 function compareProperties(a, b) {
-  a = a.sort();
-  b = b.sort();
+  a = a.sort(); // eslint-disable-line no-param-reassign
+  b = b.sort(); // eslint-disable-line no-param-reassign
 
-  var difference = {
+  const difference = {
     added: [],
     removed: []
   };
 
-  for (var i = 0; i < b.length; i++)
-    if (!~(a.indexOf(b[i]))) difference.added.push(b[i]);
+  for (let i = 0; i < b.length; i++) {
+    if (!~(a.indexOf(b[i]))) { // eslint-disable-line no-bitwise
+      difference.added.push(b[i]);
+    }
+  }
 
-  for (var j = 0; j < a.length; j++)
-    if (!~(b.indexOf(a[j]))) difference.removed.push(a[j]);
+  for (let j = 0; j < a.length; j++) {
+    if (!~(b.indexOf(a[j]))) { // eslint-disable-line no-bitwise
+      difference.removed.push(a[j]);
+    }
+  }
 
   return difference;
 }
@@ -54,30 +57,36 @@ function different(difference) {
   return difference.added.length > 0 || difference.removed.length > 0;
 }
 
-var CONQUESO = process.argv[2];
-var PROPSD = 'http://localhost:9100/v1/conqueso';
+const CONQUESO = process.argv[2];
+const PROPSD = 'http://localhost:9100/v1/conqueso';
 
 (function poll() {
-  requestProperties(CONQUESO, function (err0, conqueso) {
-    if (err0) console.error(err0);
+  requestProperties(CONQUESO, (err0, conqueso) => {
+    if (err0) {
+      console.error(err0);
+    }
 
-    requestProperties(PROPSD, function (err1, propsd) {
-      if (err1) console.error(err1);
+    requestProperties(PROPSD, (err1, propsd) => {
+      if (err1) {
+        console.error(err1);
+      }
 
-      var diff = compareProperties(conqueso, propsd);
+      const diff = compareProperties(conqueso, propsd);
 
-      if (!different(diff)) return console.log('Properties are identical');
+      if (!different(diff)) {
+        return console.log('Properties are identical');
+      }
 
       console.log('Properties are not identical!');
-      diff.added.forEach(function (p) {
-        console.log('  + ' + p);
+      diff.added.forEach((p) => {
+        console.log(`  + ${p}`);
       });
 
-      diff.removed.forEach(function (p) {
-        console.log('  - ' + p);
+      diff.removed.forEach((p) => {
+        console.log(`  - ${p}`);
       });
     });
   });
 
   setTimeout(poll, ONE_MINUTE);
-})();
+}());

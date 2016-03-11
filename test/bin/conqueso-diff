@@ -7,6 +7,7 @@
 const HTTP = require('http');
 const ONE_MINUTE = 60000;
 
+/* eslint-disable no-console */
 function requestProperties(uri) {
   console.log(`Polling ${uri}`);
   return new Promise((resolve, reject) => {
@@ -31,9 +32,27 @@ function requestProperties(uri) {
   });
 }
 
+/**
+ * Sort values that are comma-delimited
+ * @param {Array} arr
+ * @returns {Array}
+ */
+function sortDelimitedValues(arr) {
+  arr.forEach((el, i) => {
+    const splitProp = el.split('=');
+    let val = splitProp[1];
+
+    if (val.split(',').length > 1) {
+      val = val.split(',').sort();
+    }
+    arr[i] = [splitProp[0], val].join('='); // eslint-disable-line no-param-reassign
+  });
+  return arr;
+}
+
 function compareProperties(a, b) {
-  a = a.sort(); // eslint-disable-line no-param-reassign
-  b = b.sort(); // eslint-disable-line no-param-reassign
+  a = sortDelimitedValues(a.sort()); // eslint-disable-line no-param-reassign
+  b = sortDelimitedValues(b.sort()); // eslint-disable-line no-param-reassign
 
   const difference = {
     added: [],
@@ -89,3 +108,5 @@ const PROPSD = 'http://localhost:9100/v1/conqueso';
 
   setTimeout(poll, ONE_MINUTE);
 }());
+
+/* eslint-enable no-console */

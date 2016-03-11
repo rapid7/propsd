@@ -386,4 +386,4 @@ describe('Plugin manager', function () {
   });
 });
 
-/* eslint-enable func-names */
+/* eslint-enable func-names, max-nested-callbacks */

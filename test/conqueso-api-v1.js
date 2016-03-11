@@ -5,6 +5,7 @@ const generateConsulStub = require('./utils/consul-stub');
 const request = require('supertest');
 
 const testServerPort = 3000;
+const fixedDate = new Date();
 
 const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
@@ -15,6 +16,7 @@ const conquesoProperties = {
     'meta.property.2': 'artisanal cream cheese'
   },
   properties: {
+    date: fixedDate,
     name: 'hipster-mode-enabled',
     value: true,
     type: 'BOOLEAN'
@@ -38,9 +40,20 @@ const nestedProperties = {
   }
 };
 
-const javaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN';
-const nestedJavaProperties = 'name=hipster-mode-enabled\nvalue=true\ntype=BOOLEAN\nfood.name=tacos\n' +
-    'food.value=true\nfood.type=BOOLEAN';
+const javaProperties = [
+  `date=${fixedDate}`,
+  'name=hipster-mode-enabled',
+  'value=true',
+  'type=BOOLEAN'
+].join('\n');
+const nestedJavaProperties = [
+  'name=hipster-mode-enabled',
+  'value=true',
+  'type=BOOLEAN',
+  'food.name=tacos',
+  'food.value=true',
+  'food.type=BOOLEAN'
+].join('\n');
 
 /**
  * Create a new Express server for testing
@@ -230,4 +243,5 @@ describe('Conqueso API v1', () => {
       Service: {Address: '127.0.0.1'}
     }]);
   });
+
 });

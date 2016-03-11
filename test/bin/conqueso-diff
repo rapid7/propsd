@@ -1,51 +1,75 @@
 #!/usr/bin/env node
-
-/* eslint-disable curly, func-names, no-param-reassign, no-unused-func,
-                  newline-after-var, no-var, one-var, vars-on-top, no-unused-vars,
-                  no-bitwise, no-console, wrap-iife, max-nested-callbacks
-*/
+'use strict';
 
 /**
  * Poll Conqueso and propsd to test for interface inconsistencies
  */
-var HTTP = require('http');
+const HTTP = require('http');
 const ONE_MINUTE = 60000;
 
-function requestProperties(uri, callback) {
-  console.log('Polling ' + uri);
-  var req = HTTP.get(uri, function (res) {
-    res.setEncoding('utf8');
+/* eslint-disable no-console */
+function requestProperties(uri) {
+  console.log(`Polling ${uri}`);
+  return new Promise((resolve, reject) => {
+    const req = HTTP.get(uri, (res) => {
+      res.setEncoding('utf8');
 
-    var data = '';
-    res.on('data', function (d) {
-      data += d;
+      let data = '';
+
+      res.on('data', (d) => {
+        data += d;
+      });
+
+      res.on('error', reject);
+
+      res.on('end', (d) => {
+        if (d) data += d;
+        resolve(data.split(/\n/g));
+      });
     });
 
-    res.on('error', callback);
-
-    res.on('end', function (d) {
-      if (d) data += d;
-      callback(null, data.split(/\n/g));
-    });
+    req.on('error', reject);
   });
+}
 
-  req.on('error', callback);
+/**
+ * Sort values that are comma-delimited
+ * @param {Array} arr
+ * @returns {Array}
+ */
+function sortDelimitedValues(arr) {
+  arr.forEach((el, i) => {
+    const splitProp = el.split('=');
+    let val = splitProp[1];
+
+    if (val.split(',').length > 1) {
+      val = val.split(',').sort();
+    }
+    arr[i] = [splitProp[0], val].join('='); // eslint-disable-line no-param-reassign
+  });
+  return arr;
 }
 
 function compareProperties(a, b) {
-  a = a.sort();
-  b = b.sort();
+  a = sortDelimitedValues(a.sort()); // eslint-disable-line no-param-reassign
+  b = sortDelimitedValues(b.sort()); // eslint-disable-line no-param-reassign
 
-  var difference = {
+  const difference = {
     added: [],
     removed: []
   };
 
-  for (var i = 0; i < b.length; i++)
-    if (!~(a.indexOf(b[i]))) difference.added.push(b[i]);
+  for (let i = 0; i < b.length; i++) {
+    if (!~(a.indexOf(b[i]))) { // eslint-disable-line no-bitwise
+      difference.added.push(b[i]);
+    }
+  }
 
-  for (var j = 0; j < a.length; j++)
-    if (!~(b.indexOf(a[j]))) difference.removed.push(a[j]);
+  for (let j = 0; j < a.length; j++) {
+    if (!~(b.indexOf(a[j]))) { // eslint-disable-line no-bitwise
+      difference.removed.push(a[j]);
+    }
+  }
 
   return difference;
 }
@@ -54,30 +78,35 @@ function different(difference) {
   return difference.added.length > 0 || difference.removed.length > 0;
 }
 
-var CONQUESO = process.argv[2];
-var PROPSD = 'http://localhost:9100/v1/conqueso';
+const CONQUESO = process.argv[2];
+const PROPSD = 'http://localhost:9100/v1/conqueso';
 
 (function poll() {
-  requestProperties(CONQUESO, function (err0, conqueso) {
-    if (err0) console.error(err0);
+  Promise.all([
+    requestProperties(CONQUESO),
+    requestProperties(PROPSD)
+  ])
+  .then((data) => {
+    const conqueso = data[0];
+    const propsd = data[1];
 
-    requestProperties(PROPSD, function (err1, propsd) {
-      if (err1) console.error(err1);
+    const diff = compareProperties(conqueso, propsd);
 
-      var diff = compareProperties(conqueso, propsd);
+    if (!different(diff)) {
+      return console.log('Properties are identical');
+    }
 
-      if (!different(diff)) return console.log('Properties are identical');
-
-      console.log('Properties are not identical!');
-      diff.added.forEach(function (p) {
-        console.log('  + ' + p);
-      });
-
-      diff.removed.forEach(function (p) {
-        console.log('  - ' + p);
-      });
+    console.log('Properties are not identical!');
+    diff.added.forEach((p) => {
+      console.log(`  + ${p}`);
     });
-  });
+
+    diff.removed.forEach((p) => {
+      console.log(`  - ${p}`);
+    });
+  }, (err) => { console.error(err); });
 
   setTimeout(poll, ONE_MINUTE);
-})();
+}());
+
+/* eslint-enable no-console */

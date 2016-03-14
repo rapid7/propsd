@@ -34,6 +34,10 @@ def target_version
   ::File.read(::File.join(@base_dir, '.nvmrc')).strip()
 end
 
+def max_version
+   target_version.split('.').first.to_f + 1
+end
+
 def install_dir
   ::File.join('pkg', 'opt', name)
 end
@@ -87,7 +91,8 @@ task :deb => [:chdir_pkg, :propsd_source] do
   command = [
     'fpm',
     '--deb-no-default-config-files',
-    "--depends \"nodejs = #{target_version}\"",
+    "--depends \"nodejs >= #{target_version}\"",
+    "--depends \"nodejs << #{max_version}\"",
     "--license \"#{license}\"",
     "--url \"#{homepage}\"",
     "--description \"#{description}\"",

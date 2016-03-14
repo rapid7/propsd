@@ -89,7 +89,7 @@ desc 'Cleanup release and package artifacts'
 task :clean do
   rm_f 'npm-shrinkwrap.json'
   rm_f Dir["#{name}-*.tgz"]
-  rm_rf 'pkg' 
+  rm_rf 'pkg'
 end
 
 task :default => [:clean, :release, :package]

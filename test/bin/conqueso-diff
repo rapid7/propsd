@@ -75,8 +75,8 @@ Array.prototype.truncateNumericProperties = function truncateNumericProperties()
 /* eslint-enable no-extend-native */
 
 function compareProperties(a, b) {
-  a = sortDelimitedValues(a.sort()); // eslint-disable-line no-param-reassign
-  b = sortDelimitedValues(b.sort()); // eslint-disable-line no-param-reassign
+  a = a.sort().sortDelimitedValues().truncateNumericProperties(); // eslint-disable-line no-param-reassign
+  b = b.sort().sortDelimitedValues().truncateNumericProperties(); // eslint-disable-line no-param-reassign
 
   const difference = {
     added: [],

@@ -18,6 +18,26 @@ def name
   package_json['name']
 end
 
+def description
+  package_json['description']
+end
+
+def license
+  package_json['license']
+end
+
+def homepage
+  package_json['homepage']
+end
+
+def target_version
+  ::File.read(::File.join(@base_dir, '.nvmrc')).strip()
+end
+
+def max_version
+   target_version.split('.').first.to_f + 1
+end
+
 def install_dir
   ::File.join('pkg', 'opt', name)
 end
@@ -68,7 +88,21 @@ task :chdir_pkg => [:package_dirs] do
 end
 
 task :deb => [:chdir_pkg, :propsd_source] do
-  sh "fpm --deb-no-default-config-files --deb-recommends nodejs -s dir -t deb -n \"#{name}\" -v #{version} opt/"
+  command = [
+    'fpm',
+    '--deb-no-default-config-files',
+    "--depends \"nodejs >= #{target_version}\"",
+    "--depends \"nodejs << #{max_version}\"",
+    "--license \"#{license}\"",
+    "--url \"#{homepage}\"",
+    "--description \"#{description}\"",
+    '-s dir',
+    '-t deb',
+    "-n \"#{name}\"",
+    "-v #{version}",
+    'opt/'
+    ].join(' ')
+  sh command
   mkdir 'copy_to_s3'
   deb = Dir["#{name}_#{version}_*.deb"].first
   cp deb, 'copy_to_s3/'
@@ -89,7 +123,7 @@ desc 'Cleanup release and package artifacts'
 task :clean do
   rm_f 'npm-shrinkwrap.json'
   rm_f Dir["#{name}-*.tgz"]
-  rm_rf 'pkg' 
+  rm_rf 'pkg'
 end
 
 task :default => [:clean, :release, :package]

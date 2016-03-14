@@ -19,8 +19,8 @@ describe('Logging', () => {
     'log:level': 'info',
     'log:filename': 'tmp.log'
   });
-  const log = require('../lib/logger').attach(config);
   const configFile = config.get('log:filename');
+  const log = require('../lib/logger').attach(config.get('log:level'), configFile);
 
   it('returns a WINSTON object', () => {
     log.should.be.an.instanceOf(Winston.Logger);

@@ -33,22 +33,46 @@ function requestProperties(uri) {
 }
 
 /**
- * Sort values that are comma-delimited
+ * Apply an operation to each value of a conqueso property if it passes a comparator
  * @param {Array} arr
+ * @param {Function} comparator
+ * @param {Function} operation
  * @returns {Array}
  */
-function sortDelimitedValues(arr) {
+function apply(arr, comparator, operation) {
+  const ret = [];
+
   arr.forEach((el, i) => {
     const splitProp = el.split('=');
+    const prop = splitProp[0];
     let val = splitProp[1];
 
-    if (val.split(',').length > 1) {
-      val = val.split(',').sort();
+    if (comparator(val)) {
+      val = operation(val);
     }
-    arr[i] = [splitProp[0], val].join('='); // eslint-disable-line no-param-reassign
+    ret[i] = `${prop}=${val}`;
   });
-  return arr;
+  return ret;
 }
+
+/* eslint-disable no-extend-native */
+/**
+ * Sort values that are comma-delimited
+ * @returns {Array}
+ */
+Array.prototype.sortDelimitedValues = function sortDelimitedValues() {
+  return apply(this, (val) => val.split(',').length > 1, (val) => val.split(',').sort());
+};
+
+/**
+ * Truncates numeric properties for conqueso property string float -> js float comparison
+ * @returns {Array}
+ */
+Array.prototype.truncateNumericProperties = function truncateNumericProperties() {
+  return apply(this, (val) => !isNaN(val) && isFinite(val), (val) => parseFloat(val));
+};
+
+/* eslint-enable no-extend-native */
 
 function compareProperties(a, b) {
   a = sortDelimitedValues(a.sort()); // eslint-disable-line no-param-reassign

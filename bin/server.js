@@ -35,7 +35,7 @@ global.Log = Logger.attach(global.Config.get('log:level'), global.Config.get('lo
 // Add request logging middleware
 const accessLog = Logger.attach(global.Config.get('log:access:level'), global.Config.get('log:access:filename'));
 
-app.use(Logger.logRequests((message) => accessLog.verbose(message)));
+app.use(Logger.logRequests((message) => accessLog.log(global.Config.get('log:access:level'), message)));
 
 // Initialize the Plugin Manager and storage layer
 const PluginManager = require('../lib/plugin-manager');

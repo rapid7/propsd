@@ -30,12 +30,14 @@ if (args.c) {
 global.Config.defaults(require('../config/defaults.json'));
 
 // Set up logging
-global.Log = Logger.attach(global.Config.get('log:level'), global.Config.get('log:filename'));
+global.Log = Logger.attach(global.Config.get('log:level'));
 
 // Add request logging middleware
-const accessLog = Logger.attach(global.Config.get('log:access:level'), global.Config.get('log:access:filename'));
+if (global.Config.get('log:access:level')) {
+  const accessLog = Logger.attach(global.Config.get('log:access:level'));
 
-app.use(Logger.logRequests((message) => accessLog.log(global.Config.get('log:access:level'), message)));
+  app.use(Logger.logRequests((message) => accessLog.log(global.Config.get('log:access:level'), message)));
+}
 
 // Initialize the Plugin Manager and storage layer
 const PluginManager = require('../lib/plugin-manager');

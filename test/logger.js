@@ -72,6 +72,17 @@ describe('Logging', () => {
       Object.keys(logger.transports).should.eql(['console']);
     });
 
+    it('displays a deprecation warning when instantiating a file logger', (done) => {
+      process.on('deprecation', (err) => {
+        err.name.should.equal('DeprecationError');
+        err.namespace.should.equal('propsd');
+        err.message.should.equal('The file transport has been deprecated and will be removed in a later version');
+        done();
+      });
+
+      require('../lib/logger').attach('info', 'tmp.log');
+    });
+
     /* eslint-enable max-nested-callbacks */
   });
 });

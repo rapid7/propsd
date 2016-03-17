@@ -1,0 +1,21 @@
+Metrics/AbcSize:
+  Max: 48
+Metrics/CyclomaticComplexity:
+  Max: 24
+Metrics/MethodLength:
+  Max: 48
+Metrics/PerceivedComplexity:
+  Max: 12
+
+Encoding:
+  Enabled: false
+LineLength:
+  Enabled: false
+HashSyntax:
+  Enabled: false
+FileName:
+  Enabled: false
+RescueModifier:
+  Enabled: false
+SpaceInsideStringInterpolation:
+  Enabled: false

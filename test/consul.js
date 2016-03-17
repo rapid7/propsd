@@ -346,57 +346,6 @@ describe('Consul', () => {
     });
   });
 
-  it('resolves multiple tags as separate services', () => {
-    const consul = generateConsulStub();
-
-    consul.initialize();
-    consul.mock.emitChange('catalog-service', {consul: ['production', 'development']});
-    consul.mock.emitChange('consul-production', [{
-      Service: {Address: '127.0.0.1'}
-    }]);
-    consul.mock.emitChange('consul-development', [{
-      Service: {Address: '10.0.0.0'}
-    }]);
-
-    return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      'consul-production': {
-        cluster: 'production',
-        addresses: ['127.0.0.1']
-      },
-      'consul-development': {
-        cluster: 'development',
-        addresses: ['10.0.0.0']
-      }
-    });
-  });
-
-  it('avoids resolving similar tags to the same service', () => {
-    const consul = generateConsulStub();
-
-    consul.initialize();
-    consul.mock.emitChange('catalog-service', {
-      consul: ['production'],
-      elasticsearch: ['production']
-    });
-    consul.mock.emitChange('consul-production', [{
-      Service: {Address: '127.0.0.1'}
-    }]);
-    consul.mock.emitChange('elasticsearch-production', [{
-      Service: {Address: '10.0.0.0'}
-    }]);
-
-    return Promise.resolve(consul.properties.consul).should.eventually.eql({
-      'consul-production': {
-        cluster: 'production',
-        addresses: ['127.0.0.1']
-      },
-      'elasticsearch-production': {
-        cluster: 'production',
-        addresses: ['10.0.0.0']
-      }
-    });
-  });
-
   it('registers a watch on services when initialized', () => {
     const consul = generateConsulStub();
 
@@ -422,7 +371,7 @@ describe('Consul', () => {
     });
 
     return Promise.resolve(consul.mock.watching).should.eventually.eql(
-      ['catalog-service', 'consul-production', 'elasticsearch-production']
+      ['catalog-service', 'consul', 'elasticsearch']
     );
   });
 
@@ -434,10 +383,10 @@ describe('Consul', () => {
       consul: ['production'],
       elasticsearch: ['production']
     });
-    consul.mock.emitChange('consul-production', []);
+    consul.mock.emitChange('consul', []);
 
     return Promise.resolve(consul.mock.watching).should.eventually.eql(
-      ['catalog-service', 'elasticsearch-production']
+      ['catalog-service', 'elasticsearch']
     );
   });
 
@@ -445,7 +394,7 @@ describe('Consul', () => {
     const consul = generateConsulStub();
 
     consul.on('update', () => {
-      should(consul.mock.watching).eql(['catalog-service', 'consul-production']);
+      should(consul.mock.watching).eql(['catalog-service', 'consul']);
       consul.shutdown();
       should(consul.mock.watching).eql([]);
       done();
@@ -456,7 +405,7 @@ describe('Consul', () => {
       consul: ['production'],
       elasticsearch: ['production']
     });
-    consul.mock.emitChange('elasticsearch-production', []);
+    consul.mock.emitChange('elasticsearch', []);
   });
 
   it('emits itself on update', (done) => {
@@ -469,7 +418,7 @@ describe('Consul', () => {
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {elasticsearch: ['production']});
-    consul.mock.emitChange('elasticsearch-production', []);
+    consul.mock.emitChange('elasticsearch', []);
   });
 
   it('can clear its properties', (done) => {
@@ -483,7 +432,7 @@ describe('Consul', () => {
 
     consul.initialize();
     consul.mock.emitChange('catalog-service', {elasticsearch: ['production']});
-    consul.mock.emitChange('elasticsearch-production', []);
+    consul.mock.emitChange('elasticsearch', []);
   });
 });
 

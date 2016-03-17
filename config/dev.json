@@ -10,7 +10,8 @@
   "log": {
     "level": "info",
     "access": {
-      "level": "debug"
+      "level": "debug",
+      "filename": "tmp.log"
     }
   }
 }

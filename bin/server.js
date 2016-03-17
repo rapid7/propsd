@@ -30,11 +30,11 @@ if (args.c) {
 global.Config.defaults(require('../config/defaults.json'));
 
 // Set up logging
-global.Log = Logger.attach(global.Config.get('log:level'));
+global.Log = Logger.attach(global.Config.get('log:level'), global.Config.get('log:filename'));
 
 // Add request logging middleware
 if (global.Config.get('log:access:level')) {
-  const accessLog = Logger.attach(global.Config.get('log:access:level'));
+  const accessLog = Logger.attach(global.Config.get('log:access:level'), global.Config.get('log:access:filename'));
 
   app.use(Logger.logRequests((message) => accessLog.log(global.Config.get('log:access:level'), message)));
 }

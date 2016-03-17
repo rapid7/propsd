@@ -50,4 +50,28 @@ describe('Logging', () => {
     // least we can tell that the request logger looks right.
     args.should.be.eql(['req', 'res', 'next']);
   });
+
+  describe('File logging', () => {
+    const fileLog = require('../lib/logger').attach('info', 'tmp.log');
+
+    /* eslint-disable max-nested-callbacks */
+    it('writes to the correct file', (done) => {
+      fileLog.log(config.get('log:level'), 'Test logging message');
+
+      fileLog.on('logging', (transport, level, msg) => {
+        transport.name.should.equal('file');
+        transport.filename.should.equal('tmp.log');
+        msg.should.equal('Test logging message');
+        done();
+      });
+    });
+
+    it('optionally logs to a file', () => {
+      const logger = require('../lib/logger').attach('info');
+
+      Object.keys(logger.transports).should.eql(['console']);
+    });
+
+    /* eslint-enable max-nested-callbacks */
+  });
 });

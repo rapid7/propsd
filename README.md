@@ -34,14 +34,16 @@ This defines the port the propsd server will listen on. By default it's 9100.
 ### log:level
 
 This defines the verbosity of logging. The default level is "info". Other
-supported values are "debug", "warn", and "error".
+supported values are "debug", "verbose", "warn", and "error".
 
-### log:filename
+### log:access
 
-Propsd logs to $STDOUT by default. This defines an additional file for logging
-so you can run propsd without terminal output. Log files aren't rotated by
-propsd, so you'll want to configure something externally to handle that if
-you enable file logging.
+Propsd also logs access requests to its endpoints. The `log:access` configuration namespace exposes one option: `level`.
+
+Output is logged in JSON format using the standard [Apache combined log format](https://httpd.apache.org/docs/2.4/logs.html#combined).
+
+### log:access:level
+This defines the verbosity of access logging. The default level is "verbose". Other supported values are "debug", "info", "warn", and "error".
 
 ### properties
 

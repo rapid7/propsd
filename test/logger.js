@@ -4,6 +4,14 @@
 require('should');
 const Winston = require('winston');
 
+function argumentNames(fun) {
+  const names = fun.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
+      .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')
+      .replace(/\s+/g, '').split(',');
+
+  return names.length === 1 && !names[0] ? [] : names;
+}
+
 class ConfigLike {
   constructor(data) {
     this.data = data;
@@ -17,10 +25,9 @@ class ConfigLike {
 describe('Logging', () => {
   const config = new ConfigLike({
     'log:level': 'info',
-    'log:filename': 'tmp.log'
+    'log:access:level': 'verbose'
   });
-  const log = require('../lib/logger').attach(config);
-  const configFile = config.get('log:filename');
+  const log = require('../lib/logger').attach(config.get('log:level'));
 
   it('returns a WINSTON object', () => {
     log.should.be.an.instanceOf(Winston.Logger);
@@ -30,23 +37,52 @@ describe('Logging', () => {
     log.level.should.be.exactly('info');
   });
 
-  it('writes to the correct file', (done) => {
-    log.log(config.get('log:level'), 'Test logging message');
+  it('logs access requests', () => {
+    const Logger = require('../lib/logger');
+    const accessLog = Logger.attach(config.get('log:access:level'));
+    const morgan = Logger.logRequests((message) => accessLog.log(config.get('log:access:level'), message));
+    const args = argumentNames(morgan);
 
-    log.on('logging', (transport, level, msg) => {
-      transport.name.should.equal('file');
-      transport.filename.should.equal(configFile);
-      msg.should.equal('Test logging message');
-      done();
-    });
+    morgan.should.be.a.Function();
+
+    // All express middleware should accept 3 params, req, res, and next. This is how we test that what's returned
+    // from Logger.logRequests is an instance of an express middleware. It's not a great way to test this but at
+    // least we can tell that the request logger looks right.
+    args.should.be.eql(['req', 'res', 'next']);
   });
 
-  it('optionally logs to a file', () => {
-    const configWithoutFile = new ConfigLike({
-      'log:level': 'info'
-    });
-    const logger = require('../lib/logger').attach(configWithoutFile);
+  describe('File logging', () => {
+    const fileLog = require('../lib/logger').attach('info', 'tmp.log');
 
-    Object.keys(logger.transports).should.eql(['console']);
+    /* eslint-disable max-nested-callbacks */
+    it('writes to the correct file', (done) => {
+      fileLog.log(config.get('log:level'), 'Test logging message');
+
+      fileLog.on('logging', (transport, level, msg) => {
+        transport.name.should.equal('file');
+        transport.filename.should.equal('tmp.log');
+        msg.should.equal('Test logging message');
+        done();
+      });
+    });
+
+    it('optionally logs to a file', () => {
+      const logger = require('../lib/logger').attach('info');
+
+      Object.keys(logger.transports).should.eql(['console']);
+    });
+
+    it('displays a deprecation warning when instantiating a file logger', (done) => {
+      process.on('deprecation', (err) => {
+        err.name.should.equal('DeprecationError');
+        err.namespace.should.equal('propsd');
+        err.message.should.equal('The file transport has been deprecated and will be removed in a later version');
+        done();
+      });
+
+      require('../lib/logger').attach('info', 'tmp.log');
+    });
+
+    /* eslint-enable max-nested-callbacks */
   });
 });

@@ -9,7 +9,10 @@
     "hostname": "127.0.0.1"
   },
   "log": {
-    "level": "info"
+    "level": "info",
+    "access": {
+      "level": "verbose"
+    }
   },
   "consul": {
     "host": "127.0.0.1",

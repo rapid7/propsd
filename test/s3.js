@@ -242,4 +242,17 @@ describe('S3 source plugin', () => {
 
     this.s3.initialize();
   });
+
+  it('can be configured with a different endpoint', () => {
+    const endpoint = 'www.somecoolendpoint.com';
+    const s3Source = require('../lib/source/s3');
+    const s3 = new s3Source({ // eslint-disable-line new-cap
+      bucket: DEFAULT_BUCKET,
+      path: 'foo.json',
+      interval: DEFAULT_INTERVAL,
+      endpoint
+    });
+
+    s3.service.endpoint.hostname.should.equal(endpoint);
+  });
 });

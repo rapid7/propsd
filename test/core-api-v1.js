@@ -147,4 +147,8 @@ describe('Core API v1', () => {
         done();
       });
   });
+
+  it('returns a 500 if any source plugins fail');
+
+  it('returns a 429 if any source plugins have a warning');
 });

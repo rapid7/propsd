@@ -172,7 +172,7 @@ To cut a release do the following:
 This can be accomplished by running the following commands:
 ~~~bash
 npm version minor
-rake clean package release
+rake
 ~~~
 Then following the steps to create the release on github.com
 

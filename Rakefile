@@ -3,6 +3,7 @@ require 'fileutils'
 require 'mkmf'
 require 'aws-sdk'
 require 'logger'
+require 'rake/clean'
 
 include FileUtils
 
@@ -119,11 +120,10 @@ end
 desc "Package #{name} and upload package to S3 bucket"
 task :package => [:upload_packages]
 
-desc 'Cleanup release and package artifacts'
-task :clean do
-  rm_f 'npm-shrinkwrap.json'
-  rm_f Dir["#{name}-*.tgz"]
-  rm_rf 'pkg'
-end
+CLEAN.include 'npm-shrinkwrap.json'
+CLEAN.include "#{name}-*.tgz"
+CLEAN.include 'pkg/'
 
-task :default => [:clean, :release, :package]
+CLOBBER.include 'node_modules/'
+
+task :default => [:clobber, :release, :package]

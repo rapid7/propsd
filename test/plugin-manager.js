@@ -3,6 +3,7 @@
 
 require('should');
 const sinon = require('sinon');
+const nconf = require('nconf');
 const AWS = require('aws-sdk');
 const generateConsulStub = require('./utils/consul-stub');
 
@@ -380,6 +381,22 @@ describe('Plugin manager', function () {
 
     manager.once('source-instantiated', () => {
       AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, unknownEndpointErr, null);
+    });
+
+    manager.initialize();
+  });
+
+  it('handles alternate metadata source configuration', function (done) {
+    global.Config = nconf.argv().env();
+    global.Config.set('properties', {
+      foo: 'bar',
+      baz: 'quiz'
+    });
+
+    manager.metadata.once('update', () => {
+      manager.metadata.properties.should.have.ownProperty('foo');
+      manager.metadata.properties.should.have.ownProperty('baz');
+      done();
     });
 
     manager.initialize();

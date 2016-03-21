@@ -209,7 +209,7 @@ describe('Conqueso API v1', () => {
 
   it('formats IP addresses for tagged Consul services', (done) => {
     const expectedBody = [
-      'conqueso.sweet-es-cluster.ips=10.0.0.0,127.0.0.1'
+      'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
     ].join('\n');
 
     function checkConsulProperties(err) {
@@ -219,9 +219,9 @@ describe('Conqueso API v1', () => {
 
       consul.properties.should.eql({
         consul: {
-          'elasticsearch-sweet-es-cluster': {
+          elasticsearch: {
             addresses: ['10.0.0.0', '127.0.0.1'],
-            cluster: 'sweet-es-cluster'
+            cluster: 'elasticsearch'
           }
         }
       });
@@ -240,7 +240,7 @@ describe('Conqueso API v1', () => {
     consul.mock.emitChange('catalog-service', {
       elasticsearch: ['sweet-es-cluster']
     });
-    consul.mock.emitChange('elasticsearch-sweet-es-cluster', [{
+    consul.mock.emitChange('elasticsearch', [{
       Service: {Address: '10.0.0.0'}
     }, {
       Service: {Address: '127.0.0.1'}

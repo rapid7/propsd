@@ -460,4 +460,8 @@ describe('Storage engine', () => {
       }
     });
   });
+
+  it('resolves multiple tags as separate services');
+
+  it('avoids resolving similar tags to the same service');
 });

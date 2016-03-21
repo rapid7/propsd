@@ -21,6 +21,7 @@ const fakeIndexResponse = {
 
 /* eslint-disable func-names, max-nested-callbacks */
 describe('Plugin manager', function () {
+  this.timeout(5000); // eslint-disable-line rapid7/static-magic-numbers
   const unknownEndpointErr = new Error('UnknownEndpoint');
   const _S3 = AWS.S3;
   let manager,

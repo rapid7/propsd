@@ -1,11 +1,9 @@
 
-default['propsd']['directory'] = '/opt/propsd'
-default['propsd']['executable'] = ::File.join(node['propsd']['directory'], 'bin/server.js')
+default['propsd']['user'] = 'propsd'
+default['propsd']['group'] = 'propsd'
 
-default['propsd']['version'] = '1.0.0'
+default['propsd']['paths']['directory'] = '/opt/propsd'
+default['propsd']['paths']['executable'] = ::File.join(node['propsd']['paths']['directory'], 'bin/server.js')
+default['propsd']['paths']['configuration'] = '/etc/propsd/config.json'
 
-## TODO Artifact path and hash
-default['propsd']['package']['uri'] = 'https://github.com/rapid7/propsd/releases'\
-                                      "/download/#{node['propsd']['version']}/"\
-                                      "propsd-#{node['propsd']['version']}-xxx.deb"
-default['propsd']['package']['checksum'] = 'hexhexhex'
+default['propsd']['config'] = Mash.new

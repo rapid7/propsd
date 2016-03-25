@@ -1,9 +1,18 @@
 # Propsd
 [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
 
-Propsd is a property management system built on lessons learned from running
-[Conqueso][] at scale. It leverages [Amazon S3][] to deliver properties in
-composable layers and [Consul][] to handle service discovery.
+Propsd does dynamic property management at scale, from thousands of servers to
+hundreds of developers.
+
+We built propsd with lessons learned from years of running [Conqueso][] on
+large scale systems. High availability is achieved by leveraging [Amazon S3][]
+to deliver properties and [Consul][] to handle service discovery. Composable
+layering lets you set properties for an organization, a single server, and
+everything in between. Plus, flat file storage makes backups and audits
+a breeze.
+
+So if your [Conqueso][] server's starting to heat up, you just want an audit
+trail when things change, give propsd a try.
 
 ## Usage
 

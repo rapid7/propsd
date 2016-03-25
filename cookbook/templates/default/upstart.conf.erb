@@ -1,0 +1,13 @@
+description "<%= @description %>"
+
+start on (local-filesystems and net-device-up IFACE!=lo)
+stop on runlevel [!12345]
+
+respawn
+respawn limit 10 5
+
+<% unless @user.nil? %>setuid <%= @user %><% end %>
+<% unless @group.nil? %>setgid <%= @group %><% end %>
+console log
+
+exec <%= ([@executable] + @flags).join(' ') %>

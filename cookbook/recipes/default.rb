@@ -69,7 +69,6 @@ template '/etc/init/propsd.conf' do
   variables(
     :description => 'propsd configuration service',
     :user => node['propsd']['user'],
-    :grouop => node['propsd']['group'],
     :executable => node['propsd']['paths']['executable'],
     :flags => [
       "-c #{node['propsd']['paths']['configuration']}"
@@ -99,5 +98,7 @@ end
 
 service 'propsd' do
   ## The wrapping cookbook must call `action` on this resource to start/enable
+  action :nothing
+
   provider Chef::Provider::Service::Upstart
 end

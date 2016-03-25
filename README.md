@@ -1,5 +1,10 @@
 # Propsd
 [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
+
+Propsd is a property management system built on lessons learned from running
+[Conqueso][] at scale. It leverages [Amazon S3][] to deliver properties in
+composable layers and [Consul][] to handle service discovery.
+
 ## Usage
 
 The Propsd server runs under [Node.js][]. Run the following command to start it.
@@ -184,3 +189,6 @@ Then following the steps to create the release on github.com
 [coveralls-image]: https://coveralls.io/repos/rapid7/propsd/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/rapid7/propsd?branch=master
 [npm-version]: https://docs.npmjs.com/cli/version
+[Conqueso]: https://github.com/rapid7/conqueso
+[Consul]: https://www.consul.io/
+[Amazon S3]: https://aws.amazon.com/s3/

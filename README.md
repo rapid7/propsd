@@ -1,8 +1,8 @@
 # Propsd
 [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
 
-Propsd does dynamic property management at scale, from thousands of servers to
-hundreds of developers.
+Propsd does dynamic property management at scale, across thousands of servers
+and changes from hundreds of developers.
 
 We built propsd with lessons learned from years of running [Conqueso][] on
 large scale systems. High availability is achieved by leveraging [Amazon S3][]

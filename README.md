@@ -11,7 +11,7 @@ layering lets you set properties for an organization, a single server, and
 everything in between. Plus, flat file storage makes backups and audits
 a breeze.
 
-So if your [Conqueso][] server's starting to heat up, you just want an audit
+So if your [Conqueso][] server's starting to heat up or you just want an audit
 trail when things change, give propsd a try.
 
 ## Usage

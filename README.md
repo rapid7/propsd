@@ -14,6 +14,11 @@ a breeze.
 So if your [Conqueso][] server's starting to heat up or you just want an audit
 trail when things change, give propsd a try.
 
+## Getting Started
+
+See the [getting started guide][gsg] for help installing, configuring, and
+using propsd.
+
 ## Usage
 
 The Propsd server runs under [Node.js][]. Run the following command to start it.
@@ -201,3 +206,4 @@ Then following the steps to create the release on github.com
 [Conqueso]: https://github.com/rapid7/conqueso
 [Consul]: https://www.consul.io/
 [Amazon S3]: https://aws.amazon.com/s3/
+[gsg]: ./docs/getting-started/

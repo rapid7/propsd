@@ -6,8 +6,8 @@ packages. Other operating systems should install propsd from source.
 
 ## Installing from the Debian package ##
 
-Propsd depends on Node.js, so follow the [instructions for installing Node.js
-on Debian based systems][node-debian].
+Propsd runs on the 4.4.x LTS version of Node.js, so follow the [instructions
+for installing Node.js on Debian based systems][node-debian].
 
 Download a pre-built Debian package of propsd from [the releases
 page][releases] and save it. These instructions assume you've saved the package
@@ -23,7 +23,8 @@ Propsd is installed into `/opt/propsd`.
 
 ## Installing from source ##
 
-Propsd depends on Node.js, so follow the [instructions for installing Node.js][node-source].
+Propsd runs on the 4.4.x LTS version of Node.js, so follow the [instructions
+for installing Node.js][node-source].
 
 Download a tarball of the propsd sources from [the releases page][releases] and
 save it. These instructions assume you've saved the tarball to

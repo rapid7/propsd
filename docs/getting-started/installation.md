@@ -46,6 +46,6 @@ npm install /tmp/propsd.tar.gz
 
 Propsd is installed into `/opt/node_modules/propsd`.
 
-[releases]: https://github.com/rapid7/propsd/releases
+[releases]: https://github.com/rapid7/propsd/releases/latest
 [node-debian]: https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
 [node-source]: https://nodejs.org/en/download/

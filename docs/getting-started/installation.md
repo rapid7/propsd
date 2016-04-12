@@ -23,8 +23,7 @@ Propsd is installed into `/opt/propsd`.
 
 ## Installing from source ##
 
-Propsd depends on Node.js, so follow the [instructions for installing Node.js
-on you platform][node-source].
+Propsd depends on Node.js, so follow the [instructions for installing Node.js][node-source].
 
 Download a tarball of the propsd sources from [the releases page][releases] and
 save it. These instructions assume you've saved the tarball to

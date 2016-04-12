@@ -1,7 +1,7 @@
 # How to install propsd #
 
 [Releases of propsd][releases] include both source tarballs and Debian
-packages. Debian and Ubuntu based Linux distributions can use the prebuilt
+packages. Debian and Ubuntu based Linux distributions can use the pre-built
 packages. Other operating systems should install propsd from source.
 
 ## Installing from the Debian package ##
@@ -9,9 +9,9 @@ packages. Other operating systems should install propsd from source.
 Propsd depends on Node.js, so follow the [instructions for installing Node.js
 on Debian based systems][node-debian].
 
-Download a prebuilt Debian package of propsd from [the releases page][releases]
-and save it. These instructions assume you've saved the package to
-`/tmp/propsd.deb`.
+Download a pre-built Debian package of propsd from [the releases
+page][releases] and save it. These instructions assume you've saved the package
+to `/tmp/propsd.deb`.
 
 Use `dpkg` to install propsd.
 

@@ -36,21 +36,7 @@ describe('Logging', () => {
   it('sets the log level correctly', () => {
     log.level.should.be.exactly('info');
   });
-
-  it('logs access requests', () => {
-    const Logger = require('../lib/logger');
-    const accessLog = Logger.attach(config.get('log:access:level'));
-    const morgan = Logger.logRequests((message) => accessLog.log(config.get('log:access:level'), message));
-    const args = argumentNames(morgan);
-
-    morgan.should.be.a.Function();
-
-    // All express middleware should accept 3 params, req, res, and next. This is how we test that what's returned
-    // from Logger.logRequests is an instance of an express middleware. It's not a great way to test this but at
-    // least we can tell that the request logger looks right.
-    args.should.be.eql(['req', 'res', 'next']);
-  });
-
+  
   describe('File logging', () => {
     const fileLog = require('../lib/logger').attach('info', 'tmp.log');
 

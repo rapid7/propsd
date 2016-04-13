@@ -25,7 +25,7 @@ order for propsd to run.
 ~~~json
 {
   "index": {
-    "bucket": "propsd.corp.com"
+    "bucket": "propsd.s3.amazonaws.com"
   }
 }
 ~~~
@@ -88,7 +88,7 @@ The configuration file below is the default settings for propsd.
       equal to or lower than the `log:level` makes access logs visible. Defaults
       to "verbose".
 
-* `index` - These settings control the first file properites are read from.
+* `index` - These settings control the first file properties are read from.
 
   Propsd reads properties from files stored in Amazon S3. Property files are
   JSON documents. A single property file must be configured as an index that
@@ -107,6 +107,61 @@ The configuration file below is the default settings for propsd.
 
   * `interval` - The time in milliseconds to poll the index property file for
     changes. Defaults to 30000 (30 seconds).
+
+* `properties` - An arbitrary JSON object for injecting values into the index.
+
+  Propsd supports treating the index document as a template and injecting
+  static properties into it. This can be useful for loading additional
+  properties files on a per server basis. For more information on the format of
+  properties, see the **Interpolated Properties** section.
+
+## Interpolated Properties ##
+
+Propsd supports injecting static values defined in configuration files into the
+property documents read from S3. This provides way to read instance specific
+properties.
+
+Suppose you have two configurations for metrics polling, fast and slow. Fast
+polls every thrity seconds and the configuration for it lives in
+a `metrics/fast.json` document in S3. Slow polls every five minutes, and the
+configuration for it lives in a `metrics/slow.json` document in S3.
+
+Interpolated properties let you configure propsd to read either the fast or
+slow document. You start by adding a `{{speed}}` template paramter to your
+`index.json` document in S3.
+
+~~~json
+{
+  "version": 1.0,
+  "sources": [{
+    "name": "metrics",
+    "type": "s3",
+    "parameters": {
+      "path": "metrics/{{speed}}.json"
+    }
+  }]
+}
+~~~
+
+When propsd reads the index template, it tries to replace `{{speed}}` with
+a value from in the `properties` key in the configuration file. So the
+configuration to read the "fast" document looks like this.
+
+~~~json
+{
+  "properties": {
+    "speed": "fast"
+  }
+}
+~~~
+
+If the `properties:speed` key was configured as"slow", the `metrics/slow.json`
+document would be read instead.
+
+Interpolated properties in templated documents are enclosed in double curly
+braces: `{{` and `}}`. The value betwen the double curly braces is a key from
+the `properties` object. Nested keys within the `properties` object are
+accessed by separating the keys with colons.
 
 
 [apache]: https://httpd.apache.org/docs/2.4/logs.html#combined

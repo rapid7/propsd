@@ -118,7 +118,7 @@ The configuration file below is the default settings for propsd.
 ## Interpolated Properties ##
 
 Propsd supports injecting static values defined in configuration files into the
-property documents read from S3. This provides way to read instance specific
+property documents read from S3. This provides a way to read instance specific
 properties.
 
 Suppose you have two configurations for metrics polling, fast and slow. Fast
@@ -155,7 +155,7 @@ configuration to read the "fast" document looks like this.
 }
 ~~~
 
-If the `properties:speed` key was configured as"slow", the `metrics/slow.json`
+If the `properties:speed` key was configured as "slow", the `metrics/slow.json`
 document would be read instead.
 
 Interpolated properties in templated documents are enclosed in double curly

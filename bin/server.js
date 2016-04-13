@@ -14,6 +14,7 @@ const args = require('yargs')
   .argv;
 
 const express = require('express');
+const expressWinston = require('express-winston');
 const http = require('http');
 const Path = require('path');
 const Logger = require('../lib/logger');
@@ -33,11 +34,14 @@ global.Config.defaults(require('../config/defaults.json'));
 global.Log = Logger.attach(global.Config.get('log:level'), global.Config.get('log:filename'));
 
 // Add request logging middleware
-if (global.Config.get('log:access:level')) {
-  const accessLog = Logger.attach(global.Config.get('log:access:level'), global.Config.get('log:access:filename'));
-
-  app.use(Logger.logRequests((message) => accessLog.log(global.Config.get('log:access:level'), message)));
 }
+
+app.use(expressWinston.logger({
+  winstonInstance: global.Log,
+  expressFormat: true,
+  level: global.Config.get('log:level'),
+  baseMeta: {source: 'request', type: 'request'}
+}));
 
 // Initialize the Plugin Manager and storage layer
 const PluginManager = require('../lib/plugin-manager');

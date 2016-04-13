@@ -13,6 +13,7 @@ const args = require('yargs')
   .help('help')
   .argv;
 
+const deprecate = require('depd')('propsd');
 const express = require('express');
 const expressWinston = require('express-winston');
 const http = require('http');
@@ -34,6 +35,8 @@ global.Config.defaults(require('../config/defaults.json'));
 global.Log = Logger.attach(global.Config.get('log:level'), global.Config.get('log:filename'));
 
 // Add request logging middleware
+if (global.Config.get('log:access')) {
+  deprecate('Separate logging control for access logs has been deprecated and will be removed in a later version.');
 }
 
 app.use(expressWinston.logger({

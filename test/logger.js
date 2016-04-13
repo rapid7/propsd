@@ -4,14 +4,6 @@
 require('should');
 const Winston = require('winston');
 
-function argumentNames(fun) {
-  const names = fun.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
-      .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')
-      .replace(/\s+/g, '').split(',');
-
-  return names.length === 1 && !names[0] ? [] : names;
-}
-
 class ConfigLike {
   constructor(data) {
     this.data = data;
@@ -36,7 +28,7 @@ describe('Logging', () => {
   it('sets the log level correctly', () => {
     log.level.should.be.exactly('info');
   });
-  
+
   describe('File logging', () => {
     const fileLog = require('../lib/logger').attach('info', 'tmp.log');
 

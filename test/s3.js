@@ -112,21 +112,41 @@ describe('S3 source plugin', () => {
     s3WithNoSuchKeyError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
   });
 
-  it('doesn\'t do anything if getRequest returns a NoSuchKey error', (done) => {
+  it('shuts down the source if getRequest returns a NoSuchKey error', (done) => {
     const errorSpy = sinon.spy();
     const updateSpy = sinon.spy();
 
+    shutdownSpy = sinon.spy();
+
     s3WithNoSuchKeyError.on('error', errorSpy);
     s3WithNoSuchKeyError.on('update', updateSpy);
+    s3WithNoSuchKeyError.on('shutdown', shutdownSpy);
 
     s3WithNoSuchKeyError.on('shutdown', () => {
       errorSpy.should.not.be.called();
       updateSpy.should.not.be.called();
+      shutdownSpy.should.be.called();
+      s3WithNoSuchKeyError.properties.should.be.empty();
       done();
     });
 
     s3WithNoSuchKeyError.initialize();
-    s3WithNoSuchKeyError.shutdown();
+    s3WithNoSuchKeyError.properties = {foo: 'bar'};
+  });
+
+  it('clears cached properties if getRequest returns a NoSuchKey error', (done) => {
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)
+    });
+
+    s3WithNoSuchKeyError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    s3WithNoSuchKeyError.on('shutdown', () => {
+      s3WithNoSuchKeyError.properties.should.be.empty();
+      done();
+    });
+
+    s3WithNoSuchKeyError.initialize();
+    s3WithNoSuchKeyError.properties = {foo: 'bar'};
   });
 
   before(() => {

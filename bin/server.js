@@ -42,7 +42,7 @@ if (global.Config.get('log:access')) {
 app.use(expressWinston.logger({
   winstonInstance: global.Log,
   expressFormat: true,
-  level: global.Config.get('log:level'),
+  level: global.Config.get('log:access:level') || global.Config.get('log:level'),
   baseMeta: {source: 'request', type: 'request'}
 }));
 

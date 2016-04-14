@@ -8,10 +8,6 @@
     "host": "127.0.0.1:8080"
   },
   "log": {
-    "level": "info",
-    "access": {
-      "level": "debug",
-      "filename": "tmp.log"
-    }
+    "level": "info"
   }
 }

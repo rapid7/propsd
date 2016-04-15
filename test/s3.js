@@ -105,17 +105,13 @@ describe('S3 source plugin', () => {
   }));
 
   it('clears cached properties if getRequest returns a NoSuchKey error', (done) => {
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)
-    });
-
+    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
     s3WithNoSuchKeyError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
-    s3WithNoSuchKeyError.on('shutdown', () => {
+    s3WithNoSuchKeyError.once('update', () => {
       s3WithNoSuchKeyError.properties.should.be.empty();
       done();
     });
 
-    s3WithNoSuchKeyError.initialize();
     s3WithNoSuchKeyError.properties = {foo: 'bar'};
   });
 
@@ -125,6 +121,7 @@ describe('S3 source plugin', () => {
     });
 
     s3WithNotModifiedError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    s3WithNoSuchKeyError.initialize();
   });
 
   it('doesn\'t do anything if getRequest returns a NotModified error', (done) => {

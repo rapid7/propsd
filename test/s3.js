@@ -104,42 +104,24 @@ describe('S3 source plugin', () => {
     this.s3.initialize();
   }));
 
-  before(() => {
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)
-    });
-
+  it('clears cached properties if getRequest returns a NoSuchKey error', (done) => {
+    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
     s3WithNoSuchKeyError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
-  });
-
-  it('doesn\'t do anything if getRequest returns a NoSuchKey error', (done) => {
-    const errorSpy = sinon.spy();
-    const updateSpy = sinon.spy();
-
-    s3WithNoSuchKeyError.on('error', errorSpy);
-    s3WithNoSuchKeyError.on('update', updateSpy);
-
-    s3WithNoSuchKeyError.on('shutdown', () => {
-      errorSpy.should.not.be.called();
-      updateSpy.should.not.be.called();
+    s3WithNoSuchKeyError.once('update', () => {
+      s3WithNoSuchKeyError.properties.should.be.empty();
       done();
     });
 
+    s3WithNoSuchKeyError.properties = {foo: 'bar'};
     s3WithNoSuchKeyError.initialize();
-    s3WithNoSuchKeyError.shutdown();
-  });
-
-  before(() => {
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, {code: 'NotModified'}, null)
-    });
-
-    s3WithNotModifiedError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
   });
 
   it('doesn\'t do anything if getRequest returns a NotModified error', (done) => {
     const errorSpy = sinon.spy();
     const updateSpy = sinon.spy();
+
+    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NotModified'}, null)});
+    s3WithNotModifiedError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3WithNotModifiedError.on('error', errorSpy);
     s3WithNotModifiedError.on('update', updateSpy);
@@ -154,16 +136,12 @@ describe('S3 source plugin', () => {
     s3WithNotModifiedError.shutdown();
   });
 
-  before(() => {
-    const errorObj = {code: 'BigTimeErrorCode', message: 'This is the error message'};
-
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, errorObj, null)
-    });
-
-    s3OtherError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
-  });
   it('exposes an error when any other type occurs but continues running', (done) => {
+    S3 = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, {code: 'BigTimeErrorCode', message: 'This is the error message'}, null)
+    });
+    s3OtherError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+
     s3OtherError.on('error', (err) => {
       const status = s3OtherError.status();
 
@@ -200,18 +178,13 @@ describe('S3 source plugin', () => {
     this.s3.type.should.equal('s3');
   });
 
-  before(() => {
-    const fakeResponse = {
+  it('correctly parses a sample document', (done) => {
+    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, null, {
       ETag: 'ThisIsACoolEtag',
       Body: new Buffer(JSON.stringify(require('./data/s3/global')))
-    };
-
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
-    });
+    })});
     s3SampleData = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
-  });
-  it('correctly parses a sample document', (done) => {
+
     s3SampleData.once('update', (source) => {
       source.properties.should.deepEqual({
         global: 'global',

@@ -63,8 +63,9 @@ The configuration file below is the default settings for propsd.
 
 * `log` - These settings control logging.
 
-  Propsd treats logging as an event stream and logs to `stdout`. If you
-  need routing or storage of logs, you'll want to handle that outside propsd.
+  Propsd treats logging as an event stream and logs to `stdout`. Logged events
+  are formatted as JSON objects separated by newlines. If you need routing or
+  storage of logs, you'll want to handle that outside propsd.
 
   The following keys are available:
 

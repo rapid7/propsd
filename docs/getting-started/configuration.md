@@ -148,6 +148,3 @@ Interpolated properties in templated documents are enclosed in double curly
 braces: `{{` and `}}`. The value betwen the double curly braces is a key from
 the `properties` object. Nested keys within the `properties` object are
 accessed by separating the keys with colons.
-
-
-[apache]: https://httpd.apache.org/docs/2.4/logs.html#combined

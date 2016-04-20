@@ -41,10 +41,7 @@ The configuration file below is the default settings for propsd.
     "port": 9100
   },
   "log": {
-    "level": "info",
-    "access": {
-      "level": "verbose"
-    }
+    "level": "info"
   },
   "index": {
     "path": "index.json",
@@ -75,18 +72,6 @@ The configuration file below is the default settings for propsd.
     "warn", and "error". Each log level encompases all the ones below it. So
     "debug" is the most verbose and "error" is the least verbose. Defaults to
     "info".
-
-  * `access` - These settings control access logging.
-
-  Propsd logs access requests to its end points. Access requests are logged in
-  JSON format using the [Apache combined log format][apache].
-
-  The following keys are available:
-
-    * `level` - The level to log access requests at. Valid values are "debug",
-      "verbose", "info", "warn", and "error". Setting this to a level that's
-      equal to or lower than the `log:level` makes access logs visible. Defaults
-      to "verbose".
 
 * `index` - These settings control the first file properties are read from.
 

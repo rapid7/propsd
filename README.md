@@ -27,107 +27,12 @@ The Propsd server runs under [Node.js][]. Run the following command to start it.
 node bin/server.js
 ~~~
 
-This will start the [HTTP server][http-api] listening on port 127.0.0.1:9100. If
-you need to specify different server options, see the configuration section
-below. Inline help is available with the `--help` argument.
+This will start the [HTTP server][http-api] listening on port 127.0.0.1:9100.
+If you need to specify different server options, see the [getting started
+guide][gsg]. Inline help is available with the `--help` argument.
 
 ~~~bash
 node bin/server.js --help
-~~~
-
-## Configuration
-
-Propsd reads its configuration from a JSON file. The `--config-file` argument
-can be provided to specify where to read the configuration file from. The
-following configuration options are supported.
-
-### service:hostname
-
-This defines the address the propsd server will listen on. By default it's
-127.0.0.1.
-
-### service:port
-
-This defines the port the propsd server will listen on. By default it's 9100.
-
-### log:level
-
-This defines the verbosity of logging. The default level is "info". Other
-supported values are "debug", "verbose", "warn", and "error".
-
-### log:access
-
-Propsd also logs access requests to its endpoints. The `log:access` configuration namespace exposes one option: `level`.
-
-Output is logged in JSON format using the standard [Apache combined log format](https://httpd.apache.org/docs/2.4/logs.html#combined).
-
-### log:access:level
-This defines the verbosity of access logging. The default level is "verbose". Other supported values are "debug", "info", "warn", and "error".
-
-### properties
-
-The `properties` object can contain any arbitrary properties you want loaded into the `Metadata#properties` object when it's being used to interpolate sources from the index.
-
-For example, a config file with the following `properties` object:
-
-~~~json
-{
-	...
-	"properties": {
-		"foo": "bar",
-		"baz": "s3"
-	}
-	...
-}
-~~~
-
-When presented with the following index document:
-
-~~~json
-{
-	"version": 1.0,
-	"sources": [
-		{
-			"name": "foo",
-			"type": "{{ baz }}",
-			"parameters": {
-				"path": "{{ foo }}.json"
-			}
-		}
-	]
-}
-~~~
-
-Will yield this source:
-
-~~~json
-{
-	"name": "foo",
-	"type": "s3",
-	"parameters": {
-		"path": "bar.json"
-	}
-}
-~~~
-
-
-### Example
-
-An example configuration file is shown below. The server's address is set to
-10.0.0.0 and the port is set to 2600. The log level is set to warning and
-file logging is enabled.
-
-~~~json
-{
-  "service": {
-    "hostname": "10.0.0.0",
-    "port": 2600
-  },
-  "log": {
-    "level": "warn",
-    "filename": "/var/log/propsd.log"
-  }
-}
 ~~~
 
 ### Development

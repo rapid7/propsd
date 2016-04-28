@@ -71,15 +71,16 @@ similar to this:
 The "status" and "uptime" attributes match the ones from the health endpoint.
 The "index" attribute provides metadata about the index property file, such as
 the last time it was updated. The "sources" array provides metadata about each
-of the sources propsd is reading properites from.
+of the sources propsd is reading properties from.
 
-## Property Files ##
+## Index Files ##
 
-Propsd reads JSON files from S3 and collapses them into properties. The first
-file propsd reads is called the index file. The section on [configuration
-options][configuration] describes how to tell propsd where to find the index
-file. The index file contains a list of other S3 files where propsd should read
-properties. Here's an example index file:
+The first file propsd reads is called the index file. Index files are JSON
+formatted. They are a single JSON object containing a version identifier and
+a list of sources to read properties from. You must set [configuration
+options][configuration] to tell propsd where to find the index file.
+
+### Minimal Index File ###
 
 ~~~json
 {
@@ -90,64 +91,63 @@ properties. Here's an example index file:
     "parameters": {
       "path": "global.json"
     }
-  }, {
-    "name": "service",
-    "type": "s3",
-    "parameters": {
-      "path": "service/propsd.json"
-    }
   }]
 }
 ~~~
 
-Properties are read into propsd in the order they're defined in the index file.
-Property files with matching values overwrite ones read before them. In this
-example, properties read from the `global.json` file can be overwritten in
-the `service/propsd.json` file. This can be used to do things like set software
-versions on a per application basis.
+The "version" attribute is required and must be "1.0". The "sources" attribute
+is an array of source objects to read properties from. Propsd supports reading
+properties from [Amazon S3][].
 
-Here's an example `global.json` file with software versions defined for Jenkins
-and Node.js.
+### Amazon S3 Source Key Reference ###
+
+* `name` - An arbitrary string. Must be unique within all other sources of the
+  same type. You'll see the name of the source in logs, so pick something
+  meaningful.
+
+* `type` - Must be "s3" to configure a S3 source.
+
+* `parameters` - These settings control the S3 source.
+
+  The following keys are available:
+
+  * `path` - The path to the properties file in S3.
+
+  * `bucket` - The bucket in S3 where the properties file is found. Defaults to
+    the bucket where the index file was found.
+
+## Property Files ##
+
+Property files are JSON formatted. They are a single JSON object containing
+a version identifier and property values. Properties are read in the
+order they're defined in the index file. Property files with matching values
+overwrite those read before them.
+
+### Minimal Properties File ###
 
 ~~~json
 {
   "version": "1.0",
   "properties": {
-    "jenkins.version": "1.651.1",
     "nodejs.version": "4.4.3"
   }
 }
 ~~~
 
-The "version" attribute is required and must be set to "1.0". The "properties"
-attribute is a JSON object. Keys and intrinsic values (strings and numbers) in
-the properties object are converted directly into Java properties. Nested JSON
-objects are flattened, with their keys separated by periods. Arrays are
-converted into numbered properties e.g. the first item is "key.0", the second
-item is "key.1", the third item is "key.2", etc.
+### Property Files Key Reference ###
 
-In the global file, both Jenkins and Node.js are set to use the LTS version. If
-we want the propsd service to use the latest version of Node.js instead, we
-can overwrite the "nodejs.version" attribute in the `service/propsd.json` file.
+* `version` - A string that tells propsd what version of the properties file
+  it's reading. Must be "1.0".
 
-~~~json
-{
-  "version": "1.0",
-  "properties": {
-    "nodejs.version": "6.0.0"
-  }
-}
-~~~
+* `properties` - A JSON object of properties.
 
-By setting the "nodejs.version" attribute, we create a composed set of
-properties that looks like this:
-
-~~~java
-jenkins.version: "1.651.1",
-nodejs.version: "6.0.0"
-~~~
+  Keys with string, number and boolean values are converted directly to Java
+  properties. Nested JSON objects are flattened, with their keys separated by
+  periods. Arrays are converted into numbered properties e.g. the first item is
+  "key.0", the second item is "key.1", the third item is "key.2", etc.
 
 
 [installation]: "./installation.md"
 [configuration]: "./configuration.md"
 [consul]: https://www.consul.io/docs/agent/checks.html
+[Amazon S3]:https://aws.amazon.com/s3/

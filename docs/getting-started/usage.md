@@ -45,7 +45,7 @@ The "plugins" attribute is a map from plugin type to the number of instances of
 the plugin that are running.
 
 The second endpoint is a status endpoint that provides detailed information
-about propsd. Issue a GET request to '`/v1/status` and you'll see output
+about propsd. Issue a GET request to `/v1/status` and you'll see output
 similar to this:
 
 ~~~json

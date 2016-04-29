@@ -3,10 +3,13 @@
 * [Installation][]
   * Installing from pre-built packages
   * Installing from source
-* [Configuration][]
-  * Available command-line options
-  * Using configuration files
-  * Working with interpolated properties
+* [How to configure propsd](./configuration.md)
+  * [Command-line Options](./configuration.md#command-line-options)
+  * [Configuration Files](./configuration.md#configuration-files)
+    * [Minimal Configuration File](./configuration.md#minimal-configuration-file)
+    * [Default Configuration File](./configuration.md#default-configuration-file)
+    * [Configuration Key Reference](./configuration.md#configuration-key-reference)
+  * [Interpolated Properties](./configuration.md#interpolated-properties)
 * [How to use propsd](./usage.md)
   * [Running propsd](./usage.md#running-propsd)
   * [Stopping propsd](./usage.md#stopping-propsd)
@@ -20,4 +23,3 @@
 
 
 [Installation]: ./installation.md
-[Configuration]: ./configuration.md

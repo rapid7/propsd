@@ -15,6 +15,13 @@ several [configuration options][configuration].
 When running propsd you should see output similar to this:
 
 ~~~text
+{"level":"info","message":"Initializing index and metadata","timestamp":"2016-04-29T15:28:39.574Z"}
+{"source":"s3-propsd-s3-index.json","type":"s3","level":"info","message":"Initializing s3 source s3-propsd-s3-index.json","timestamp":"2016-04-29T15:28:39.577Z"}
+{"source":"ec2-metadata","type":"ec2-metadata","level":"info","message":"Initializing ec2-metadata source ec2-metadata","timestamp":"2016-04-29T15:28:39.590Z"}
+{"level":"info","message":"Listening on 127.0.0.1:9100","timestamp":"2016-04-29T15:28:39.602Z"}
+{"source":"s3-propsd-s3-index.json","type":"s3","level":"info","message":"Updated source s3-propsd-s3-index.json","timestamp":"2016-04-29T15:28:39.620Z"}
+{"source":"ec2-metadata","type":"ec2-metadata","level":"info","message":"Updated source ec2-metadata","timestamp":"2016-04-29T15:28:39.658Z"}
+{"source":"s3-propsd-s3-global.json","type":"s3","level":"info","message":"Initializing s3 source s3-propsd-s3-global.json","timestamp":"2016-04-29T15:28:39.659Z"}
 ~~~
 
 ## Stopping propsd ##

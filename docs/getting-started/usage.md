@@ -123,6 +123,39 @@ properties from [Amazon S3][].
   * `bucket` - The bucket in S3 where the properties file is found. Defaults to
     the bucket where the index file was found.
 
+### Amazon S3 Bucket Permissions ###
+
+Propsd reads from S3, so you need to configure your bucket to allow read
+access. The example bucket policy below shows how to grant read-only access to
+a separate AWS account.
+
+~~~json
+{
+  "Version": "2012-10-17",
+  "Id": "propsd",
+  "Statement": [{
+    "Sid": "read-only-for-XXXXXXXXXXXX",
+    "Effect": "Allow",
+    "Principal": {
+      "AWS": "arn:aws:iam::XXXXXXXXXXXX:root"
+    },
+    "Action": [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:GetBucketLocation"
+    ],
+    "Resource": [
+      "arn:aws:s3:::propsd.s3.amazonaws.com/*",
+      "arn:aws:s3:::propsd.s3.amazonaws.com"
+    ]
+  }]
+}
+~~~
+
+See [Amazon's documentation around bucket policies and user
+policies][bucket-policies] for more details around controlling access to S3
+buckets.
+
 ## Property Files ##
 
 Property files are JSON formatted. They are a single JSON object containing
@@ -157,4 +190,5 @@ overwrite those read before them.
 [installation]: "./installation.md"
 [configuration]: "./configuration.md"
 [consul]: https://www.consul.io/docs/agent/checks.html
-[Amazon S3]:https://aws.amazon.com/s3/
+[Amazon S3]: https://aws.amazon.com/s3/
+[bucket-policies]: http://docs.aws.amazon.com/AmazonS3/latest/dev/using-iam-policies.html

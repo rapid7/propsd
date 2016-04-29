@@ -17,6 +17,7 @@
   * [Index Files](./usage.md#index-files)
     * [Minimal Index File](./usage.md#minimal-index-file)
     * [Amazon S3 Source Key Reference](./usage.md#amazon-s3-source-key-reference)
+    * [Amazon S3 Bucket Permissions](./usage.md#amazon-s3-bucket-permissions)
   * [Property Files](./usage.md#property-files)
     * [Minimal Properties File](./usage.md#minimal-properties-file)
     * [Property Files Key Reference](./usage.md#property-files-key-reference)

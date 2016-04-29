@@ -1,8 +1,8 @@
 # Getting started with propsd #
 
-* [Installation][]
-  * Installing from pre-built packages
-  * Installing from source
+* [How to install propsd](./installation.md)
+  * [Installing from the Debian package](./installation.md#installing-from-the-debian-package)
+  * [Installing from source](./installation.md#installing-from-source)
 * [How to configure propsd](./configuration.md)
   * [Command-line Options](./configuration.md#command-line-options)
   * [Configuration Files](./configuration.md#configuration-files)
@@ -20,6 +20,3 @@
   * [Property Files](./usage.md#property-files)
     * [Minimal Properties File](./usage.md#minimal-properties-file)
     * [Property Files Key Reference](./usage.md#property-files-key-reference)
-
-
-[Installation]: ./installation.md

@@ -14,26 +14,10 @@ a breeze.
 So if your [Conqueso][] server's starting to heat up or you just want an audit
 trail when things change, give propsd a try.
 
-## Getting Started
+## Usage
 
 See the [getting started guide][gsg] for help installing, configuring, and
 using propsd.
-
-## Usage
-
-The Propsd server runs under [Node.js][]. Run the following command to start it.
-
-~~~bash
-node bin/server.js
-~~~
-
-This will start the [HTTP server][http-api] listening on port 127.0.0.1:9100.
-If you need to specify different server options, see the [getting started
-guide][gsg]. Inline help is available with the `--help` argument.
-
-~~~bash
-node bin/server.js --help
-~~~
 
 ### Development
 

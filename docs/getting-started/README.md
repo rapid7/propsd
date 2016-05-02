@@ -1,13 +1,23 @@
 # Getting started with propsd #
 
-* [Installation][]
-  * Installing from pre-built packages
-  * Installing from source
-* [Configuration][]
-  * Available command-line options
-  * Using configuration files
-  * Working with interpolated properties
-
-
-[Installation]: ./installation.md
-[Configuration]: ./configuration.md
+* [How to install propsd](./installation.md)
+  * [Installing from the Debian package](./installation.md#installing-from-the-debian-package)
+  * [Installing from source](./installation.md#installing-from-source)
+* [How to configure propsd](./configuration.md)
+  * [Command-line Options](./configuration.md#command-line-options)
+  * [Configuration Files](./configuration.md#configuration-files)
+    * [Minimal Configuration File](./configuration.md#minimal-configuration-file)
+    * [Default Configuration File](./configuration.md#default-configuration-file)
+    * [Configuration Key Reference](./configuration.md#configuration-key-reference)
+  * [Interpolated Properties](./configuration.md#interpolated-properties)
+* [How to use propsd](./usage.md)
+  * [Running propsd](./usage.md#running-propsd)
+  * [Stopping propsd](./usage.md#stopping-propsd)
+  * [Monitoring propsd](./usage.md#monitoring-propsd)
+  * [Index Files](./usage.md#index-files)
+    * [Minimal Index File](./usage.md#minimal-index-file)
+    * [Amazon S3 Source Key Reference](./usage.md#amazon-s3-source-key-reference)
+    * [Amazon S3 Bucket Permissions](./usage.md#amazon-s3-bucket-permissions)
+  * [Property Files](./usage.md#property-files)
+    * [Minimal Properties File](./usage.md#minimal-properties-file)
+    * [Property Files Key Reference](./usage.md#property-files-key-reference)

@@ -25,6 +25,7 @@ end
 package 'nodejs'
 #######################
 
+node.default['propsd']['version'] = cookbook_version.version
 
 group node['propsd']['group'] do
   system true
@@ -48,8 +49,8 @@ end
 
 ## Fetch and install propsd
 remote_file 'propsd' do
-  source Propsd::Helpers.github_download('rapid7', 'propsd', cookbook_version.version)
-  path ::File.join(Chef::Config['file_cache_path'], "propsd-#{cookbook_version.version}.deb")
+  source Propsd::Helpers.github_download('rapid7', 'propsd', node['propsd']['version'])
+  path ::File.join(Chef::Config['file_cache_path'], "propsd-#{node['propsd']['version']}.deb")
 
   action :create_if_missing
   backup false

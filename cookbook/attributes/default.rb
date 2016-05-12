@@ -7,3 +7,4 @@ default['propsd']['paths']['executable'] = ::File.join(node['propsd']['paths']['
 default['propsd']['paths']['configuration'] = '/etc/propsd/config.json'
 
 default['propsd']['config'] = Mash.new
+default['propsd']['version'] = nil

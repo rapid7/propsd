@@ -25,7 +25,7 @@ end
 package 'nodejs'
 #######################
 
-node.default['propsd']['version'] = cookbook_version.version
+node.default['propsd']['version'] = cookbook_version
 
 group node['propsd']['group'] do
   system true

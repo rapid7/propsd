@@ -1,7 +1,9 @@
 class Chef::Recipe
-  ## Return a CookbookVersion, like Resource.cookbook_version
+  ##
+  # Allow a recipe to find its cookbook's version
+  ##
   def cookbook_version
-    run_context.cookbook_collection[cookbook_name]
+    run_context.cookbook_collection[cookbook_name].version
   end
 end
 

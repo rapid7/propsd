@@ -147,13 +147,15 @@ describe('Conqueso API v1', () => {
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect(HTTP_OK, nestedJavaProperties, done);
   });
+
   it('retrieves a specific property if it exists', (done) => {
     request(server)
-        .get('/v1/conqueso/name')
+        .get('/v1/conqueso/api/roles/global/properties/name')
         .set('Accept', 'text/plain')
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect(HTTP_OK, 'hipster-mode-enabled', done);
   });
+
   after((done) => {
     server.close(done);
   });

@@ -150,15 +150,15 @@ describe('Conqueso API v1', () => {
 
   it('retrieves a specific property if it exists', (done) => {
     request(server)
-      .get('/v1/conqueso/api/roles/global/properties/name')
+      .get('/v1/conqueso/api/roles/global/properties/food.name')
       .set('Accept', 'text/plain')
       .expect('Content-Type', 'text/plain; charset=utf-8')
-      .expect(HTTP_OK, 'hipster-mode-enabled', done);
+      .expect(HTTP_OK, 'tacos', done);
   });
 
   it('returns no data if a specific property does not exist', (done) => {
     request(server)
-      .get('/v1/conqueso/api/roles/global/properties/bogus')
+      .get('/v1/conqueso/api/roles/global/properties/food.gluten')
       .set('Accept', 'text/plain')
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect(HTTP_OK, '', done);

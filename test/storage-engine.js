@@ -211,8 +211,10 @@ describe('Storage Engine', () => {
     should(storage.sources.length).equal(2);
 
     storage.unregister(source2);
-    storage.update();
     should(storage.sources.length).equal(1);
+    should(storage.properties).eql({drink: ['coffee', 'hoppy IPA'], food: ['tacos', 'peanuts']});
+
+    storage.update();
     should(storage.properties).eql({food: ['tacos', 'peanuts']});
   });
 
@@ -229,6 +231,9 @@ describe('Storage Engine', () => {
     storage.clear();
     should(storage.sources.length).equal(0);
     should(storage.properties).eql({drink: ['coffee', 'hoppy IPA'], food: ['tacos', 'peanuts']});
+
+    storage.update();
+    should(storage.properties).eql({});
   });
 
   it('shuts down plugins when unregistered', (done) => {

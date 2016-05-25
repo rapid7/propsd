@@ -228,7 +228,7 @@ describe('Storage Engine', () => {
 
     storage.clear();
     should(storage.sources.length).equal(0);
-    should(storage.properties).eql({});
+    should(storage.properties).eql({drink: ['coffee', 'hoppy IPA'], food: ['tacos', 'peanuts']});
   });
 
   it('shuts down plugins when unregistered', (done) => {

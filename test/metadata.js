@@ -68,9 +68,8 @@ describe('Metadata source plugin', () => {
     this.m.shutdown();
   });
 
-  it('can only be initialized once', () => {
-    this.m.initialize();
-    this.m.should.deepEqual(this.m.initialize());
+  it('initialize returns a promise', () => {
+    this.m.initialize().should.be.instanceOf(Promise);
   });
 
   it('clears the sha1 signature when it\'s shutdown', (done) => {
@@ -130,15 +129,5 @@ describe('Metadata source plugin', () => {
 
   after(() => {
     this.m.service.host = '127.0.0.1:8080';
-  });
-
-  it('can clear its properties', (done) => {
-    this.m.on('update', () => {
-      this.m.clear();
-      this.m.properties.should.eql({});
-      done();
-    });
-
-    this.m.initialize();
   });
 });

@@ -275,10 +275,12 @@ describe('Plugin manager', function () {
     }
 
     manager.once('sources-registered', (storageSources) => {
-      storageSources[0].on('shutdown', () => {
+      storageSources.length.should.equal(1);
+      addS3Source('local');
+      manager.once('sources-registered', (s) => {
+        s.length.should.equal(2);
         done();
       });
-      addS3Source('local');
     });
 
     addS3Source('global');

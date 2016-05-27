@@ -30,7 +30,7 @@ describe('Metadata source plugin', () => {
   });
 
   it('initializes a timer with the set interval', (done) => {
-    this.m.on('update', () => {
+    this.m.once('update', () => {
       this.m._timer.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
         '_onTimeout', '_repeat']);
       done();
@@ -40,7 +40,7 @@ describe('Metadata source plugin', () => {
   });
 
   it('munges a set of paths to create a valid data object', (done) => {
-    this.m.on('update', () => {
+    this.m.once('update', () => {
       const instance = this.m.properties.instance;
       const fake = fakeMetadata.latest['meta-data'];
       const creds = JSON.parse(fake.iam['security-credentials']['fake-role-name']);
@@ -57,7 +57,7 @@ describe('Metadata source plugin', () => {
   });
 
   it('shuts down cleanly', (done) => {
-    this.m.on('shutdown', () => {
+    this.m.once('shutdown', () => {
       const status = this.m.status();
 
       status.running.should.be.false();
@@ -73,7 +73,7 @@ describe('Metadata source plugin', () => {
   });
 
   it('clears the sha1 signature when it\'s shutdown', (done) => {
-    this.m.on('shutdown', () => {
+    this.m.once('shutdown', () => {
       should(this.m.signature).be.null();
       done();
     });
@@ -87,7 +87,7 @@ describe('Metadata source plugin', () => {
         signature = null,
         secondExecution = false;
 
-    this.m.on('update', () => {
+    this.m.once('update', () => {
       instanceId = this.m.properties.instance['ami-id'];
       signature = this.m.signature;
 
@@ -98,7 +98,7 @@ describe('Metadata source plugin', () => {
       this.m.initialize();
     });
 
-    this.m.on('no-update', () => {
+    this.m.once('no-update', () => {
       if (secondExecution) {
         this.m.properties.instance['ami-id'].should.equal(instanceId);
         this.m.signature.should.equal(signature);
@@ -111,7 +111,7 @@ describe('Metadata source plugin', () => {
 
   it('exposes an error when one occurs but continues running', (done) => {
     this.m.service.host = '0.0.0.0';
-    this.m.on('error', (err) => {
+    this.m.once('error', (err) => {
       const status = this.m.status();
 
       err.code.should.equal('ECONNREFUSED');

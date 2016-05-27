@@ -22,7 +22,8 @@ const conquesoProperties = {
     name: 'hipster-mode-enabled',
     value: true,
     type: 'BOOLEAN'
-  }
+  },
+  on() {}
 };
 
 const nestedProperties = {
@@ -39,7 +40,8 @@ const nestedProperties = {
       value: true,
       type: 'BOOLEAN'
     }
-  }
+  },
+  on() {}
 };
 
 const javaProperties = [

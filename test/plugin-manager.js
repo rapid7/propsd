@@ -275,12 +275,10 @@ describe('Plugin manager', function () {
     }
 
     manager.once('sources-registered', (storageSources) => {
-      storageSources.length.should.equal(1);
-      addS3Source('local');
-      manager.once('sources-registered', (s) => {
-        s.length.should.equal(2);
+      storageSources[0].on('shutdown', () => {
         done();
       });
+      addS3Source('local');
     });
 
     addS3Source('global');
@@ -365,6 +363,64 @@ describe('Plugin manager', function () {
     }
 
     addS3Source('global');
+    manager.on('sources-registered', onSourcesRegistered);
+    manager.index.interval = 1;
+    manager.initialize();
+  });
+
+  it('keeps sources ordered correctly in the index', function (done) {
+    let s3Sources = [];
+
+    function removeS3Source(name) {
+      s3Sources = s3Sources.filter((source) => {
+        return source.name !== name;
+      });
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+        ETag: `v${s3Sources.length}`,
+        Body: new Buffer(JSON.stringify({version: 1.0, sources: s3Sources}))
+      });
+    }
+
+    function addS3Source(name, options) {
+      const newSource = {
+        name, type: 's3', parameters: {path: `${name}.json`}
+      };
+
+      if (options && options.head) {
+        s3Sources.splice(0, 0, newSource);
+      } else {
+        s3Sources.push(newSource);
+      }
+
+      AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, {
+        ETag: `v${s3Sources.length}`,
+        Body: new Buffer(JSON.stringify({version: 1.0, sources: s3Sources}))
+      });
+    }
+
+    function onSourcesRegistered(storageSources) {
+      if (storageSources.length === 2) {
+        removeS3Source('1');
+        addS3Source('3', {head: true});
+        addS3Source('4');
+      }
+
+      if (storageSources.length === 3) { // eslint-disable-line rapid7/static-magic-numbers
+        manager.removeListener('sources-registered', onSourcesRegistered);
+
+        storageSources.map((source) => {
+          return source.name;
+        }).should.eql(s3Sources.map((source) => {
+          return `s3-foo-${source.name}.json`;
+        }));
+
+        done();
+      }
+    }
+
+    addS3Source('1');
+    addS3Source('2');
     manager.on('sources-registered', onSourcesRegistered);
     manager.index.interval = 1;
     manager.initialize();

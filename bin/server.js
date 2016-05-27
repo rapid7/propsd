@@ -51,7 +51,7 @@ const PluginManager = require('../lib/plugin-manager');
 const storage = new (require('../lib/storage'))();
 const manager = new PluginManager(storage, {});
 
-manager.on('error', (err) => global.Log.error(err));
+manager.on('error', (err, logMetadata) => global.Log.error(err, logMetadata));
 manager.initialize();
 
 // Register endpoints

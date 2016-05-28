@@ -77,8 +77,8 @@ describe('S3 source plugin', function () {
   });
 
   it('parses a buffer from S3 to a JSON object', (done) => {
-    this.s3.on('update', (source) => {
-      source.properties.should.deepEqual({a: 1, b: 'foo', c: {d: 0}});
+    this.s3.on('update', () => {
+      this.s3.properties.should.deepEqual({a: 1, b: 'foo', c: {d: 0}});
       done();
     });
 
@@ -192,8 +192,8 @@ describe('S3 source plugin', function () {
 
     const s3SampleData = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
 
-    s3SampleData.once('update', (source) => {
-      source.properties.should.deepEqual({
+    s3SampleData.once('update', () => {
+      s3SampleData.properties.should.deepEqual({
         global: 'global',
         account: 'account',
         region: 'region',

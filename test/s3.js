@@ -10,27 +10,24 @@ require('should-sinon');
 const NON_DEFAULT_INTERVAL = 10000;
 const DEFAULT_INTERVAL = 60000;
 const DEFAULT_BUCKET = 'fake-bucket';
+
+const Source = require('../lib/source/common');
 const s3Stub = require('./utils/s3-stub');
 
-describe('S3 source plugin', () => {
-  let S3,
-      s3WithNoSuchKeyError,
-      s3WithNotModifiedError,
-      s3OtherError,
-      shutdownSpy,
-      s3SampleData;
+/* eslint-disable func-names, max-nested-callbacks */
+describe('S3 source plugin', function () {
+  this.timeout(2000); // eslint-disable-line rapid7/static-magic-numbers
+
+  const fakeResponse = {
+    ETag: 'ThisIsACoolEtag',
+    Body: new Buffer(JSON.stringify({properties: {a: 1, b: 'foo', c: {d: 0}}}))
+  };
+
+  const S3 = s3Stub({
+    getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
+  });
 
   beforeEach((done) => {
-    // Stub out all calls to AWS.S3.getObject
-    const fakeResponse = {
-      ETag: 'ThisIsACoolEtag',
-      Body: new Buffer(JSON.stringify({properties: {a: 1, b: 'foo', c: {d: 0}}}))
-    };
-
-    S3 = s3Stub({
-      getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
-    });
-
     this.s3 = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
     done();
   });
@@ -41,11 +38,11 @@ describe('S3 source plugin', () => {
 
   it('throws an error if instantiated without bucket or path', () => {
     should.throws(() => {
-      const s3 = new S3(); // eslint-disable-line no-unused-vars
+      new S3(); // eslint-disable-line no-new
     }, Error);
 
     should.throws(() => {
-      const s3 = new S3({  // eslint-disable-line no-unused-vars
+      new S3({  // eslint-disable-line no-new
         bucket: DEFAULT_BUCKET
       });
     }, Error);
@@ -71,7 +68,7 @@ describe('S3 source plugin', () => {
     this.s3.on('shutdown', () => {
       const status = this.s3.status();
 
-      status.running.should.be.false();
+      status.state.should.equal(Source.SHUTDOWN);
       done();
     });
 
@@ -88,40 +85,43 @@ describe('S3 source plugin', () => {
     this.s3.initialize();
   });
 
-  it('returns a properly formed status object', sinon.test((done) => {
+  it('returns a properly formed status object', (done) => {
     this.s3.on('update', () => {
       const status = this.s3.status();
 
-      status.should.eql({
-        ok: true,
-        updated: new Date(),
-        interval: DEFAULT_INTERVAL,
-        running: true
-      });
+      status.ok.should.equal(true);
+      status.updated.should.be.instanceOf(Date);
+      status.interval.should.equal(DEFAULT_INTERVAL);
+      status.state.should.equal(Source.RUNNING);
+
       done();
     });
 
     this.s3.initialize();
-  }));
+  });
 
   it('clears cached properties if getRequest returns a NoSuchKey error', (done) => {
-    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
-    s3WithNoSuchKeyError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
+    const s3WithNoSuchKeyError = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+
     s3WithNoSuchKeyError.once('update', () => {
       s3WithNoSuchKeyError.properties.should.be.empty();
       done();
     });
 
     s3WithNoSuchKeyError.properties = {foo: 'bar'};
-    s3WithNoSuchKeyError.initialize();
+    s3WithNoSuchKeyError.state = Source.RUNNING;
+
+    // Bypasss #initialize state check
+    s3WithNoSuchKeyError.start();
   });
 
   it('doesn\'t do anything if getRequest returns a NotModified error', (done) => {
     const errorSpy = sinon.spy();
     const updateSpy = sinon.spy();
 
-    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NotModified'}, null)});
-    s3WithNotModifiedError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NotModified'}, null)});
+    const s3WithNotModifiedError = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3WithNotModifiedError.on('error', errorSpy);
     s3WithNotModifiedError.on('update', updateSpy);
@@ -137,26 +137,25 @@ describe('S3 source plugin', () => {
   });
 
   it('exposes an error when any other type occurs but continues running', (done) => {
-    S3 = s3Stub({
+    const Stub = s3Stub({
       getObject: sinon.stub().callsArgWith(1, {code: 'BigTimeErrorCode', message: 'This is the error message'}, null)
     });
-    s3OtherError = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const s3OtherError = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3OtherError.on('error', (err) => {
       const status = s3OtherError.status();
 
       status.ok.should.be.false();
-      status.running.should.be.true();
+      status.state.should.equal(Source.ERROR);
       err.code.should.equal('BigTimeErrorCode');
       done();
     });
 
     s3OtherError.initialize();
-    s3OtherError.shutdown();
   });
 
   it('can\'t shutdown a plugin that\'s already shut down', (done) => {
-    shutdownSpy = sinon.spy();
+    const shutdownSpy = sinon.spy();
 
     this.s3.on('shutdown', shutdownSpy);
     this.s3.on('shutdown', () => {
@@ -168,10 +167,17 @@ describe('S3 source plugin', () => {
     this.s3.shutdown();
   });
 
-  it('can only be initialized once', () => {
+  it('can only be initialized once', (done) => {
     this.s3.initialize();
-    this.s3.should.deepEqual(this.s3.initialize());
-    this.s3.shutdown();
+    this.s3.state.should.equal(Source.INITIALIZING);
+
+    this.s3.once('update', () => {
+      this.s3.state.should.equal(Source.RUNNING);
+      this.s3.initialize();
+      this.s3.state.should.equal(Source.RUNNING);
+
+      done();
+    });
   });
 
   it('identifies as a \'s3\' source plugin', () => {
@@ -179,11 +185,12 @@ describe('S3 source plugin', () => {
   });
 
   it('correctly parses a sample document', (done) => {
-    S3 = s3Stub({getObject: sinon.stub().callsArgWith(1, null, {
+    const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, null, {
       ETag: 'ThisIsACoolEtag',
       Body: new Buffer(JSON.stringify(require('./data/s3/global')))
     })});
-    s3SampleData = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
+
+    const s3SampleData = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
 
     s3SampleData.once('update', (source) => {
       source.properties.should.deepEqual({
@@ -204,16 +211,6 @@ describe('S3 source plugin', () => {
     });
 
     s3SampleData.initialize();
-  });
-
-  it('can clear its properties', (done) => {
-    this.s3.on('update', () => {
-      this.s3.clear();
-      this.s3.properties.should.eql({});
-      done();
-    });
-
-    this.s3.initialize();
   });
 
   it('can be configured with a different endpoint', () => {

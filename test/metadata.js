@@ -7,6 +7,7 @@ const Path = require('path');
 const fs = require('fs');
 
 const Metadata = require('../lib/source/metadata');
+const Source = require('../lib/source/common');
 const fakeMetadata = JSON.parse(fs.readFileSync(Path.resolve(__dirname, './data/test-metadata.json')));
 
 const NON_DEFAULT_INTERVAL = 10000;
@@ -60,7 +61,7 @@ describe('Metadata source plugin', () => {
     this.m.once('shutdown', () => {
       const status = this.m.status();
 
-      status.running.should.be.false();
+      status.state.should.equal(Source.SHUTDOWN);
       done();
     });
 
@@ -92,10 +93,6 @@ describe('Metadata source plugin', () => {
       signature = this.m.signature;
 
       secondExecution = true;
-
-      // This is a terrible hack
-      this.m._timer = false;
-      this.m.initialize();
     });
 
     this.m.once('no-update', () => {
@@ -106,6 +103,7 @@ describe('Metadata source plugin', () => {
       }
     });
 
+    this.m.interval = 100;
     this.m.initialize();
   });
 
@@ -116,7 +114,7 @@ describe('Metadata source plugin', () => {
 
       err.code.should.equal('ECONNREFUSED');
       status.ok.should.be.false();
-      status.running.should.be.true();
+      status.state.should.equal(Source.ERROR);
       done();
     });
 

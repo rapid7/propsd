@@ -103,7 +103,7 @@ describe('Metadata source plugin', () => {
       }
     });
 
-    this.m.interval = 100;
+    this.m.interval = 100; // eslint-disable-line rapid7/static-magic-numbers
     this.m.initialize();
   });
 

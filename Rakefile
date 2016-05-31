@@ -77,7 +77,7 @@ task :package_dirs do
 end
 
 task :propsd_source => [:install] do
-  ['bin/', 'lib/', 'node_modules/', 'LICENSE'].each do |src|
+  ['bin/', 'lib/', 'node_modules/', 'LICENSE', 'package.json'].each do |src|
     cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
   end
   cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)

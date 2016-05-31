@@ -144,6 +144,7 @@ describe('Core API v1', () => {
       .end((err, res) => {
         res.body.should.have.properties({status: HTTP_OK, plugins: {s3: expectedStatusResponse.sources.length}});
         res.body.should.have.property('uptime');
+        res.body.should.have.property('version');
         done();
       });
   });

@@ -26,22 +26,24 @@ describe('Logging', () => {
   });
 
   it('sets the log level correctly', () => {
-    log.level.should.be.exactly('info');
+    log.level.should.be.exactly('INFO');
   });
 
   describe('File logging', () => {
-    const fileLog = require('../lib/logger').attach('info', 'tmp.log');
+    const fileLog = require('../lib/logger').attach('INFO', 'tmp.log');
+
+    fileLog.remove(Winston.transports.Console);
 
     /* eslint-disable max-nested-callbacks */
     it('writes to the correct file', (done) => {
-      fileLog.log(config.get('log:level'), 'Test logging message');
-
       fileLog.on('logging', (transport, level, msg) => {
         transport.name.should.equal('file');
         transport.filename.should.equal('tmp.log');
         msg.should.equal('Test logging message');
         done();
       });
+
+      fileLog.INFO('Test logging message');
     });
 
     it('optionally logs to a file', () => {

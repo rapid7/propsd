@@ -453,7 +453,7 @@ describe('Plugin manager', function () {
       baz: 'quiz'
     });
 
-    manager.metadata.once('update', () => {
+    manager.once('sources-generated', () => {
       manager.metadata.properties.should.have.ownProperty('foo');
       manager.metadata.properties.should.have.ownProperty('baz');
       done();

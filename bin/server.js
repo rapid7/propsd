@@ -43,7 +43,7 @@ app.use(expressWinston.logger({
   winstonInstance: global.Log,
   expressFormat: true,
   level: global.Config.get('log:access:level') || global.Config.get('log:level'),
-  baseMeta: {source: 'request'}
+  baseMeta: {sourceName: 'request'}
 }));
 
 // Initialize the Plugin Manager and storage layer

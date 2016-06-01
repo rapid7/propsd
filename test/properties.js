@@ -207,13 +207,31 @@ describe('Properties', function _() {
   });
 
   it('does not update properties from sources in an inactive view', function __() {
-    const stub = new Stub();
+    const props = new Properties();
 
-    properties.view().register(stub);
-    properties.once('build', () => {
-      throw Error('It shouldn\'t have done this...');
+    // Stub the build method to ensure that it fails within the test context
+    props.build = function build() {
+      throw Error('A build should not have been triggered!');
+    };
+
+    const view = props.view();
+    const stub = new NoStub();
+
+    view.register(stub);
+    view.activate();
+
+    // A new, unactivated view
+    const view2 = props.view();
+    const stub2 = new NoStub();
+
+    view2.register(stub);
+
+    // This should not trigger a build
+    stub2.emit('update');
+
+    // Replacing `view` with `view2` should deregister `view`'s sources
+    view2.activate().then(() => {
+      stub.emit('update');
     });
-
-    stub.emit('update');
   });
 });

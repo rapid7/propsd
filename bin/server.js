@@ -15,7 +15,6 @@ const args = require('yargs')
 
 const deprecate = require('depd')('propsd');
 const express = require('express');
-const expressWinston = require('express-winston');
 const http = require('http');
 const Path = require('path');
 const Logger = require('../lib/logger');
@@ -39,12 +38,7 @@ if (global.Config.get('log:access')) {
   deprecate('Separate logging control for access logs has been deprecated and will be removed in a later version.');
 }
 
-app.use(expressWinston.logger({
-  winstonInstance: global.Log,
-  expressFormat: true,
-  level: global.Config.get('log:access:level') || global.Config.get('log:level'),
-  baseMeta: {sourceName: 'request'}
-}));
+app.use(Logger.requests(global.Log, global.Config.get('log:access:level') || global.Config.get('log:level')));
 
 // Initialize the Plugin Manager and storage layer
 const PluginManager = require('../lib/plugin-manager');

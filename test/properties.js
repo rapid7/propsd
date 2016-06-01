@@ -130,7 +130,7 @@ describe('Properties', function _() {
       interval: 500
     }, {
       foo: 'bar'
-    })
+    });
 
     view.register(stub);
 

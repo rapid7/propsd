@@ -9,6 +9,7 @@ const generateConsulStub = require('./utils/consul-stub');
 
 require('should-sinon');
 
+const Source = require('../lib/source/common');
 const PluginManager = require('../lib/plugin-manager');
 const StringTemplate = require('../lib/string-template');
 
@@ -171,7 +172,7 @@ describe('Plugin manager', function () {
         managerStatus.running.should.be.true();
         managerStatus.ok.should.be.false();
         metadataStatus.ok.should.be.false();
-        metadataStatus.running.should.be.true();
+        metadataStatus.state.should.equal(Source.ERROR);
 
         manager.metadata.service.host = '127.0.0.1:8080';
       }
@@ -206,7 +207,7 @@ describe('Plugin manager', function () {
         managerStatus.running.should.be.true();
         managerStatus.ok.should.be.false();
         indexStatus.ok.should.be.false();
-        indexStatus.running.should.be.true();
+        indexStatus.state.should.equal(Source.ERROR);
 
         AWS.S3.prototype.getObject = sinon.stub().callsArgWith(1, null, fakeIndexResponse);
       }

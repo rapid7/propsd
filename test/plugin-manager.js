@@ -161,6 +161,28 @@ describe('Plugin manager', function () {
     manager.initialize();
   });
 
+  it('initializes the metadata before the index', function (done) {
+    const order = [];
+
+    function testInitializeOrder(source) {
+      order.push(source);
+      if (order.length >= 2) {
+        order.should.eql(['metadata', 'index']);
+        done();
+      }
+    }
+
+    manager.index.once('initialized', () => {
+      testInitializeOrder('index');
+    });
+
+    manager.metadata.once('initialized', () => {
+      testInitializeOrder('metadata');
+    });
+
+    manager.initialize();
+  });
+
   it('retries Metadata source until it succeeds if the Metadata source fails', function (done) {
     function onConnectionRefused(err) {
       if (err.code === 'ECONNREFUSED') {

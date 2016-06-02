@@ -45,7 +45,7 @@ const PluginManager = require('../lib/plugin-manager');
 const storage = new (require('../lib/storage'))();
 const manager = new PluginManager(storage, {});
 
-manager.on('error', (err, logMetadata) => global.Log.ERROR(err, logMetadata));
+manager.on('error', (err, logMetadata) => global.Log.log('ERROR', err, logMetadata));
 manager.initialize();
 
 // Register endpoints
@@ -57,8 +57,8 @@ const host = Config.get('service:hostname');
 const port = Config.get('service:port');
 const server = http.createServer(app);
 
-server.on('error', (err) => global.Log.ERROR(err));
+server.on('error', (err) => global.Log.log('ERROR', err));
 
 server.listen(port, host, () => {
-  global.Log.INFO(`Listening on ${host}:${port}`);
+  global.Log.log('INFO', `Listening on ${host}:${port}`);
 });

@@ -43,7 +43,7 @@ describe('Logging', () => {
         done();
       });
 
-      fileLog.INFO('Test logging message');
+      fileLog.log('INFO', 'Test logging message');
     });
 
     it('optionally logs to a file', () => {

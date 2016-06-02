@@ -42,7 +42,7 @@ const port = args.p;
 const path = Path.resolve(__dirname, `../../${args.d}`);
 
 nconf.set('log:level', 'debug');
-const Log = require('../../lib/logger').attach(nconf);
+const Log = require('../../lib/logger').attach('debug');
 
 const awsConfig = {
   s3ForcePathStyle: true,
@@ -100,7 +100,7 @@ function copyFiles(bucket) {
       Body: stream
     }, (err) => {
       if (err) {
-        Log.error(err, err.stack);
+        Log.log('ERROR', err, err.stack);
       }
       next();
     });
@@ -134,12 +134,12 @@ function exitHandler(err) {
   let code = 0;
 
   if (err) {
-    Log.error(err, err.stack);
+    Log.log('ERROR', err, err.stack);
     code = 1;
   }
   const tmpDirBucketPath = Path.resolve(os.tmpdir(), `propsd-temp-s3-server`);
 
-  Log.info(`Cleaning up temp directory: ${tmpDirBucketPath}`);
+  Log.log('INFO', `Cleaning up temp directory: ${tmpDirBucketPath}`);
   cleanupTempDir();
   process.exit(code);
 }
@@ -165,11 +165,11 @@ function createBucket(bucket) {
 function init() {
   fs.stat(path, (err, stats) => {
     if (err) {
-      Log.error(err, err.stack);
+      Log.log('ERROR', err, err.stack);
       process.exit(1);
     }
     if (!stats.isDirectory()) {
-      Log.error(`${path} is not a directory`);
+      Log.log('ERROR', `${path} is not a directory`);
       process.exit(1);
     }
     const bucket = getBucketName(path);
@@ -184,13 +184,13 @@ function init() {
 
     client.run((serverErr, host, p) => {
       if (serverErr) {
-        Log.error(serverErr, serverErr.stack);
+        Log.log('ERROR', serverErr, serverErr.stack);
         process.exit(1);
       }
 
       createBucket(bucket);
 
-      Log.info(`listening for S3 requests at http://${host}:${p}`);
+      Log.log('INFO', `listening for S3 requests at http://${host}:${p}`);
     });
   });
 }

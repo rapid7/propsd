@@ -12,7 +12,7 @@ global.Config = require('nconf')
   .defaults(require('../config/defaults.json'));
 
 // Need to disable console logging for these tests to filter out the chaff from meaningful test output
-global.Log = require('../lib/logger').attach(global.Config);
+global.Log = require('../lib/logger').attach(global.Config.get('log:level'));
 global.Log.remove(winston.transports.Console);
 
 before(function globalBefore() {

@@ -15,7 +15,6 @@ const args = require('yargs')
 
 const deprecate = require('depd')('propsd');
 const express = require('express');
-const expressWinston = require('express-winston');
 const http = require('http');
 const Path = require('path');
 const Logger = require('../lib/logger');
@@ -39,19 +38,14 @@ if (global.Config.get('log:access')) {
   deprecate('Separate logging control for access logs has been deprecated and will be removed in a later version.');
 }
 
-app.use(expressWinston.logger({
-  winstonInstance: global.Log,
-  expressFormat: true,
-  level: global.Config.get('log:access:level') || global.Config.get('log:level'),
-  baseMeta: {source: 'request', type: 'request'}
-}));
+app.use(Logger.requests(global.Log, global.Config.get('log:access:level') || global.Config.get('log:level')));
 
 // Initialize the Plugin Manager and storage layer
 const PluginManager = require('../lib/plugin-manager');
 const storage = new (require('../lib/storage'))();
 const manager = new PluginManager(storage, {});
 
-manager.on('error', (err, logMetadata) => global.Log.error(err, logMetadata));
+manager.on('error', (err, logMetadata) => global.Log.log('ERROR', err, logMetadata));
 manager.initialize();
 
 // Register endpoints
@@ -63,8 +57,8 @@ const host = Config.get('service:hostname');
 const port = Config.get('service:port');
 const server = http.createServer(app);
 
-server.on('error', (err) => global.Log.error(err));
+server.on('error', (err) => global.Log.log('ERROR', err));
 
 server.listen(port, host, () => {
-  Log.info(`Listening on ${host}:${port}`);
+  global.Log.log('INFO', `Listening on ${host}:${port}`);
 });

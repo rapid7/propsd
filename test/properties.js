@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* eslint-disable rapid7/static-magic-numbers */
+/* eslint-disable rapid7/static-magic-numbers, max-nested-callbacks */
 'use strict';
 
 global.Log = new (require('winston').Logger)();
@@ -23,7 +23,7 @@ class Parser {
 }
 
 class Stub extends Source(Parser) { // eslint-disable-line new-cap
-  constructor(opts, properties) {
+  constructor(properties, opts) {
     // Inject defaults into options
     const options = Object.assign({
       type: 'stub',
@@ -31,17 +31,18 @@ class Stub extends Source(Parser) { // eslint-disable-line new-cap
       nopoll: true
     }, opts);
 
-    super(options);
+    super('stub', options);
     this.delay = options.delay;
     this.nopoll = options.nopoll;
     this.properties = properties || {};
   }
 
   initialize() {
-    super.initialize();
+    const initialized = super.initialize();
 
     // Kill the polling interval.
     if (this.nopoll) clearTimeout(this._timer);
+    return initialized;
   }
 
   _fetch(callback) {
@@ -52,7 +53,11 @@ class Stub extends Source(Parser) { // eslint-disable-line new-cap
   }
 }
 
-class NoStub extends Stub {
+class NoExistStub extends Stub {
+  constructor() {
+    super('noexist-stub');
+  }
+
   _fetch(callback) {
     callback(null, Source.NO_EXIST);
   }
@@ -93,20 +98,22 @@ describe('Properties', function _() {
   });
 
   it('adds a dynamic layer and rebuilds on updates', function __(done) {
-    const stub = new Stub({}, {
+    const stub = new Stub({
       stubby: 'property!'
     });
 
     properties.dynamic(stub);
 
-    properties.once('build', (props) => {
-      expect(props.hello).to.equal('world');
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.stubby).to.equal('property!');
-      done();
-    });
+    properties.initialize().then(() => {
+      properties.once('build', (props) => {
+        expect(props.hello).to.equal('world');
+        expect(props.goodbye.cruel).to.equal('world');
+        expect(props.stubby).to.equal('property!');
+        done();
+      });
 
-    stub.emit('update');
+      stub.emit('update');
+    });
   });
 
   it('creates and activates a new view', function __(done) {
@@ -127,35 +134,33 @@ describe('Properties', function _() {
   it('rebuilds properties when a source in the active view updates', function __(done) {
     const view = properties.view();
     const stub = new Stub({
-      interval: 500
-    }, {
       foo: 'bar'
     });
 
     view.register(stub);
 
-    properties.once('build', (props) => {
-      expect(props.hello).to.equal('world');
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.stubby).to.equal('property!');
-      expect(props.foo).to.equal('bar');
+    view.activate().then(() => {
+      properties.once('build', (props) => {
+        expect(props.hello).to.equal('world');
+        expect(props.goodbye.cruel).to.equal('world');
+        expect(props.stubby).to.equal('property!');
+        expect(props.foo).to.equal('bar');
 
-      done();
+        done();
+      });
+
+      stub.emit('update');
     });
-
-    view.activate();
   });
 
   it('activates a view correctly when a source is NO_EXIST', function __(done) {
-    const view = properties.view();
-    const stub = new NoStub();
-
     // Get current active view's sources
-    const sources = properties.active.sources;
+    const sources = properties.active.sources.concat([]);
+    const stub = new NoExistStub();
 
     // Register sources with new view
     sources.push(stub);
-    sources.forEach((source) => view.register(source));
+    const view = properties.view(sources);
 
     properties.once('build', (props) => {
       expect(stub.state).to.equal(Source.WAITING);
@@ -192,46 +197,55 @@ describe('Properties', function _() {
       expect(props.goodbye.cruel).to.equal('world');
       expect(props.stubby).to.equal('property!');
 
-      expect(props.first).to.eql({
-        test: 'value'
-      });
-
-      expect(props.second).to.eql({
-        another: 'value'
-      });
-
+      // This specifically tests the hold-down behavior. If it didn't work,
+      // the first sources indexNumber (0) will be set on the first 'build'
+      // event instead
+      expect(props.indexNumber).to.equal(1);
       done();
     });
 
-    sources.forEach((source) => source.emit('update'));
+    sources.forEach((source, i) => {
+      source.properties = { // eslint-disable-line no-param-reassign
+        indexNumber: i
+      };
+
+      source.emit('update');
+    });
   });
 
-  it('does not update properties from sources in an inactive view', function __() {
+  it('does not update properties from sources in an inactive view', function __(done) {
     const props = new Properties();
 
     // Stub the build method to ensure that it fails within the test context
-    props.build = function build() {
+    function build() {
       throw Error('A build should not have been triggered!');
-    };
+    }
 
     const view = props.view();
-    const stub = new NoStub();
+    const stub = new NoExistStub();
 
     view.register(stub);
-    view.activate();
 
     // A new, unactivated view
     const view2 = props.view();
-    const stub2 = new NoStub();
+    const stub2 = new Stub();
 
-    view2.register(stub);
+    view2.register(stub2);
 
-    // This should not trigger a build
-    stub2.emit('update');
+    view.activate().then(() => {
+      props.build = build;
 
-    // Replacing `view` with `view2` should deregister `view`'s sources
-    view2.activate().then(() => {
-      stub.emit('update');
-    });
+      // This should not trigger a build
+      stub2.emit('update');
+      delete props.build;
+
+      // Replacing `view` with `view2` should deregister `view`'s sources
+      return view2.activate().then(() => {
+        props.build = build;
+
+        stub.emit('update');
+        done();
+      });
+    }).catch(done);
   });
 });

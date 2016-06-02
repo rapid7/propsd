@@ -52,7 +52,7 @@ describe('Consul#status', () => {
   it('reports as running after startup', (done) => {
     const consul = generateConsulStub();
 
-    consul.on('startup', () => {
+    consul.on('init', () => {
       should(consul.status().running).eql(true);
       done();
     });
@@ -196,7 +196,7 @@ describe('Consul', () => {
     const consul = generateConsulStub();
     let startupCount = 0;
 
-    consul.on('startup', () => {
+    consul.on('init', () => {
       startupCount += 1;
     });
 

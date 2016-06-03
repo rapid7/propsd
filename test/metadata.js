@@ -14,8 +14,9 @@ const NON_DEFAULT_INTERVAL = 10000;
 
 describe('Metadata source plugin', () => {
   beforeEach(() => {
-    this.m = new Metadata();
-    this.m.service.host = '127.0.0.1:8080';
+    this.m = new Metadata({
+      host: '127.0.0.1:8080'
+    });
   });
 
   afterEach(() => {
@@ -42,14 +43,13 @@ describe('Metadata source plugin', () => {
 
   it('munges a set of paths to create a valid data object', (done) => {
     this.m.once('update', () => {
-      const instance = this.m.properties.instance;
       const fake = fakeMetadata.latest['meta-data'];
       const creds = JSON.parse(fake.iam['security-credentials']['fake-role-name']);
 
-      instance['ami-id'].should.equal(fake['ami-id']);
-      instance.hostname.should.equal(fake.hostname);
-      instance.identity.document.should.equal(fakeMetadata.latest.dynamic['instance-identity'].document);
-      instance.credentials.lastUpdated.should.equal(creds.LastUpdated);
+      this.m.properties['ami-id'].should.equal(fake['ami-id']);
+      this.m.properties.hostname.should.equal(fake.hostname);
+      this.m.properties.identity.document.should.equal(fakeMetadata.latest.dynamic['instance-identity'].document);
+      this.m.properties.credentials.lastUpdated.should.equal(creds.LastUpdated);
 
       done();
     });
@@ -75,36 +75,12 @@ describe('Metadata source plugin', () => {
 
   it('clears the sha1 signature when it\'s shutdown', (done) => {
     this.m.once('shutdown', () => {
-      should(this.m.signature).be.null();
+      should(this.m._state).be.null();
       done();
     });
 
     this.m.initialize();
     this.m.shutdown();
-  });
-
-  it('doesn\'t update data if the Metadata Service document is the same', (done) => {
-    let instanceId = null,
-        signature = null,
-        secondExecution = false;
-
-    this.m.once('update', () => {
-      instanceId = this.m.properties.instance['ami-id'];
-      signature = this.m.signature;
-
-      secondExecution = true;
-    });
-
-    this.m.once('no-update', () => {
-      if (secondExecution) {
-        this.m.properties.instance['ami-id'].should.equal(instanceId);
-        this.m.signature.should.equal(signature);
-        done();
-      }
-    });
-
-    this.m.interval = 100; // eslint-disable-line rapid7/static-magic-numbers
-    this.m.initialize();
   });
 
   it('exposes an error when one occurs but continues running', (done) => {
@@ -121,8 +97,8 @@ describe('Metadata source plugin', () => {
     this.m.initialize();
   });
 
-  it('identifies as a \'ec2-metadata\' source plugin', () => {
-    this.m.type.should.equal('ec2-metadata');
+  it('identifies as a \'metadata\' source plugin', () => {
+    this.m.type.should.equal('metadata');
   });
 
   after(() => {

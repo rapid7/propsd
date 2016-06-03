@@ -1,4 +1,8 @@
 {
+  "globals": {
+    "Config": true,
+    "Log": true
+  },
   "plugins": [
     "rapid7"
   ],

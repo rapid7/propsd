@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/rapid7/propsd#readme",
   "devDependencies": {
+    "aws-sdk-mock": "^1.2.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
     "chokidar": "^1.4.3",
@@ -54,6 +55,7 @@
     "clone": "^1.0.2",
     "consul": "^0.23.0",
     "deep-diff": "^0.3.4",
+    "deep-equal": "^1.0.1",
     "depd": "^1.1.0",
     "express": "^4.13.3",
     "flat": "^2.0.0",

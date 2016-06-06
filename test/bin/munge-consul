@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+'use strict';
+
+/* eslint-disable no-param-reassign, rapid7/static-magic-numbers */
+
+/**
+ * Modify Consul Node, Service, and Check identifiers consistently in
+ * data/consul-checks.json and data/consul-nodes.json
+ */
+
+const Crypto = require('crypto');
+const FS = require('fs');
+const Path = require('path');
+
+const checks = require('../data/consul-checks.json');
+const nodes = require('../data/consul-nodes.json');
+
+const replacements = {};
+
+function replace(input) {
+  if (replacements.hasOwnProperty(input)) { return replacements[input]; }
+
+  replacements[input] = Crypto.randomBytes(16).toString('hex');
+  return replacements[input];
+}
+
+nodes.forEach(function _(node) {
+  node.Node = replace(node.Node);
+});
+
+checks.forEach(function _(check) {
+  check.Node = replace(check.Node);
+  check.CheckID = replace(check.CheckID);
+  check.Name = replace(check.Name);
+  check.Output = replace(check.Output);
+  check.ServiceID = replace(check.ServiceID);
+  check.ServiceName = replace(check.ServiceName);
+});
+
+FS.writeFileSync(Path.resolve(__dirname, '../data/consul-checks.json'), JSON.stringify(checks, null, 2));
+FS.writeFileSync(Path.resolve(__dirname, '../data/consul-nodes.json'), JSON.stringify(nodes, null, 2));

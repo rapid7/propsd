@@ -102,7 +102,7 @@ describe('S3 source plugin', function () {
 
   it('clears cached properties if getRequest returns a NoSuchKey error', (done) => {
     const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
-    const s3WithNoSuchKeyError = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const s3WithNoSuchKeyError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3WithNoSuchKeyError.once('update', () => {
       s3WithNoSuchKeyError.properties.should.be.empty();
@@ -121,7 +121,7 @@ describe('S3 source plugin', function () {
     const updateSpy = sinon.spy();
 
     const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NotModified'}, null)});
-    const s3WithNotModifiedError = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const s3WithNotModifiedError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3WithNotModifiedError.on('error', errorSpy);
     s3WithNotModifiedError.on('update', updateSpy);
@@ -140,7 +140,7 @@ describe('S3 source plugin', function () {
     const Stub = s3Stub({
       getObject: sinon.stub().callsArgWith(1, {code: 'BigTimeErrorCode', message: 'This is the error message'}, null)
     });
-    const s3OtherError = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const s3OtherError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3OtherError.on('error', (err) => {
       const status = s3OtherError.status();
@@ -190,7 +190,7 @@ describe('S3 source plugin', function () {
       Body: new Buffer(JSON.stringify(require('./data/s3/global')))
     })});
 
-    const s3SampleData = new Stub({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
+    const s3SampleData = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
 
     s3SampleData.once('update', () => {
       s3SampleData.properties.should.deepEqual({
@@ -216,7 +216,7 @@ describe('S3 source plugin', function () {
   it('can be configured with a different endpoint', () => {
     const endpoint = 'www.somecoolendpoint.com';
     const s3Source = require('../lib/source/s3');
-    const s3 = new s3Source({ // eslint-disable-line new-cap
+    const s3 = new s3Source('foo.json', { // eslint-disable-line new-cap
       bucket: DEFAULT_BUCKET,
       path: 'foo.json',
       interval: DEFAULT_INTERVAL,

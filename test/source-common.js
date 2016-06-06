@@ -1,6 +1,8 @@
-/* eslint-env mocha */
-/* eslint-disable rapid7/static-magic-numbers, max-nested-callbacks */
 'use strict';
+
+/* eslint-env mocha */
+/* global Config, Log */
+/* eslint-disable rapid7/static-magic-numbers, max-nested-callbacks */
 
 require('./lib/helpers');
 
@@ -8,6 +10,20 @@ const Source = require('./lib/stub/source');
 const expect = require('chai').expect;
 
 describe('Source/Common', function _() {
+  it('sets configurable parameters from constructor options', function __() {
+    // Create some references to test against
+    const testParser = {};
+
+    const stub = new Source.Stub({}, {
+      parser: testParser
+    });
+
+    expect(stub.name).to.equal('stub');
+    expect(stub.type).to.equal('stub');
+
+    expect(stub.parser).to.equal(testParser);
+  });
+
   it('initialize returns a promise', function __() {
     const source = new Source.Stub();
 
@@ -71,5 +87,56 @@ describe('Source/Common', function _() {
     });
 
     source.initialize();
+  });
+
+  describe('Polling', function __() {
+    it('sets an interval', function ___() {
+      const stub = new Source.PollingStub({}, {
+        interval: 42
+      });
+
+      expect(stub.interval).to.equal(42);
+    });
+
+    it('starts a timer when initialized', function ___(done) {
+      const stub = new Source.PollingStub();
+
+      stub.initialize().then(() => {
+        expect(stub._timer).to.be.an('object');
+        stub.shutdown();
+
+        done();
+      });
+    });
+
+    it('only creates one timer if initialized multiple times', function ___(done) {
+      const stub = new Source.PollingStub();
+
+      stub.initialize().then(() => {
+        expect(stub._timer).to.be.an('object');
+
+        const firstTimer = stub._timer;
+
+        stub.initialize().then(() => {
+          expect(stub._timer).to.equal(firstTimer);
+
+          stub.shutdown();
+          done();
+        });
+      });
+    });
+
+    it('clears its timer when shutdown', function ___(done) {
+      const stub = new Source.PollingStub();
+
+      stub.initialize().then(() => {
+        expect(stub._timer).to.be.an('object');
+
+        stub.shutdown();
+        expect(stub._timer).to.equal(undefined);
+
+        done();
+      });
+    });
   });
 });

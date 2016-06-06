@@ -39,8 +39,8 @@ class Stub extends Common(Parser) { // eslint-disable-line new-cap
 }
 
 class NoExistStub extends Stub {
-  constructor() {
-    super('noexist-stub');
+  constructor(properties, options) {
+    super(properties, options);
   }
 
   initialize() {
@@ -52,8 +52,8 @@ class NoExistStub extends Stub {
 }
 
 class ErrorStub extends Stub {
-  constructor() {
-    super('noexist-stub');
+  constructor(properties, options) {
+    super(properties, options);
   }
 
   initialize() {
@@ -65,7 +65,21 @@ class ErrorStub extends Stub {
 
 }
 
-module.exports = Common;
-Common.Stub = Stub;
-Common.NoExistStub = NoExistStub;
-Common.ErrorStub = ErrorStub;
+class PollingStub extends Common.Polling(Parser) {
+  constructor(properties, options) {
+    super('polling-stub', options);
+    this.properties = properties;
+  }
+
+  _fetch(callback) {
+    setImmediate(() => callback(null, this.properties));
+  }
+}
+
+// Wrap a namespace around the common module
+module.exports = class extends Common.Class {};
+
+module.exports.Stub = Stub;
+module.exports.NoExistStub = NoExistStub;
+module.exports.ErrorStub = ErrorStub;
+module.exports.PollingStub = PollingStub;

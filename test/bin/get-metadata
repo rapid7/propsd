@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+
+/**
+ * Fetch an object mapping request paths to un-parsed response data from the EC2 metadata API
+ *
+ * WARNING: This will not obfuscate any data. You must manually remove any references
+ * that you deem critical from the generated JSON.
+ *
+ * N.B, You should _definitely_ munge
+ * - /latest/meta-data/iam/info
+ * - /latest/meta-data/iam/security-credentials/
+ * - /latest/meta-data/iam/security-credentials/PROFILE-ID
+ * - Public IPv4 addresses of persistent resources and EIPs
+ * - Public domain names of persistent resources and EIPs
+ * - Your account id in /latest/dynamic/instance-identity/document
+ * - /latest/meta-data/network/interfaces/macs/MAC_ADDR/vpc-id
+ */
+
+const AWS = require('aws-sdk');
+const FS = require('fs');
+const Path = require('path');
+const Util = require('../../lib/source/metadata/util');
+
+const metadata = new AWS.MetadataService({
+  host: 'localhost:8080'
+});
+
+const paths = {};
+
+Util.traverse(
+  'latest',
+  ['/meta-data/', '/dynamic/'],
+
+  // Call `Metadata.request` for each path
+  (path, cb) => metadata.request(path, (err, data) => {
+    if (err) { return cb(err); }
+
+    // Store unparsed data from each path
+    paths[path] = data;
+
+    cb(null, data);
+  }),
+
+  // Handle results of metadata tree traversal
+  (err) => {
+    if (err) { throw err; }
+    FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-paths.json'), JSON.stringify(paths, null, 2));
+  }
+);

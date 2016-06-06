@@ -12,36 +12,6 @@ const testServerPort = 3000;
 const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
 
-const sourceStatus = () => {
-  return {
-    ok: true,
-    updated: 1,
-    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
-    running: true
-  };
-};
-
-const storage = {
-  sources: [{
-    name: 'foo-bar-baz.json',
-    type: 's3',
-    status: sourceStatus
-  }, {
-    name: 'foo-quiz-buzz.json',
-    type: 's3',
-    status: sourceStatus
-  }]
-};
-
-const pluginManager = {
-  index: {
-    status: sourceStatus
-  },
-  metadata: {
-    status: sourceStatus
-  }
-};
-
 const endpoints = {
   health: '/v1/health',
   status: '/v1/status'

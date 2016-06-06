@@ -214,6 +214,13 @@ describe('S3 source plugin', function () {
   });
 
   it('can be configured with a different endpoint', () => {
+    // Clear the require cache to avoid getting a proxied Aws.S3 object.
+    Object.keys(require.cache).forEach((key) => {
+      if (key.indexOf('lib/source/s3') > -1) {
+        delete require.cache[key];
+      }
+    });
+
     const endpoint = 'www.somecoolendpoint.com';
     const s3Source = require('../lib/source/s3');
     const s3 = new s3Source('foo.json', { // eslint-disable-line new-cap

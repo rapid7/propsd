@@ -23,16 +23,44 @@ const expectedStatusResponse = {
     ok: true,
     updated: null,
     interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
-    running: false
+    running: false,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
   },
+  indices: [{
+    ok: true,
+    updated: null,
+    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
+    running: false,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
+  }],
   sources: [{
     name: 'foo-bar-baz.json',
     type: 's3',
-    status: 'okay'
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/foo-bar-baz.json',
+    ok: true,
+    interval: 60000 // eslint-disable-line rapid7/static-magic-numbers
   }, {
     name: 'foo-quiz-buzz.json',
     type: 's3',
-    status: 'okay'
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/foo-quiz-buzz.json',
+    ok: true,
+    interval: 60000 // eslint-disable-line rapid7/static-magic-numbers
   }]
 };
 
@@ -123,6 +151,7 @@ describe('Core API v1', () => {
       .end((err, res) => {
         res.body.should.have.properties(expectedStatusResponse);
         res.body.should.have.property('uptime');
+        res.body.should.have.property('version');
         done();
       });
   });

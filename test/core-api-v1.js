@@ -28,11 +28,23 @@ const expectedStatusResponse = {
   sources: [{
     name: 'foo-bar-baz.json',
     type: 's3',
-    status: 'okay'
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/foo-bar-baz.json',
+    ok: true,
+    interval: 60000
   }, {
     name: 'foo-quiz-buzz.json',
     type: 's3',
-    status: 'okay'
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/foo-quiz-buzz.json',
+    ok: true,
+    interval: 60000
   }]
 };
 

@@ -28,7 +28,7 @@ describe('S3 source plugin', function () {
   });
 
   beforeEach((done) => {
-    this.s3 = new S3({bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
+    this.s3 = new S3('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
     done();
   });
 
@@ -38,18 +38,18 @@ describe('S3 source plugin', function () {
 
   it('throws an error if instantiated without bucket or path', () => {
     should.throws(() => {
-      new S3(); // eslint-disable-line no-new
+      new S3('test'); // eslint-disable-line no-new
     }, Error);
 
     should.throws(() => {
-      new S3({  // eslint-disable-line no-new
+      new S3('test', {  // eslint-disable-line no-new
         bucket: DEFAULT_BUCKET
       });
     }, Error);
   });
 
   it('creates an S3 source instance with a non-default timer interval', () => {
-    const s3 = new S3({interval: NON_DEFAULT_INTERVAL, bucket: DEFAULT_BUCKET, path: 'foo.json'});
+    const s3 = new S3('foo.json', {interval: NON_DEFAULT_INTERVAL, bucket: DEFAULT_BUCKET, path: 'foo.json'});
 
     s3.interval.should.equal(NON_DEFAULT_INTERVAL);
   });

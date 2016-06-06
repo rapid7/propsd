@@ -89,6 +89,12 @@ describe('Source/Common', function _() {
     source.initialize();
   });
 
+  it('fakes inheritance checks through the Source Factory methods', function __() {
+    expect(new Source.Stub()).to.be.instanceOf(Source.Common);
+    expect(new Source.PollingStub()).to.be.instanceOf(Source.Common);
+    expect(new Source.PollingStub()).to.be.instanceOf(Source.Common.Polling);
+  });
+
   describe('Polling', function __() {
     it('sets an interval', function ___() {
       const stub = new Source.PollingStub({}, {

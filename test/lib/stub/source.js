@@ -76,9 +76,12 @@ class PollingStub extends Common.Polling(Parser) {
   }
 }
 
-// Wrap a namespace around the common module
+// Wrap a namespace around the common module. This exposes
+// constants and helpers as one would expect, but protects the namespace
+// of the cached Common module.
 module.exports = class extends Common.Class {};
 
+module.exports.Common = Common;
 module.exports.Stub = Stub;
 module.exports.NoExistStub = NoExistStub;
 module.exports.ErrorStub = ErrorStub;

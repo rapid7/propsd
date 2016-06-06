@@ -24,7 +24,6 @@ const expectedStatusResponse = {
     updated: null,
     interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
     running: false,
-    updated: null,
     etag: null,
     state: 'CREATED',
     resource: 's3://test-bucket/index.json',
@@ -34,9 +33,8 @@ const expectedStatusResponse = {
   indices: [{
     ok: true,
     updated: null,
-    interval: 60000,
+    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
     running: false,
-    updated: null,
     etag: null,
     state: 'CREATED',
     resource: 's3://test-bucket/index.json',
@@ -52,7 +50,7 @@ const expectedStatusResponse = {
     state: 'CREATED',
     resource: 's3://test-bucket/foo-bar-baz.json',
     ok: true,
-    interval: 60000
+    interval: 60000 // eslint-disable-line rapid7/static-magic-numbers
   }, {
     name: 'foo-quiz-buzz.json',
     type: 's3',
@@ -62,7 +60,7 @@ const expectedStatusResponse = {
     state: 'CREATED',
     resource: 's3://test-bucket/foo-quiz-buzz.json',
     ok: true,
-    interval: 60000
+    interval: 60000 // eslint-disable-line rapid7/static-magic-numbers
   }]
 };
 

@@ -51,9 +51,9 @@ const expectedStatusResponse = {
   status: HTTP_OK,
   index: {
     ok: true,
-    updated: 1,
+    updated: null,
     interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
-    running: true
+    running: false
   },
   sources: [{
     name: 'foo-bar-baz.json',
@@ -80,6 +80,10 @@ properties.dynamic(new S3('foo-quiz-buzz.json', {
 
 const sources = new Sources(properties);
 
+sources.index(new S3('index.json', {
+  bucket: 'test-bucket',
+  path: 'index.json'
+}));
 
 /**
  * Create a new Express server for testing

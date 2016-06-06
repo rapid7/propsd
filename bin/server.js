@@ -21,6 +21,7 @@ const Logger = require('../lib/logger');
 
 const Properties = require('../lib/properties');
 const Sources = require('../lib/sources');
+const Consul = require('../lib/source/consul');
 const Metadata = require('../lib/source/metadata');
 const S3 = require('../lib/source/s3');
 
@@ -55,6 +56,7 @@ const sources = new Sources(properties);
 // Add metadata and some statics
 properties.static(Config.get('properties'));
 properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
+properties.dynamic(new Consul('consul', Config.get('consul')), 'consul');
 
 // Create the Index source
 sources.index(new S3('index', Config.get('index')));
@@ -64,6 +66,7 @@ sources.initialize();
 
 // Register endpoints
 require('../lib/control/v1/core').attach(app, sources);
+require('../lib/control/v1/properties').attach(app, properties);
 require('../lib/control/v1/conqueso').attach(app, properties);
 
 // Instantiate server and start it

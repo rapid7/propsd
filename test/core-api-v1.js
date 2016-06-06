@@ -23,8 +23,26 @@ const expectedStatusResponse = {
     ok: true,
     updated: null,
     interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
-    running: false
+    running: false,
+    updated: null,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
   },
+  indices: [{
+    ok: true,
+    updated: null,
+    interval: 60000,
+    running: false,
+    updated: null,
+    etag: null,
+    state: 'CREATED',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
+  }],
   sources: [{
     name: 'foo-bar-baz.json',
     type: 's3',

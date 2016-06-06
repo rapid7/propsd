@@ -2,6 +2,9 @@
 'use strict';
 
 const request = require('supertest');
+const Properties = require('../lib/properties');
+const Sources = require('../lib/sources');
+const S3 = require('../lib/source/s3');
 
 require('should');
 
@@ -63,6 +66,21 @@ const expectedStatusResponse = {
   }]
 };
 
+const properties = new Properties();
+
+properties.dynamic(new S3('foo-bar-baz.json', {
+  bucket: 'test-bucket',
+  path: 'foo-bar-baz.json'
+}), 'test');
+
+properties.dynamic(new S3('foo-quiz-buzz.json', {
+  bucket: 'test-bucket',
+  path: 'foo-quiz-buzz.json'
+}), 'test');
+
+const sources = new Sources(properties);
+
+
 /**
  * Create a new Express server for testing
  *
@@ -71,7 +89,7 @@ const expectedStatusResponse = {
 const makeServer = () => {
   const app = require('express')();
 
-  require('../lib/control/v1/core').attach(app, storage, pluginManager);
+  require('../lib/control/v1/core').attach(app, sources);
   return app.listen(testServerPort);
 };
 

@@ -6,6 +6,7 @@ const should = require('should');
 const Path = require('path');
 const fs = require('fs');
 
+const server = require('./utils/test-metadata-server');
 const Metadata = require('../lib/source/metadata');
 const Source = require('../lib/source/common');
 const fakeMetadata = JSON.parse(fs.readFileSync(Path.resolve(__dirname, './data/test-metadata.json')));
@@ -13,6 +14,14 @@ const fakeMetadata = JSON.parse(fs.readFileSync(Path.resolve(__dirname, './data/
 const NON_DEFAULT_INTERVAL = 10000;
 
 describe('Metadata source plugin', () => {
+  before(() => {
+    server.start();
+  });
+
+  after(() => {
+    server.stop();
+  });
+
   beforeEach(() => {
     this.m = new Metadata({
       host: '127.0.0.1:8080'

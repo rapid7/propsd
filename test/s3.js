@@ -1,6 +1,10 @@
-/* eslint-env mocha */
-/* global Config */
 'use strict';
+
+/* eslint-env mocha */
+/* global Config, Log */
+/* eslint-disable max-nested-callbacks */
+
+require('./lib/helpers');
 
 const should = require('should');
 const sinon = require('sinon');

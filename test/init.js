@@ -3,7 +3,6 @@
 
 const Path = require('path');
 const winston = require('winston');
-const server = require('./utils/test-metadata-server');
 
 global.Config = require('nconf')
   .argv()
@@ -14,11 +13,3 @@ global.Config = require('nconf')
 // Need to disable console logging for these tests to filter out the chaff from meaningful test output
 global.Log = require('../lib/logger').attach(global.Config.get('log:level'));
 global.Log.remove(winston.transports.Console);
-
-before(function globalBefore() {
-  server.start();
-});
-
-after(function globalAfter() {
-  server.stop();
-});

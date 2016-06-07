@@ -57,46 +57,6 @@ describe('Metadata source plugin', () => {
     this.m.initialize();
   });
 
-  it('shuts down cleanly', (done) => {
-    this.m.once('shutdown', () => {
-      const status = this.m.status();
-
-      status.state.should.equal(Source.SHUTDOWN);
-      done();
-    });
-
-    this.m.initialize();
-    this.m.shutdown();
-  });
-
-  it('initialize returns a promise', () => {
-    this.m.initialize().should.be.instanceOf(Promise);
-  });
-
-  it('clears the sha1 signature when it\'s shutdown', (done) => {
-    this.m.once('shutdown', () => {
-      should(this.m._state).be.null();
-      done();
-    });
-
-    this.m.initialize();
-    this.m.shutdown();
-  });
-
-  it('exposes an error when one occurs but continues running', (done) => {
-    this.m.service.host = '0.0.0.0';
-    this.m.once('error', (err) => {
-      const status = this.m.status();
-
-      err.code.should.equal('ECONNREFUSED');
-      status.ok.should.be.false();
-      status.state.should.equal(Source.ERROR);
-      done();
-    });
-
-    this.m.initialize();
-  });
-
   it('identifies as a \'metadata\' source plugin', () => {
     this.m.type.should.equal('metadata');
   });

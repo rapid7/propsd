@@ -1,67 +1,83 @@
-/* eslint-env mocha */
-/* global Config */
 'use strict';
 
-const should = require('should');
-const Path = require('path');
-const fs = require('fs');
+/* eslint-env mocha */
+/* global Config, Log */
+/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
+
+require('./lib/helpers');
+
+const expect = require('chai').expect;
 
 const Metadata = require('../lib/source/metadata');
-const Source = require('../lib/source/common');
-const fakeMetadata = JSON.parse(fs.readFileSync(Path.resolve(__dirname, './data/test-metadata.json')));
+const Parser = require('../lib/source/metadata/parser');
+const Util = require('../lib/source/metadata/util');
 
-const NON_DEFAULT_INTERVAL = 10000;
+describe('Metadata source plugin', function _() {
+  const metadataPaths = require('./data/metadata-paths.json');
+  const metadataValues = require('./data/metadata-values.json');
 
-describe('Metadata source plugin', () => {
-  beforeEach(() => {
-    this.m = new Metadata({
-      host: '127.0.0.1:8080'
-    });
+  it('traverses metadata paths', function __(done) {
+    Util.traverse(
+      'latest',
+      ['/meta-data/', '/dynamic/'],
+      (path, cb) => cb(null, metadataPaths[path]),
+      (err, data) => {
+        if (err) { return done(err); }
+
+        expect(data).to.eql(metadataValues);
+        done();
+      }
+    );
   });
 
-  afterEach(() => {
-    this.m.shutdown();
+  it('parses traversed values into a useful object', function __() {
+    const parser = new Parser();
+
+    parser.update(metadataValues);
+
+    // Currently used in our Index object.
+    expect(parser.properties.account).to.be.a('string');
+    expect(parser.properties.region).to.be.a('string');
+    expect(parser.properties['vpc-id']).to.be.a('string');
+    expect(parser.properties['instance-id']).to.be.a('string');
+
+    expect(parser.properties.identity).to.be.an('object');
+    expect(parser.properties.credentials).to.be.an('object');
+    expect(parser.properties.interface).to.be.an('object');
   });
 
-  it('creates a Metadata source instance with a non-default timer interval', () => {
-    const m = new Metadata({
-      interval: NON_DEFAULT_INTERVAL
-    });
+  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
+    this.timeout(2500);
 
-    m.interval.should.equal(NON_DEFAULT_INTERVAL);
-  });
-
-  it('initializes a timer with the set interval', (done) => {
-    this.m.once('update', () => {
-      this.m._timer.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
-        '_onTimeout', '_repeat']);
-      done();
-    });
-
-    this.m.initialize();
-  });
-
-  it('munges a set of paths to create a valid data object', (done) => {
-    this.m.once('update', () => {
-      const fake = fakeMetadata.latest['meta-data'];
-      const creds = JSON.parse(fake.iam['security-credentials']['fake-role-name']);
-
-      this.m.properties['ami-id'].should.equal(fake['ami-id']);
-      this.m.properties.hostname.should.equal(fake.hostname);
-      this.m.properties.identity.document.should.equal(fakeMetadata.latest.dynamic['instance-identity'].document);
-      this.m.properties.credentials.lastUpdated.should.equal(creds.LastUpdated);
-
-      done();
+    const source = new Metadata({
+      interval: 100
     });
 
-    this.m.initialize();
-  });
+    // Stub the AWS.MetadataService request method
+    source.service = {
+      request: function request(path, callback) {
+        callback(null, metadataPaths[path]);
+      }
+    };
 
-  it('identifies as a \'metadata\' source plugin', () => {
-    this.m.type.should.equal('metadata');
-  });
+    source.once('update', () => {
+      // Currently used in our Index object.
+      expect(source.properties.account).to.be.a('string');
+      expect(source.properties.region).to.be.a('string');
+      expect(source.properties['vpc-id']).to.be.a('string');
+      expect(source.properties['instance-id']).to.be.a('string');
 
-  after(() => {
-    this.m.service.host = '127.0.0.1:8080';
+      expect(source.properties.identity).to.be.an('object');
+      expect(source.properties.credentials).to.be.an('object');
+      expect(source.properties.interface).to.be.an('object');
+
+      source.once('noupdate', () => {
+        expect(source.state).to.equal(Metadata.RUNNING);
+        source.shutdown();
+        done();
+      });
+    });
+
+    source.initialize();
   });
 });

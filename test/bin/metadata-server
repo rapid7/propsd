@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+'use strict';
+
+/* eslint-disable rapid7/static-magic-numbers, no-param-reassign */
+
+/**
+ * Serve mocked metadata path data from a local HTTP interface
+ */
+
+const HTTP = require('http');
+const paths = require('../data/metadata-paths.json');
+
+const NOT_FOUND_BODY =
+  '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"\n' +
+  '         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n' +
+  '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n' +
+  '<head>\n' +
+  '  <title>404 - Not Found</title>\n' +
+  ' </head>\n' +
+  ' <body>\n' +
+  '  <h1>404 - Not Found</h1>\n' +
+  ' </body>\n' +
+  '</html>\n';
+
+HTTP.createServer(function(req, res) {
+  if (!paths.hasOwnProperty(req.url)) {
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Length', NOT_FOUND_BODY.length);
+    res.write(NOT_FOUND_BODY);
+    res.end();
+
+    return;
+  }
+
+  res.setHeader('Content-Type', 'text/plain');
+  res.setHeader('Content-Length', paths[req.url].length);
+  res.write(paths[req.url]);
+  res.end();
+}).listen(8080);

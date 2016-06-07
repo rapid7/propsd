@@ -13,7 +13,7 @@
     "lint": "eslint bin/** lib/** test/**",
     "coverage": "istanbul cover _mocha -- -R spec",
     "report-coverage": "npm run coverage && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
-    "metadata-server": "./test/bin/metadata-server.js",
+    "metadata-server": "./test/bin/metadata-server",
     "s3-server": "./test/bin/s3-server.js",
     "dev-server": "npm run metadata-server & npm run s3-server -- -d test/data/s3 & npm start -- -c config/dev.json"
   },

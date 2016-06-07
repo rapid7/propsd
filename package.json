@@ -9,9 +9,9 @@
   },
   "scripts": {
     "start": "./bin/server.js",
-    "test": "mocha",
+    "test": "mocha --require ./test/init",
     "lint": "eslint bin/** lib/** test/**",
-    "coverage": "istanbul cover _mocha -- -R spec",
+    "coverage": "istanbul cover _mocha -- -R spec --require ./test/init",
     "report-coverage": "npm run coverage && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "metadata-server": "./test/bin/metadata-server.js",
     "s3-server": "./test/bin/s3-server.js",

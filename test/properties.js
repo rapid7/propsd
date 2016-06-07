@@ -1,67 +1,18 @@
-/* eslint-env mocha */
-/* eslint-disable rapid7/static-magic-numbers, max-nested-callbacks */
 'use strict';
 
-global.Log = new (require('winston').Logger)();
+/* eslint-env mocha */
+/* global Config, Log */
+/* eslint-disable max-nested-callbacks */
+
+require('./lib/helpers');
 
 const Properties = require('../lib/properties');
-const Source = require('../lib/source/common');
+const Source = require('./lib/stub/source');
 
 // Shorten build hold-down timeout for testing
-Properties.BUILD_HOLD_DOWN = 100;
+Properties.BUILD_HOLD_DOWN = 100; // eslint-disable-line rapid7/static-magic-numbers
 
 const expect = require('chai').expect;
-
-class Parser {
-  constructor() {
-    this.properties = {};
-  }
-
-  update(data) {
-    this.properties = data;
-  }
-}
-
-class Stub extends Source(Parser) { // eslint-disable-line new-cap
-  constructor(properties, opts) {
-    // Inject defaults into options
-    const options = Object.assign({
-      type: 'stub',
-      delay: 250 + Math.floor(Math.random() * 250),
-      nopoll: true
-    }, opts);
-
-    super('stub', options);
-    this.delay = options.delay;
-    this.nopoll = options.nopoll;
-    this.properties = properties || {};
-  }
-
-  initialize() {
-    const initialized = super.initialize();
-
-    // Kill the polling interval.
-    if (this.nopoll) clearTimeout(this._timer);
-    return initialized;
-  }
-
-  _fetch(callback) {
-    // Simulate a network request
-    setTimeout(() => {
-      callback(null, this.properties);
-    }, this.delay);
-  }
-}
-
-class NoExistStub extends Stub {
-  constructor() {
-    super('noexist-stub');
-  }
-
-  _fetch(callback) {
-    callback(null, Source.NO_EXIST);
-  }
-}
 
 describe('Properties', function _() {
   const properties = new Properties();
@@ -98,7 +49,7 @@ describe('Properties', function _() {
   });
 
   it('adds a dynamic layer and rebuilds on updates', function __(done) {
-    const stub = new Stub({
+    const stub = new Source.Stub({
       stubby: 'property!'
     });
 
@@ -133,7 +84,7 @@ describe('Properties', function _() {
 
   it('rebuilds properties when a source in the active view updates', function __(done) {
     const view = properties.view();
-    const stub = new Stub({
+    const stub = new Source.Stub({
       foo: 'bar'
     });
 
@@ -156,7 +107,7 @@ describe('Properties', function _() {
   it('activates a view correctly when a source is NO_EXIST', function __(done) {
     // Get current active view's sources
     const sources = properties.active.sources.concat([]);
-    const stub = new NoExistStub();
+    const stub = new Source.NoExistStub();
 
     // Register sources with new view
     sources.push(stub);
@@ -222,13 +173,13 @@ describe('Properties', function _() {
     }
 
     const view = props.view();
-    const stub = new NoExistStub();
+    const stub = new Source.NoExistStub();
 
     view.register(stub);
 
     // A new, unactivated view
     const view2 = props.view();
-    const stub2 = new Stub();
+    const stub2 = new Source.Stub();
 
     view2.register(stub2);
 

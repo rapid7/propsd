@@ -59,15 +59,16 @@ exports.data = {
 };
 
 const parser = new Parser();
+
 parser.catalog(nodes);
 parser.update(checks);
 
 exports.data.services = parser.properties.services;
 exports.data.conqueso = Object.keys(exports.data.services)
   .map((service) => {
-    const nodes = exports.data.services[service];
+    const serviceNodes = exports.data.services[service];
 
-    return `conqueso.${service}.ips=` + Object.keys(nodes)
-      .map((node) => nodes[node]).join(',');
+    return `conqueso.${service}.ips=` + Object.keys(serviceNodes)
+      .map((node) => serviceNodes[node]).join(',');
   })
   .join('\n');

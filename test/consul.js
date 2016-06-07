@@ -128,5 +128,4 @@ describe('Consul', function _() {
 
     consul.watcher.change();
   });
-
 });

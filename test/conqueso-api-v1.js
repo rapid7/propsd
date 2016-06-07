@@ -1,7 +1,14 @@
-/* eslint-env mocha */
 'use strict';
 
-const generateConsulStub = require('./utils/consul-stub');
+/* eslint-env mocha */
+/* global Config, Log */
+/* eslint-disable max-nested-callbacks */
+
+require('./lib/helpers');
+
+const ConsulStub = require('./lib/stub/consul');
+const Consul = require('../lib/source/consul');
+
 const request = require('supertest');
 
 const testServerPort = 3000;
@@ -175,10 +182,20 @@ describe('Conqueso API v1', () => {
   let consul = null,
       server = null;
 
-  beforeEach(() => {
-    consul = generateConsulStub();
-    server = makeServer(consul);
-    consul.initialize();
+  beforeEach((done) => {
+    consul = new Consul('consul');
+    consul.client = ConsulStub;
+
+    consul.initialize().then(() => {
+      server = makeServer({
+        properties: {
+          consul: consul.properties
+        }
+      });
+
+      done();
+    });
+    consul.watcher.change();
   });
 
   afterEach((done) => {
@@ -186,83 +203,13 @@ describe('Conqueso API v1', () => {
     server.close(done);
   });
 
-  it('formats IP addresses for untagged Consul services', (done) => {
-    const expectedBody = [
-      'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
-    ].join('\n');
+  it('formats IP addresses for Consul services', (done) => {
+    const expectedBody = ConsulStub.data.conqueso;
 
-    function checkConsulProperties(err) {
-      if (err) {
-        return done(err);
-      }
-
-      consul.properties.should.eql({
-        consul: {
-          elasticsearch: {
-            addresses: ['10.0.0.0', '127.0.0.1'],
-            cluster: 'elasticsearch'
-          }
-        }
-      });
-
-      done();
-    }
-
-    consul.on('update', () => {
-      request(server)
-        .get('/v1/conqueso/api/roles')
-        .set('Accept', 'text/plain')
-        .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, expectedBody, checkConsulProperties);
-    });
-
-    consul.mock.emitChange('catalog-service', {
-      elasticsearch: []
-    });
-    consul.mock.emitChange('elasticsearch', [{
-      Service: {Address: '10.0.0.0'}
-    }, {
-      Service: {Address: '127.0.0.1'}
-    }]);
-  });
-
-  it('formats IP addresses for tagged Consul services', (done) => {
-    const expectedBody = [
-      'conqueso.elasticsearch.ips=10.0.0.0,127.0.0.1'
-    ].join('\n');
-
-    function checkConsulProperties(err) {
-      if (err) {
-        return done(err);
-      }
-
-      consul.properties.should.eql({
-        consul: {
-          elasticsearch: {
-            addresses: ['10.0.0.0', '127.0.0.1'],
-            cluster: 'elasticsearch'
-          }
-        }
-      });
-
-      done();
-    }
-
-    consul.on('update', () => {
-      request(server)
-        .get('/v1/conqueso/api/roles')
-        .set('Accept', 'text/plain')
-        .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect(HTTP_OK, expectedBody, checkConsulProperties);
-    });
-
-    consul.mock.emitChange('catalog-service', {
-      elasticsearch: ['sweet-es-cluster']
-    });
-    consul.mock.emitChange('elasticsearch', [{
-      Service: {Address: '10.0.0.0'}
-    }, {
-      Service: {Address: '127.0.0.1'}
-    }]);
+    request(server)
+      .get('/v1/conqueso/api/roles')
+      .set('Accept', 'text/plain')
+      .expect('Content-Type', 'text/plain; charset=utf-8')
+      .expect(HTTP_OK, expectedBody, done);
   });
 });

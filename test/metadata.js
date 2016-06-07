@@ -2,7 +2,7 @@
 
 /* eslint-env mocha */
 /* global Config, Log */
-/* eslint-disable max-nested-callbacks */
+/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
 
 require('./lib/helpers');
 
@@ -14,7 +14,7 @@ const Util = require('../lib/source/metadata/util');
 
 describe('Metadata source plugin', function _() {
   const metadataPaths = require('./data/metadata-paths.json');
-  const metadataValues = require('./data/metadata-values');
+  const metadataValues = require('./data/metadata-values.json');
 
   it('traverses metadata paths', function __(done) {
     Util.traverse(
@@ -47,7 +47,11 @@ describe('Metadata source plugin', function _() {
   });
 
   it('periodically fetches metadata from the EC2 metadata API', function __(done) {
-    const source = new Metadata();
+    this.timeout(2500);
+
+    const source = new Metadata({
+      interval: 100
+    });
 
     // Stub the AWS.MetadataService request method
     source.service = {
@@ -56,7 +60,7 @@ describe('Metadata source plugin', function _() {
       }
     };
 
-    source.on('update', () => {
+    source.once('update', () => {
       // Currently used in our Index object.
       expect(source.properties.account).to.be.a('string');
       expect(source.properties.region).to.be.a('string');
@@ -67,8 +71,11 @@ describe('Metadata source plugin', function _() {
       expect(source.properties.credentials).to.be.an('object');
       expect(source.properties.interface).to.be.an('object');
 
-      source.shutdown();
-      done();
+      source.once('noupdate', () => {
+        expect(source.state).to.equal(Metadata.RUNNING);
+        source.shutdown();
+        done();
+      });
     });
 
     source.initialize();

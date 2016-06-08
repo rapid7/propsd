@@ -207,7 +207,7 @@ describe('Conqueso API v1', () => {
       'conqueso.postgresql.ips=10.0.0.2',
       'conqueso.redis.ips=10.0.0.1',
       'conqueso.consul.ips=10.0.0.1,10.0.0.2,10.0.0.3'
-    ].join("\n");
+    ].join('\n');
 
     request(server)
       .get('/v1/conqueso/api/roles')

@@ -9,7 +9,6 @@ require('./lib/helpers');
 const Stub = require('./lib/stub/consul');
 const Consul = require('../lib/source/consul');
 
-const Net = require('net');
 const expect = require('chai').expect;
 
 describe('Consul', function _() {
@@ -36,9 +35,9 @@ describe('Consul', function _() {
     expect(consul.client._opts.secure).to.equal(true);
   });
 
-
   it('sets up properties on initialize', function __(done) {
     const consul = new Consul('test');
+
     consul.client = Stub;
 
     consul.initialize()
@@ -66,8 +65,9 @@ describe('Consul', function _() {
 
   it('handles errors safely', function ___(done) {
     const consul = new Consul('test');
+
     consul.client = Stub;
-    consul.client.health.service = function (options, callback) {
+    consul.client.health.service = (options, callback) => {
       callback(new Error('This is a test error!'), null);
     };
 

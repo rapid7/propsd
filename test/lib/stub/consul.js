@@ -8,8 +8,6 @@ const nodes = require('../../data/consul-nodes.json');
 const services = require('../../data/consul-catalog-services.json');
 const health = require('../../data/consul-health-service.json');
 
-const Parser = require('../../../lib/source/consul/parser');
-
 class Watcher extends EventEmitter {
   constructor(data) {
     super();

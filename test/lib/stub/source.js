@@ -38,6 +38,18 @@ class Stub extends Common(Parser) { // eslint-disable-line new-cap
 
     return initialized;
   }
+
+  update(properties) {
+    this._update({properties});
+  }
+
+  error(err) {
+    this._error(err || new Error('this is a stub error'));
+  }
+
+  recover() {
+    this._update({properties: this.properties});
+  }
 }
 
 class NoExistStub extends Stub {
@@ -78,10 +90,9 @@ class PollingStub extends Common.Polling(Parser) {
   }
 }
 
-class IndexStub extends Common(Parser) {
-  constructor(name, sources) {
-    super(name, {});
-
+class IndexStub extends Common(Parser) { // eslint-disable-line new-cap
+  constructor(sources) {
+    super('index', {});
     this.sources = sources;
   }
 
@@ -91,6 +102,18 @@ class IndexStub extends Common(Parser) {
     setImmediate(() => this._update({sources: this.sources}));
 
     return initialized;
+  }
+
+  update(sources) {
+    this._update({sources});
+  }
+
+  error(err) {
+    this._error(err || new Error('this is a stub error'));
+  }
+
+  recover() {
+    this._update({sources: this.sources});
   }
 }
 

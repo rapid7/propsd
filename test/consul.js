@@ -11,7 +11,6 @@ const Consul = require('../lib/source/consul');
 
 const Net = require('net');
 const expect = require('chai').expect;
-const should = require('should');
 
 describe('Consul', function _() {
   it('instantiates a Consul Source with defaults', () => {
@@ -37,121 +36,47 @@ describe('Consul', function _() {
     expect(consul.client._opts.secure).to.equal(true);
   });
 
-  const consul = new Consul('test');
 
-  consul.client = Stub;
+  it('sets up properties on initialize', function __(done) {
+    const consul = new Consul('test');
+    consul.client = Stub;
 
-  it('creates a watcher and initializes on a `change` event', function __(done) {
     consul.initialize()
       .then(() => {
         expect(consul.state).to.equal(Consul.RUNNING);
-        expect(consul.properties).to.include.keys('nodes', 'services');
+        expect(consul.properties).to.eql({
+          consul: {
+            cluster: 'consul',
+            addresses: ['10.0.0.1', '10.0.0.2', '10.0.0.3']
+          },
+          redis: {
+            cluster: 'redis',
+            addresses: ['10.0.0.1']
+          },
+          postgresql: {
+            cluster: 'postgresql',
+            addresses: ['10.0.0.2']
+          }
+        });
 
         done();
       })
       .catch(done);
-
-    // Trigger `initialized`
-    expect(consul.watcher).to.be.instanceOf(Stub.Watcher);
-    consul.watcher.change();
-  });
-
-  it('fetches the current node-catalog on a change event', function __() {
-    expect(consul.parser.nodes).to.be.an('object');
-
-    // Test that parser.nodes is a hash of ID => IP address
-    Object.keys(consul.parser.nodes).forEach((id) => {
-      expect(consul.parser.nodes[id]).to.be.a('string');
-      expect(Net.isIPv4(consul.parser.nodes[id])).to.equal(true);
-    });
-  });
-
-  it('correlates checks to nodes and correctly sets passing states', function __() {
-    expect(consul.properties.nodes).to.be.an('object');
-
-    // Expect nodes to reflect the status of their checks
-    Object.keys(consul.properties.nodes).forEach((id) => {
-      const node = consul.properties.nodes[id];
-
-      const nodeServices = {};
-      const nodeState = node.checks.reduce((state, check) => {
-        // Roll up service check statuses
-        if (check.service) {
-          if (!nodeServices.hasOwnProperty(check.service)) { nodeServices[check.service] = true; }
-          nodeServices[check.service] = check.passing && nodeServices[check.service];
-
-          return state;
-        }
-
-        return check.passing && state;
-      }, true);
-
-      expect(node.passing).to.equal(nodeState);
-
-      Object.keys(node.services).forEach((service) => {
-        expect(node.services[service]).to.equal(nodeServices[service]);
-      });
-    });
-  });
-
-  it('only reports passing instances of services', function __() {
-    Object.keys(consul.properties.services).forEach((id) => {
-      const service = consul.properties.services[id];
-
-      Object.keys(service).forEach((node) => {
-        expect(consul.properties.nodes[node].passing).to.equal(true);
-        expect(consul.properties.nodes[node].services[id]).to.equal(true);
-      });
-    });
   });
 
   it('handles errors safely', function ___(done) {
-    consul.once('error', (err) => {
-      expect(err).to.be.instanceOf(Error);
-      expect(consul.state).to.equal(Consul.ERROR);
+    const consul = new Consul('test');
+    consul.client = Stub;
+    consul.client.health.service = function (options, callback) {
+      callback(new Error('This is a test error!'), null);
+    };
 
-      // Doesn't drop the last-known set of services
-      expect(consul.properties.services).to.not.be.empty;
-
-      done();
-    });
-
-    consul.watcher.error();
-  });
-
-  it('returns to a healthy state on a change event', function __(done) {
-    expect(consul.state).to.equal(Consul.ERROR);
-
-    consul.once('update', () => {
-      expect(consul.state).to.equal(Consul.RUNNING);
-      done();
-    });
-
-    consul.watcher.change();
-  });
-
-  it('can fetch lists of services with addresses', function __(done) {
-    consul._fetch((error, data) => {
-      if (error) {
-        return done(error);
-      }
-
-      should(data).eql({
-        consul: {
-          cluster: 'consul',
-          addresses: ['10.0.0.1', '10.0.0.2', '10.0.0.3']
-        },
-        redis: {
-          cluster: 'redis',
-          addresses: ['10.0.0.1']
-        },
-        postgresql: {
-          cluster: 'postgresql',
-          addresses: ['10.0.0.2']
-        }
-      });
-
-      done();
-    });
+    consul.initialize()
+      .then(() => {
+        expect(consul.state).to.equal(Consul.ERROR);
+        expect(consul.properties).to.eql({});
+        done();
+      })
+      .catch(done);
   });
 });

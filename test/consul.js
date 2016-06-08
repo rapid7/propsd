@@ -128,4 +128,16 @@ describe('Consul', function _() {
 
     consul.watcher.change();
   });
+
+  it('can fetch lists of services', function __(done) {
+    consul._fetch((error, data) => {
+      if (error) {
+        return done(error);
+      }
+
+      expect(data).to.equal(['consul', 'redis', 'postgresql']);
+
+      done();
+    });
+  });
 });

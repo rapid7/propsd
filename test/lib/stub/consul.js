@@ -5,8 +5,8 @@ const EventEmitter = require('events').EventEmitter;
 
 const checks = require('../../data/consul-checks.json');
 const nodes = require('../../data/consul-nodes.json');
-
-const Parser = require('../../../lib/source/consul/parser');
+const services = require('../../data/consul-catalog-services.json');
+const health = require('../../data/consul-health-service.json');
 
 class Watcher extends EventEmitter {
   constructor(data) {
@@ -28,6 +28,20 @@ exports.Watcher = Watcher;
 
 // Data mappings. These get passed as the `method` parameter of `watch`
 exports.health = {
+  service: function service(options, callback) {
+    const name = options.service;
+    let results = health[name];
+
+    if (options.passing) {
+      results = results.filter((node) => {
+        return !!node.Checks.every((check) => check.Status === 'passing');
+      });
+    }
+
+    setTimeout(function _() {
+      callback(null, results);
+    }, 150);
+  },
   state: checks
 };
 
@@ -39,6 +53,13 @@ exports.watch = function watch(options) {
 };
 
 exports.catalog = {
+  service: {
+    list: function list(options, callback) {
+      setTimeout(function _() {
+        callback(null, services);
+      }, 150);
+    }
+  },
   node: {
     list: function list(callback) {
       // Simulate a little bit of network-service latency
@@ -57,18 +78,3 @@ exports.data = {
     critical: checks.filter((check) => check.Status === 'critical')
   }
 };
-
-const parser = new Parser();
-
-parser.catalog(nodes);
-parser.update(checks);
-
-exports.data.services = parser.properties.services;
-exports.data.conqueso = Object.keys(exports.data.services)
-  .map((service) => {
-    const serviceNodes = exports.data.services[service];
-
-    return `conqueso.${service}.ips=` + Object.keys(serviceNodes)
-      .map((node) => serviceNodes[node]).join(',');
-  })
-  .join('\n');

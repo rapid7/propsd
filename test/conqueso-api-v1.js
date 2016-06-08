@@ -195,7 +195,6 @@ describe('Conqueso API v1', () => {
 
       done();
     });
-    consul.watcher.change();
   });
 
   afterEach((done) => {
@@ -204,7 +203,11 @@ describe('Conqueso API v1', () => {
   });
 
   it('formats IP addresses for Consul services', (done) => {
-    const expectedBody = ConsulStub.data.conqueso;
+    const expectedBody = [
+      'conqueso.postgresql.ips=10.0.0.2',
+      'conqueso.redis.ips=10.0.0.1',
+      'conqueso.consul.ips=10.0.0.1,10.0.0.2,10.0.0.3'
+    ].join('\n');
 
     request(server)
       .get('/v1/conqueso/api/roles')

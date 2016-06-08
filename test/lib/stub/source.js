@@ -6,10 +6,12 @@ const Common = require('../../../lib/source/common');
 class Parser {
   constructor() {
     this.properties = {};
+    this.sources = [];
   }
 
   update(data) {
-    this.properties = data;
+    this.properties = data.properties;
+    this.sources = data.sources || [];
   }
 }
 
@@ -31,10 +33,22 @@ class Stub extends Common(Parser) { // eslint-disable-line new-cap
 
     // Simulate a network request
     setTimeout(() => {
-      this._update(this.properties);
+      this._update({properties: this.properties});
     }, this.delay);
 
     return initialized;
+  }
+
+  update(properties) {
+    this._update({properties});
+  }
+
+  error(err) {
+    this._error(err || new Error('this is a stub error'));
+  }
+
+  recover() {
+    this._update({properties: this.properties});
   }
 }
 
@@ -72,7 +86,34 @@ class PollingStub extends Common.Polling(Parser) {
   }
 
   _fetch(callback) {
-    setImmediate(() => callback(null, this.properties));
+    setImmediate(() => callback(null, {properties: this.properties}));
+  }
+}
+
+class IndexStub extends Common(Parser) { // eslint-disable-line new-cap
+  constructor(sources) {
+    super('index', {});
+    this.sources = sources;
+  }
+
+  initialize() {
+    const initialized = super.initialize();
+
+    setImmediate(() => this._update({sources: this.sources}));
+
+    return initialized;
+  }
+
+  update(sources) {
+    this._update({sources});
+  }
+
+  error(err) {
+    this._error(err || new Error('this is a stub error'));
+  }
+
+  recover() {
+    this._update({sources: this.sources});
   }
 }
 
@@ -86,3 +127,4 @@ module.exports.Stub = Stub;
 module.exports.NoExistStub = NoExistStub;
 module.exports.ErrorStub = ErrorStub;
 module.exports.PollingStub = PollingStub;
+module.exports.IndexStub = IndexStub;

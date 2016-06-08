@@ -5,6 +5,7 @@ const EventEmitter = require('events').EventEmitter;
 
 const checks = require('../../data/consul-checks.json');
 const nodes = require('../../data/consul-nodes.json');
+const services = require('../../data/consul-catalog-services.json');
 
 const Parser = require('../../../lib/source/consul/parser');
 
@@ -39,6 +40,13 @@ exports.watch = function watch(options) {
 };
 
 exports.catalog = {
+  service: {
+    list: function list(options, callback) {
+      setTimeout(function _() {
+        callback(null, services);
+      }, 150);
+    }
+  },
   node: {
     list: function list(callback) {
       // Simulate a little bit of network-service latency

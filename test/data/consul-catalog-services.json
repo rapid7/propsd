@@ -1,0 +1,8 @@
+{
+  "consul": [],
+  "redis": [],
+  "postgresql": [
+    "master",
+    "slave"
+  ]
+}

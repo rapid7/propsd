@@ -82,6 +82,10 @@ describe('Properties', function _() {
     view.activate();
   });
 
+  it('does nothing when activate is called on the active view', function __() {
+    expect(properties.active.activate()).to.be.instanceOf(Promise);
+  });
+
   it('rebuilds properties when a source in the active view updates', function __(done) {
     const view = properties.view();
     const stub = new Source.Stub({

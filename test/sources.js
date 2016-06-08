@@ -2,7 +2,7 @@
 
 /* eslint-env mocha */
 /* global Config, Log */
-/* eslint-disable max-nested-callbacks, no-unused-expressions */
+/* eslint-disable max-nested-callbacks, no-unused-expressions, rapid7/static-magic-numbers */
 
 require('./lib/helpers');
 
@@ -225,14 +225,20 @@ describe('Sources', function _() {
   });
 
   const properties = new Properties();
+  const layer = new Source.Stub({foo: 'bar'}, {delay: 5});
   const sources = new Sources(properties);
-  const index = new Source.IndexStub('stub', [{
+  const index = new Source.IndexStub([{
     type: 'stub',
-    name: 'stub1'
+    name: 'stub1',
+    parameters: {
+      value: '{{foo}}'
+    }
   }, {
     type: 'stub',
     name: 'stub2'
   }]);
+
+  properties.dynamic(layer);
 
   describe('Configuration', function __() {
     it('has the correct initial state', function ___() {
@@ -254,10 +260,15 @@ describe('Sources', function _() {
     this.timeout(5000);
 
     it('initializes properties and indices', function ___(done) {
+      sources.initialize();
+
+      expect(sources.initializing).to.equal(true);
+
+      // Calling initialize multiple times returns valid promises
       sources.initialize()
         .then(() => {
           expect(index.state).to.equal(Source.RUNNING);
-          expect(properties.sources).to.have.length.of(2);
+          expect(properties.sources).to.have.length.of(3);
 
           properties.sources.forEach((source) =>
             expect(source.state).to.equal(Source.RUNNING));
@@ -266,9 +277,77 @@ describe('Sources', function _() {
         })
         .catch(done);
     });
+
+    it('returns a resolved promise if called multiple times', function ___() {
+      expect(sources.initialized).to.equal(true);
+      expect(sources.initialize()).to.be.instanceOf(Promise);
+    });
+
+    it('updates the index when a Properties layer updates', function ___(done) {
+      sources.once('update', () => {
+        expect(sources.current.configurations.stub1.parameters.value).to.equal('quux');
+        done();
+      });
+
+      layer.update({foo: 'quux'});
+    });
+
+    it('updates the index when an Index layer updates', function ___(done) {
+      sources.once('update', () => {
+        expect(sources.current.configurations.stub2.parameters.changed).to.equal('parameter!');
+        done();
+      });
+
+      index.update([{
+        type: 'stub',
+        name: 'stub1',
+        parameters: {
+          value: '{{foo}}'
+        }
+      }, {
+        type: 'stub',
+        name: 'stub2',
+        parameters: {
+          changed: 'parameter!'
+        }
+      }]);
+    });
+
+    it('does not update the properties view when the index isn\'t changed', function ___(done) {
+      sources.once('noupdate', () => done());
+      index.emit('update');
+    });
   });
 
-  describe('health', function __() {
+  describe('Health', function __() {
+    it('sets a healthy code and status message', function ___() {
+      const healthy = sources.health();
 
+      expect(healthy.code).to.equal(200);
+      expect(healthy.status).to.equal('OK');
+    });
+
+    it('sets an unhealthy code and status message when an index source is in an error state', function ___() {
+      index.error();
+
+      const healthy = sources.health();
+
+      expect(healthy.code).to.equal(500);
+      expect(healthy.status).to.equal('ERROR');
+    });
+
+    it('sets an unhealthy code and status message when a layer source is in an error state', function ___() {
+      index.recover();
+      const h1 = sources.health();
+
+      expect(h1.code).to.equal(200);
+      expect(h1.status).to.equal('OK');
+
+      layer.error();
+      const h2 = sources.health();
+
+      expect(h2.code).to.equal(500);
+      expect(h2.status).to.equal('ERROR');
+    });
   });
 });

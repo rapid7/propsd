@@ -11,6 +11,7 @@ const Consul = require('../lib/source/consul');
 
 const Net = require('net');
 const expect = require('chai').expect;
+const should = require('should');
 
 describe('Consul', function _() {
   it('instantiates a Consul Source with defaults', () => {
@@ -135,7 +136,7 @@ describe('Consul', function _() {
         return done(error);
       }
 
-      expect(data).to.equal(['consul', 'redis', 'postgresql']);
+      should(data).eql(['consul', 'postgresql', 'redis']);
 
       done();
     });

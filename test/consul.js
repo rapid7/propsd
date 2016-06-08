@@ -130,13 +130,26 @@ describe('Consul', function _() {
     consul.watcher.change();
   });
 
-  it('can fetch lists of services', function __(done) {
+  it('can fetch lists of services with addresses', function __(done) {
     consul._fetch((error, data) => {
       if (error) {
         return done(error);
       }
 
-      should(data).eql(['consul', 'postgresql', 'redis']);
+      should(data).eql({
+        consul: {
+          cluster: 'consul',
+          addresses: ['10.0.0.1', '10.0.0.2', '10.0.0.3']
+        },
+        redis: {
+          cluster: 'redis',
+          addresses: ['10.0.0.1']
+        },
+        postgresql: {
+          cluster: 'postgresql',
+          addresses: ['10.0.0.2']
+        }
+      });
 
       done();
     });

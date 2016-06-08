@@ -19,9 +19,9 @@ strict digraph {
   subgraph {
     rank=same;
 
-    _update [label="#_update(<data>|NO_UPDATE)"; group=running];
-    _update_no_exist [label="#_update(NO_EXIST)"; group=waiting];
-    _error [label="#_error(Error)"; group=error];
+    i_update [label="#_update(<data>|NO_UPDATE)"; group=running];
+    i_update_no_exist [label="#_update(NO_EXIST)"; group=waiting];
+    i_error [label="#_error(Error)"; group=error];
   }
 
   subgraph {
@@ -32,16 +32,16 @@ strict digraph {
     s_error [label="State: ERROR"; shape=box; group=error];
   }
 
-  shutdown [label="#shutdown()"];
-  Shutdown [label="SHUTDOWN"; shape=box];
+  i_shutdown [label="#shutdown()"];
+  s_shutdown [label="SHUTDOWN"; shape=box];
 
   s_created -> i_initialize -> s_initializing;
   s_initializing -> e_initialized;
   i_initialize -> p_initialized [label="returns"];
   e_initialized -> p_initialized [label="resolves"];
 
-  {s_initializing s_running s_waiting s_error} -> _update -> s_running;
-  {s_initializing s_running s_waiting s_error} -> _update_no_exist -> s_waiting;
-  {s_initializing s_running s_waiting s_error} -> _error -> s_error;
-  {s_initializing s_running s_waiting s_error} -> shutdown -> Shutdown;
+  {s_initializing s_running s_waiting s_error} -> i_update -> s_running;
+  {s_initializing s_running s_waiting s_error} -> i_update_no_exist -> s_waiting;
+  {s_initializing s_running s_waiting s_error} -> i_error -> s_error;
+  {s_initializing s_running s_waiting s_error} -> i_shutdown -> s_shutdown;
 }

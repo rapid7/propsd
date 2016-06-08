@@ -1,0 +1,13 @@
+strict digraph {
+  subgraph Sources {
+    label="Sources";
+
+    a_properties [label="#proeprties"];
+  }
+
+  subgraph Properties {
+    label="Properties";
+
+    a_active [label="#active"];
+  }
+}

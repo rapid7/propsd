@@ -88,6 +88,29 @@ describe('Sources', function _() {
       });
     });
 
+    it('ignores configuration objects with undefined interpolation parameters', function ___() {
+      const index = new Sources.Index([{
+        name: 'test-source',
+        type: 'test',
+        parameters: {
+          bucket: 'water',
+          path: 'a road covered in {{ surface:gravel }}',
+          waffles: {
+            chocolate: '{{ topping }}'
+          },
+          ignores: 'This {{ thing:because:its:not:defined }}'
+        }
+      }], {
+        surface: {
+          gravel: 'small rocks'
+        },
+        topping: 'fudge!'
+      });
+
+      expect(index.order).to.have.length.of(0);
+      expect(index.configurations).to.be.empty;
+    });
+
     it('returns an ordered set of sources', function ___() {
       const index = new Sources.Index([{
         name: 'first',

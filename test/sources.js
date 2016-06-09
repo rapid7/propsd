@@ -261,7 +261,7 @@ describe('Sources', function _() {
     name: 'stub2'
   }]);
 
-  properties.dynamic(layer);
+  properties.dynamic(layer, null, {render: false});
 
   describe('Configuration', function __() {
     it('has the correct initial state', function ___() {

@@ -203,4 +203,51 @@ describe('Properties', function _() {
       });
     }).catch(done);
   });
+
+  it('allows layers to not be rendered', function __(done) {
+    const props = new Properties();
+
+    props.static({
+      value: 'static'
+    }, 'test', {
+      render: false
+    });
+
+    props.dynamic(new Source.Stub({
+      value: 'dynamic'
+    }), 'test', {
+      render: false
+    });
+
+    props.dynamic(new Source.Stub({
+      counter: 0
+    }), null, {
+      render: false
+    });
+
+    props.dynamic(new Source.Stub({
+      counter: 1
+    }));
+
+    props.static({
+      counter: -1
+    });
+
+    props.once('build', () => {
+      expect(props.properties).to.eql({
+        counter: 1
+      });
+
+      expect(props.persistent).to.eql({
+        counter: 0,
+        test: {
+          value: 'static'
+        }
+      });
+
+      done();
+    });
+
+    props.build();
+  });
 });

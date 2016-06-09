@@ -285,6 +285,18 @@ describe('Properties', function _() {
       });
     });
 
+    it('always returns an Object', function ___() {
+      const a = [];
+      const b = null;
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.not.equal(a);
+      expect(c).to.not.equal(b);
+      expect(c).to.be.instanceOf(Object);
+      expect(c).to.deep.equal({});
+    });
+
     it('does not attempt to merge values that aren\'t direct descendants of Object', function ___() {
       const a = {
         a: 2, c: {

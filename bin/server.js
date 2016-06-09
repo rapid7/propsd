@@ -54,8 +54,8 @@ const properties = new Properties();
 const sources = new Sources(properties);
 
 // Add metadata and some statics
-properties.static(Config.get('properties'));
-properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
+properties.static(Config.get('properties'), null, {render: false});
+properties.dynamic(new Metadata(Config.get('metadata')), 'instance', {render: false});
 properties.dynamic(new Consul('consul', Config.get('consul')), 'consul');
 
 // Create the Index source

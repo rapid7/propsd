@@ -258,7 +258,7 @@ describe('Properties', function _() {
       expect(c).to.deep.equal({a: 1});
     });
 
-    it('instantiates a new object for source when null or undefined are passed', function ___() {
+    it('avoids merging source when null or undefined are passed', function ___() {
       const a = {a: 1};
       const b = null;
 

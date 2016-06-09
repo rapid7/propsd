@@ -2,7 +2,7 @@
 
 /* eslint-env mocha */
 /* global Config, Log */
-/* eslint-disable max-nested-callbacks */
+/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
 
 require('./lib/helpers');
 
@@ -10,7 +10,7 @@ const Properties = require('../lib/properties');
 const Source = require('./lib/stub/source');
 
 // Shorten build hold-down timeout for testing
-Properties.BUILD_HOLD_DOWN = 100; // eslint-disable-line rapid7/static-magic-numbers
+Properties.BUILD_HOLD_DOWN = 100;
 
 const expect = require('chai').expect;
 
@@ -202,5 +202,95 @@ describe('Properties', function _() {
         done();
       });
     }).catch(done);
+  });
+
+  describe('Merge', function __() {
+    it('merges one object into another', function ___() {
+      const a = {};
+      const b = {
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0)
+        }
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(a).to.equal(c);
+      expect(c).to.deep.equal(b);
+    });
+
+    it('merges objects recursively', function ___() {
+      const a = {
+        a: 2, c: {
+          d: 42
+        },
+        e: []
+      };
+      const b = {
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0)
+        }
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(a).to.equal(c);
+      expect(c).to.deep.equal({
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0),
+          d: 42
+        },
+        e: []
+      });
+    });
+
+    it('instantiates a new object for destination when null or undefined are passed', function ___() {
+      const a = null;
+      const b = {a: 1};
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.not.equal(a);
+      expect(c).to.not.equal(b);
+      expect(c).to.deep.equal({a: 1});
+    });
+
+    it('does not attempt to merge values that aren\'t direct descendants of Object', function ___() {
+      const a = {
+        a: 2, c: {
+          a: [1, 2, 3],
+          b: {a: 'foo'},
+          d: 42,
+          e: new Date(1),
+          f: []
+        },
+        e: []
+      };
+      const b = {
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0),
+          e: 'bar',
+          f: {a: 123}
+        }
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(a).to.equal(c);
+      expect(c).to.deep.equal({
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0),
+          d: 42,
+          e: 'bar',
+          f: {a: 123}
+        },
+        e: []
+      });
+    });
   });
 });

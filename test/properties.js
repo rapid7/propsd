@@ -268,6 +268,23 @@ describe('Properties', function _() {
       expect(c).to.deep.equal({a: 1});
     });
 
+    it('avoids merging keys with null or undefined values', function ___() {
+      const a = {a: 0};
+      const b = {
+        z: 1,
+        n: null,
+        u: undefined
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.equal(a);
+      expect(c).to.deep.equal({
+        a: 0,
+        z: 1
+      });
+    });
+
     it('does not attempt to merge values that aren\'t direct descendants of Object', function ___() {
       const a = {
         a: 2, c: {

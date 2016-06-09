@@ -207,8 +207,15 @@ describe('Properties', function _() {
   it('allows layers to not be rendered', function __(done) {
     const props = new Properties();
 
+    props.static({
+      value: 'static'
+    }, null, {
+      render: false
+    });
+
     props.dynamic(new Source.Stub({
-      counter: 0
+      counter: 0,
+      value: 'dynamic'
     }), null, {
       render: false
     });
@@ -223,7 +230,8 @@ describe('Properties', function _() {
       });
 
       expect(props.persistent).to.eql({
-        counter: 0
+        counter: 0,
+        value: 'static'
       });
 
       done();

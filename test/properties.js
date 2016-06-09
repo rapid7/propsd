@@ -209,9 +209,9 @@ describe('Properties', function _() {
 
     props.dynamic(new Source.Stub({
       counter: 0
-    }, null, {
+    }), null, {
       render: false
-    }));
+    });
 
     props.dynamic(new Source.Stub({
       counter: 1

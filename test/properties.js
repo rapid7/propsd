@@ -209,13 +209,18 @@ describe('Properties', function _() {
 
     props.static({
       value: 'static'
-    }, null, {
+    }, 'test', {
       render: false
     });
 
     props.dynamic(new Source.Stub({
-      counter: 0,
       value: 'dynamic'
+    }), 'test', {
+      render: false
+    });
+
+    props.dynamic(new Source.Stub({
+      counter: 0
     }), null, {
       render: false
     });
@@ -224,6 +229,10 @@ describe('Properties', function _() {
       counter: 1
     }));
 
+    props.static({
+      counter: -1
+    });
+
     props.once('build', () => {
       expect(props.properties).to.eql({
         counter: 1
@@ -231,7 +240,9 @@ describe('Properties', function _() {
 
       expect(props.persistent).to.eql({
         counter: 0,
-        value: 'static'
+        test: {
+          value: 'static'
+        }
       });
 
       done();

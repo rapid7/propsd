@@ -186,6 +186,10 @@ overwrite those read before them.
   periods. Arrays are converted into numbered properties e.g. the first item is
   "key.0", the second item is "key.1", the third item is "key.2", etc.
 
+  The keys "instance", "consul", and "conqueso" are reserved for use by propsd
+  internally. Defining your own properties with those keys may result in
+  unexpected behavior.
+
 
 [installation]: "./installation.md"
 [configuration]: "./configuration.md"

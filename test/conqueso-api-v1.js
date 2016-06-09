@@ -215,4 +215,24 @@ describe('Conqueso API v1', () => {
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect(HTTP_OK, expectedBody, done);
   });
+
+  it('removes reserved "instance" keyword from properties', (done) => {
+    server.close();
+
+    server = makeServer({
+      properties: {
+        instance: {
+          food: 'tacos'
+        },
+        gluten: 'free'
+      },
+      on() {}
+    });
+
+    request(server)
+      .get('/v1/conqueso/api/roles')
+      .set('Accept', 'text/plain')
+      .expect('Content-Type', 'text/plain; charset=utf-8')
+      .expect(HTTP_OK, 'gluten=free', done);
+  });
 });

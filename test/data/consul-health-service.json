@@ -1,0 +1,95 @@
+{
+  "consul": [{
+    "Node": {
+      "Name": "redis",
+      "Address": "10.0.0.1"
+    },
+    "Service": {
+      "Name": "consul"
+    },
+    "Checks": [{
+      "Node": "redis",
+      "CheckID": "serfHealth",
+      "Status": "passing"
+    }]
+  }, {
+    "Node": {
+      "Name": "postgresql-master",
+      "Address": "127.0.0.1"
+    },
+    "Service": {
+      "Name": "consul",
+      "Address": "10.0.0.2"
+    },
+    "Checks": [{
+      "Node": "postgresql-master",
+      "CheckID": "serfHealth",
+      "Status": "passing"
+    }]
+  }, {
+    "Node": {
+      "Name": "postgresql-slave",
+      "Address": "127.0.0.1"
+    },
+    "Service": {
+      "Name": "consul",
+      "Address": "10.0.0.3"
+    },
+    "Checks": [{
+      "Node": "postgresql-master",
+      "CheckID": "serfHealth",
+      "Status": "passing"
+    }]
+  }],
+  "redis": [{
+    "Node": {
+      "Name": "redis",
+      "Address": "10.0.0.1"
+    },
+    "Service": {
+      "Name": "redis"
+    },
+    "Checks": [{
+      "Node": "redis",
+      "CheckID": "serfHealth",
+      "Status": "passing"
+    }]
+  }],
+  "postgresql": [{
+    "Node": {
+      "Name": "postgresql-master",
+      "Address": "127.0.0.1"
+    },
+    "Service": {
+      "Name": "postgresql",
+      "Address": "10.0.0.2"
+    },
+    "Checks": [{
+      "Node": "postgresql-master",
+      "CheckID": "service:postgresql",
+      "Status": "passing"
+    }, {
+      "Node": "postgresql-master",
+      "CheckID": "serfHealth",
+      "Status": "passing"
+    }]
+  }, {
+    "Node": {
+      "Name": "postgresql-slave",
+      "Address": "127.0.0.1"
+    },
+    "Service": {
+      "Name": "postgresql",
+      "Address": "10.0.0.3"
+    },
+    "Checks": [{
+      "Node": "postgresql-slave",
+      "CheckID": "service:postgresql",
+      "Status": "failing"
+    }, {
+      "Node": "postgresql-master",
+      "CheckID": "serfHealth",
+      "Status": "passing"
+    }]
+  }]
+}

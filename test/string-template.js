@@ -58,4 +58,26 @@ describe('StringTemplate', () => {
 
     t.should.equal('foo:bar}}');
   });
+
+  it('iterates through a deep object and substitutes template values', () => {
+    const _scope = {
+      watermelon: 'test',
+      yo: {lo: 'slap'}
+    };
+    const _template = {
+      value: 'this is a {{ watermelon }}',
+      complex: Promise.resolve(),
+      node: {
+        list: ['of', {
+          objects: '{{yo:lo}}'
+        }]
+      }
+    };
+
+    const rendered = StringTemplate.render(_template, _scope);
+
+    rendered.value.should.equal('this is a test');
+    rendered.complex.should.equal(_template.complex);
+    rendered.node.list.should.containDeep(['of', {objects: 'slap'}]);
+  });
 });

@@ -9,7 +9,8 @@
     "hostname": "127.0.0.1"
   },
   "log": {
-    "level": "info"
+    "level": "info",
+    "json": true
   },
   "consul": {
     "host": "127.0.0.1",

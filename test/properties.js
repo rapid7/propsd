@@ -258,6 +258,16 @@ describe('Properties', function _() {
       expect(c).to.deep.equal({a: 1});
     });
 
+    it('instantiates a new object for source when null or undefined are passed', function ___() {
+      const a = {a: 1};
+      const b = null;
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.equal(a);
+      expect(c).to.deep.equal({a: 1});
+    });
+
     it('does not attempt to merge values that aren\'t direct descendants of Object', function ___() {
       const a = {
         a: 2, c: {

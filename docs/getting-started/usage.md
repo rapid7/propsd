@@ -40,8 +40,10 @@ request to `/v1/health` and you'll see output similar to this:
   "status": 200,
   "uptime": 3193957,
   "plugins": {
-    "s3": 1
-  }
+    "s3": 1,
+    "consul": 1,
+  },
+  "version": "1.2.5"
 }
 ~~~
 
@@ -49,7 +51,7 @@ The "status" attribute is the response code. Response codes from the health
 endpoint are compatible with [Consul's HTTP health checks][consul]. The
 "uptime" attribute is the number of milliseconds the service has been running.
 The "plugins" attribute is a map from plugin type to the number of instances of
-the plugin that are running.
+the plugin that are running. The "version" attribute is the version of propsd.
 
 The second endpoint is a status endpoint that provides detailed information
 about propsd. Issue a GET request to `/v1/status` and you'll see output

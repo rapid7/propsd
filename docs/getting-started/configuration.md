@@ -94,6 +94,24 @@ The configuration file below is the default settings for propsd.
   * `interval` - The time in milliseconds to poll the index property file for
     changes. Defaults to 30000 (30 seconds).
 
+* `consul` - These settings control service discovery via [Consul][].
+
+  Propsd can use Consul for service discovery. Services registered with Consul
+  show up in propsd as properties that look like "conqueso.service.ips=127.0.0.1".
+  IP addresses are comma separated and only services whose health checks are all
+  passing will be reported. Consul is polled periodically for changes. This
+  allows service discovery to happen without requiring a restart of propsd.
+
+  * `host` - The host to connect to Consul on. Defaults to 127.0.0.1.
+
+  * `port` - The HTTP port to connect to Consul on. Defaults to 8500.
+
+  * `secure` - Whether to use HTTPS when connecting to Consul. Defaults to false
+    and uses HTTP.
+
+  * `interval` - The time in milliseconds to poll Consul for changes. Defaults
+    to 60000 (60 seconds).
+
 * `properties` - An arbitrary JSON object for injecting values into the index.
 
   Propsd supports treating the index document as a template and injecting
@@ -148,3 +166,6 @@ Interpolated properties in templated documents are enclosed in double curly
 braces: `{{` and `}}`. The value betwen the double curly braces is a key from
 the `properties` object. Nested keys within the `properties` object are
 accessed by separating the keys with colons.
+
+
+[Consul]: https://www.consul.io/

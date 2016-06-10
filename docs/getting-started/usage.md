@@ -40,8 +40,10 @@ request to `/v1/health` and you'll see output similar to this:
   "status": 200,
   "uptime": 3193957,
   "plugins": {
-    "s3": 1
-  }
+    "s3": 1,
+    "consul": 1,
+  },
+  "version": "1.2.5"
 }
 ~~~
 
@@ -49,7 +51,7 @@ The "status" attribute is the response code. Response codes from the health
 endpoint are compatible with [Consul's HTTP health checks][consul]. The
 "uptime" attribute is the number of milliseconds the service has been running.
 The "plugins" attribute is a map from plugin type to the number of instances of
-the plugin that are running.
+the plugin that are running. The "version" attribute is the version of propsd.
 
 The second endpoint is a status endpoint that provides detailed information
 about propsd. Issue a GET request to `/v1/status` and you'll see output
@@ -61,24 +63,45 @@ similar to this:
   "uptime": 18160502,
   "index": {
     "running": true,
+    "name": "index",
+    "type": "s3",
+    "ok": true,
+    "state": "RUNNING",
+    "updated": "2016-06-10T14:53:08.453Z",
     "interval": 30000,
-    "updated": "2016-04-25T13:00:04.257Z",
-    "ok": true
+    "resource": "s3://bucket/index.json",
+    "etag": "e81944e6e597d8e9e5db01b1cf9dfd7d"
   },
   "sources": [
     {
       "status": "okay",
+      "interval": 60000,
+      "updated": "2016-06-10T18:45:07.182Z",
+      "state": "RUNNING",
+      "ok": true,
+      "type": "consul",
+      "name": "consul"
+    },
+    {
+      "status": "okay",
+      "name": "global",
       "type": "s3",
-      "name": "s3-config.propsd-global.json"
+      "ok": true,
+      "state": "RUNNING",
+      "updated": "2016-06-10T14:53:09.613Z",
+      "interval": 60000,
+      "resource": "s3://bucket/global.json",
+      "etag": "4856c7b6c749068ea986f23668a41c46"
     }
-  ]
+  ],
+  "vesion": "1.2.6"
 }
 ~~~
 
-The "status" and "uptime" attributes match the ones from the health endpoint.
-The "index" attribute provides metadata about the index property file, such as
-the last time it was updated. The "sources" array provides metadata about each
-of the sources propsd is reading properties from.
+The "status", "uptime", and "version" attributes match the ones from the health
+endpoint. The "index" attribute provides metadata about the index property file,
+such as the last time it was updated. The "sources" array provides metadata
+about each of the sources propsd is reading properties from.
 
 ## Index Files ##
 

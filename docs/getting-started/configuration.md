@@ -70,7 +70,7 @@ The configuration file below is the default settings for propsd.
   The following keys are available:
 
   * `level` - The level to log at. Valid values are "debug", "verbose", "info",
-    "warn", and "error". Each log level encompases all the ones below it. So
+    "warn", and "error". Each log level encompasses all the ones below it. So
     "debug" is the most verbose and "error" is the least verbose. Defaults to
     "info".
 
@@ -78,7 +78,7 @@ The configuration file below is the default settings for propsd.
 
   Propsd reads properties from files stored in Amazon S3. Property files are
   JSON documents. A single property file must be configured as an index that
-  lists other property files to read. Property files are polled periodicaly for
+  lists other property files to read. Property files are polled periodically for
   changes. This allows new property files to be read at run time without
   requiring a restart of propsd.
 
@@ -94,6 +94,24 @@ The configuration file below is the default settings for propsd.
   * `interval` - The time in milliseconds to poll the index property file for
     changes. Defaults to 30000 (30 seconds).
 
+* `consul` - These settings control service discovery via [Consul][].
+
+  Propsd can use Consul for service discovery. Services registered with Consul
+  show up in propsd as properties that look like "conqueso.service.ips=127.0.0.1".
+  IP addresses are comma separated and only services whose health checks are all
+  passing will be reported. Consul is polled periodically for changes. This
+  allows service discovery to happen without requiring a restart of propsd.
+
+  * `host` - The host to connect to Consul on. Defaults to 127.0.0.1.
+
+  * `port` - The HTTP port to connect to Consul on. Defaults to 8500.
+
+  * `secure` - Whether to use HTTPS when connecting to Consul. Defaults to false
+    and uses HTTP.
+
+  * `interval` - The time in milliseconds to poll Consul for changes. Defaults
+    to 60000 (60 seconds).
+
 * `properties` - An arbitrary JSON object for injecting values into the index.
 
   Propsd supports treating the index document as a template and injecting
@@ -108,12 +126,12 @@ property documents read from S3. This provides a way to read instance specific
 properties.
 
 Suppose you have two configurations for metrics polling, fast and slow. Fast
-polls every thrity seconds and the configuration for it lives in
+polls every thirty seconds and the configuration for it lives in
 a `metrics/fast.json` document in S3. Slow polls every five minutes, and the
 configuration for it lives in a `metrics/slow.json` document in S3.
 
 Interpolated properties let you configure propsd to read either the fast or
-slow document. You start by adding a `{{speed}}` template paramter to your
+slow document. You start by adding a `{{speed}}` template parameter to your
 `index.json` document in S3.
 
 ~~~json
@@ -145,6 +163,9 @@ If the `properties:speed` key was configured as "slow", the `metrics/slow.json`
 document would be read instead.
 
 Interpolated properties in templated documents are enclosed in double curly
-braces: `{{` and `}}`. The value betwen the double curly braces is a key from
+braces: `{{` and `}}`. The value between the double curly braces is a key from
 the `properties` object. Nested keys within the `properties` object are
 accessed by separating the keys with colons.
+
+
+[Consul]: https://www.consul.io/

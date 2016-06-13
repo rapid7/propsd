@@ -10,7 +10,13 @@ const AWS = require('aws-sdk');
 const rmdir = require('rimraf');
 const walk = require('walk');
 const chokidar = require('chokidar');
-const nconf = require('nconf');
+
+global.Config = require('nconf')
+  .argv()
+  .env()
+  .file(Path.resolve(__dirname, '../data/config.json'))
+  .defaults(require('../../config/defaults.json'));
+global.Log = require('../../lib/logger').attach(Config.get('log:level'));
 
 const DEFAULT_HTTP_PORT = 4569;
 
@@ -40,9 +46,6 @@ const args = require('yargs')
 const hostname = args.h;
 const port = args.p;
 const path = Path.resolve(__dirname, `../../${args.d}`);
-
-nconf.set('log:level', 'debug');
-const Log = require('../../lib/logger').attach('debug');
 
 const awsConfig = {
   s3ForcePathStyle: true,

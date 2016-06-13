@@ -1,131 +1,83 @@
-/* eslint-env mocha */
-/* global Config */
 'use strict';
 
-const should = require('should');
-const Path = require('path');
-const fs = require('fs');
+/* eslint-env mocha */
+/* global Config, Log */
+/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
+
+require('./lib/helpers');
+
+const expect = require('chai').expect;
 
 const Metadata = require('../lib/source/metadata');
-const Source = require('../lib/source/common');
-const fakeMetadata = JSON.parse(fs.readFileSync(Path.resolve(__dirname, './data/test-metadata.json')));
+const Parser = require('../lib/source/metadata/parser');
+const Util = require('../lib/source/metadata/util');
 
-const NON_DEFAULT_INTERVAL = 10000;
+describe('Metadata source plugin', function _() {
+  const metadataPaths = require('./data/metadata-paths.json');
+  const metadataValues = require('./data/metadata-values.json');
 
-describe('Metadata source plugin', () => {
-  beforeEach(() => {
-    this.m = new Metadata();
-    this.m.service.host = '127.0.0.1:8080';
-  });
+  it('traverses metadata paths', function __(done) {
+    Util.traverse(
+      'latest',
+      ['/meta-data/', '/dynamic/'],
+      (path, cb) => cb(null, metadataPaths[path]),
+      (err, data) => {
+        if (err) { return done(err); }
 
-  afterEach(() => {
-    this.m.shutdown();
-  });
-
-  it('creates a Metadata source instance with a non-default timer interval', () => {
-    const m = new Metadata({
-      interval: NON_DEFAULT_INTERVAL
-    });
-
-    m.interval.should.equal(NON_DEFAULT_INTERVAL);
-  });
-
-  it('initializes a timer with the set interval', (done) => {
-    this.m.once('update', () => {
-      this.m._timer.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
-        '_onTimeout', '_repeat']);
-      done();
-    });
-
-    this.m.initialize();
-  });
-
-  it('munges a set of paths to create a valid data object', (done) => {
-    this.m.once('update', () => {
-      const instance = this.m.properties.instance;
-      const fake = fakeMetadata.latest['meta-data'];
-      const creds = JSON.parse(fake.iam['security-credentials']['fake-role-name']);
-
-      instance['ami-id'].should.equal(fake['ami-id']);
-      instance.hostname.should.equal(fake.hostname);
-      instance.identity.document.should.equal(fakeMetadata.latest.dynamic['instance-identity'].document);
-      instance.credentials.lastUpdated.should.equal(creds.LastUpdated);
-
-      done();
-    });
-
-    this.m.initialize();
-  });
-
-  it('shuts down cleanly', (done) => {
-    this.m.once('shutdown', () => {
-      const status = this.m.status();
-
-      status.state.should.equal(Source.SHUTDOWN);
-      done();
-    });
-
-    this.m.initialize();
-    this.m.shutdown();
-  });
-
-  it('initialize returns a promise', () => {
-    this.m.initialize().should.be.instanceOf(Promise);
-  });
-
-  it('clears the sha1 signature when it\'s shutdown', (done) => {
-    this.m.once('shutdown', () => {
-      should(this.m.signature).be.null();
-      done();
-    });
-
-    this.m.initialize();
-    this.m.shutdown();
-  });
-
-  it('doesn\'t update data if the Metadata Service document is the same', (done) => {
-    let instanceId = null,
-        signature = null,
-        secondExecution = false;
-
-    this.m.once('update', () => {
-      instanceId = this.m.properties.instance['ami-id'];
-      signature = this.m.signature;
-
-      secondExecution = true;
-    });
-
-    this.m.once('no-update', () => {
-      if (secondExecution) {
-        this.m.properties.instance['ami-id'].should.equal(instanceId);
-        this.m.signature.should.equal(signature);
+        expect(data).to.eql(metadataValues);
         done();
       }
+    );
+  });
+
+  it('parses traversed values into a useful object', function __() {
+    const parser = new Parser();
+
+    parser.update(metadataValues);
+
+    // Currently used in our Index object.
+    expect(parser.properties.account).to.be.a('string');
+    expect(parser.properties.region).to.be.a('string');
+    expect(parser.properties['vpc-id']).to.be.a('string');
+    expect(parser.properties['instance-id']).to.be.a('string');
+
+    expect(parser.properties.identity).to.be.an('object');
+    expect(parser.properties.credentials).to.be.an('object');
+    expect(parser.properties.interface).to.be.an('object');
+  });
+
+  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
+    this.timeout(2500);
+
+    const source = new Metadata({
+      interval: 100
     });
 
-    this.m.interval = 100; // eslint-disable-line rapid7/static-magic-numbers
-    this.m.initialize();
-  });
+    // Stub the AWS.MetadataService request method
+    source.service = {
+      request: function request(path, callback) {
+        callback(null, metadataPaths[path]);
+      }
+    };
 
-  it('exposes an error when one occurs but continues running', (done) => {
-    this.m.service.host = '0.0.0.0';
-    this.m.once('error', (err) => {
-      const status = this.m.status();
+    source.once('update', () => {
+      // Currently used in our Index object.
+      expect(source.properties.account).to.be.a('string');
+      expect(source.properties.region).to.be.a('string');
+      expect(source.properties['vpc-id']).to.be.a('string');
+      expect(source.properties['instance-id']).to.be.a('string');
 
-      err.code.should.equal('ECONNREFUSED');
-      status.ok.should.be.false();
-      status.state.should.equal(Source.ERROR);
-      done();
+      expect(source.properties.identity).to.be.an('object');
+      expect(source.properties.credentials).to.be.an('object');
+      expect(source.properties.interface).to.be.an('object');
+
+      source.once('noupdate', () => {
+        expect(source.state).to.equal(Metadata.RUNNING);
+        source.shutdown();
+        done();
+      });
     });
 
-    this.m.initialize();
-  });
-
-  it('identifies as a \'ec2-metadata\' source plugin', () => {
-    this.m.type.should.equal('ec2-metadata');
-  });
-
-  after(() => {
-    this.m.service.host = '127.0.0.1:8080';
+    source.initialize();
   });
 });

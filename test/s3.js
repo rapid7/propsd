@@ -173,6 +173,25 @@ describe('S3 source plugin', function () {
     s3OtherError.initialize();
   });
 
+  it('clears ETag but not properites if getRequest returns an error', (done) => {
+    const Stub = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, {code: 'BigTimeErrorCode', message: 'This is the error message'}, null)
+    });
+    const s3OtherError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
+
+    s3OtherError.once('error', () => {
+      should(s3OtherError.status().etag).be.null();
+      should(s3OtherError.properties).eql({foo: 'bar'});
+      done();
+    });
+
+    s3OtherError.state = Source.RUNNING;
+    s3OtherError._state = 'ThisIsACoolEtag';
+    s3OtherError.properties = {foo: 'bar'};
+
+    s3OtherError.start();
+  });
+
   it('can\'t shutdown a plugin that\'s already shut down', (done) => {
     const shutdownSpy = sinon.spy();
 

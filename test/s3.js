@@ -120,6 +120,21 @@ describe('S3 source plugin', function () {
     s3WithNoSuchKeyError.start();
   });
 
+  it('clears the ETag if getRequest returns a NoSuchKey error', (done) => {
+    const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
+    const s3WithNoSuchKeyError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
+
+    s3WithNoSuchKeyError.once('update', () => {
+      should(s3WithNoSuchKeyError.status().etag).be.null();
+      done();
+    });
+
+    s3WithNoSuchKeyError.state = Source.RUNNING;
+    s3WithNoSuchKeyError._state = 'ThisIsACoolEtag';
+
+    s3WithNoSuchKeyError.start();
+  });
+
   it('doesn\'t do anything if getRequest returns a NotModified error', (done) => {
     const errorSpy = sinon.spy();
     const updateSpy = sinon.spy();

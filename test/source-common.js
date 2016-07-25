@@ -147,7 +147,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('retains properties and state on NO_EXISTS when WAITING', function __() {
+  it('clears properties and state on NO_EXISTS when WAITING', function __() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.WAITING;
@@ -156,8 +156,8 @@ describe('Source/Common', function _() {
     source._update(Source.Common.NO_EXIST);
 
     expect(source.state).to.eql(Source.Common.WAITING);
-    expect(source.properties).to.eql({key: 'value'});
-    expect(source._state).to.eql('non-null-value');
+    expect(source.properties).to.eql({});
+    expect(source._state).to.eql(null);
   });
 
   describe('Polling', function __() {

@@ -95,6 +95,58 @@ describe('Source/Common', function _() {
     expect(new Source.PollingStub()).to.be.instanceOf(Source.Common.Polling);
   });
 
+  it('clears properties and state on NO_EXISTS when RUNNING', function __() {
+    const source = new Source.Stub({key: 'value'});
+
+    source.state = Source.Common.RUNNING;
+    source._state = 'non-null-value';
+
+    source._update(Source.Common.NO_EXIST);
+
+    expect(source.state).to.eql(Source.Common.WAITING);
+    expect(source.properties).to.eql({});
+    expect(source._state).to.eql(null);
+  });
+
+  it('clears properties and state on NO_EXISTS when WARNING', function __() {
+    const source = new Source.Stub({key: 'value'});
+
+    source.state = Source.Common.WARNING;
+    source._state = 'non-null-value';
+
+    source._update(Source.Common.NO_EXIST);
+
+    expect(source.state).to.eql(Source.Common.WAITING);
+    expect(source.properties).to.eql({});
+    expect(source._state).to.eql(null);
+  });
+
+  it('clears properties and state on NO_EXISTS when ERROR', function __() {
+    const source = new Source.Stub({key: 'value'});
+
+    source.state = Source.Common.ERROR;
+    source._state = 'non-null-value';
+
+    source._update(Source.Common.NO_EXIST);
+
+    expect(source.state).to.eql(Source.Common.WAITING);
+    expect(source.properties).to.eql({});
+    expect(source._state).to.eql(null);
+  });
+
+  it('retains properties and state on NO_EXISTS when WAITING', function __() {
+    const source = new Source.Stub({key: 'value'});
+
+    source.state = Source.Common.WAITING;
+    source._state = 'non-null-value';
+
+    source._update(Source.Common.NO_EXIST);
+
+    expect(source.state).to.eql(Source.Common.WAITING);
+    expect(source.properties).to.eql({key: 'value'});
+    expect(source._state).to.eql('non-null-value');
+  });
+
   describe('Polling', function __() {
     it('sets an interval', function ___() {
       const stub = new Source.PollingStub({}, {

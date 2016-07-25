@@ -95,7 +95,7 @@ describe('Source/Common', function _() {
     expect(new Source.PollingStub()).to.be.instanceOf(Source.Common.Polling);
   });
 
-  it('clears properties and state on NO_EXISTS when INITIALIZING', function __() {
+  it('clears properties and state on NO_EXIST when INITIALIZING', function __() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.INITIALIZING;
@@ -108,7 +108,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXISTS when RUNNING', function __() {
+  it('clears properties and state on NO_EXIST when RUNNING', function __() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.RUNNING;
@@ -121,7 +121,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXISTS when WARNING', function __() {
+  it('clears properties and state on NO_EXIST when WARNING', function __() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.WARNING;
@@ -134,7 +134,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXISTS when ERROR', function __() {
+  it('clears properties and state on NO_EXIST when ERROR', function __() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.ERROR;
@@ -147,7 +147,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXISTS when WAITING', function __() {
+  it('clears properties and state on NO_EXIST when WAITING', function __() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.WAITING;

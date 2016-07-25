@@ -95,6 +95,19 @@ describe('Source/Common', function _() {
     expect(new Source.PollingStub()).to.be.instanceOf(Source.Common.Polling);
   });
 
+  it('clears properties and state on NO_EXISTS when INITIALIZING', function __() {
+    const source = new Source.Stub({key: 'value'});
+
+    source.state = Source.Common.INITIALIZING;
+    source._state = 'non-null-value';
+
+    source._update(Source.Common.NO_EXIST);
+
+    expect(source.state).to.eql(Source.Common.WAITING);
+    expect(source.properties).to.eql({});
+    expect(source._state).to.eql(null);
+  });
+
   it('clears properties and state on NO_EXISTS when RUNNING', function __() {
     const source = new Source.Stub({key: 'value'});
 

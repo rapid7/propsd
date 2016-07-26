@@ -120,6 +120,21 @@ describe('S3 source plugin', function () {
     s3WithNoSuchKeyError.start();
   });
 
+  it('clears the ETag if getRequest returns a NoSuchKey error', (done) => {
+    const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, {code: 'NoSuchKey'}, null)});
+    const s3WithNoSuchKeyError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
+
+    s3WithNoSuchKeyError.once('update', () => {
+      should(s3WithNoSuchKeyError.status().etag).be.null();
+      done();
+    });
+
+    s3WithNoSuchKeyError.state = Source.RUNNING;
+    s3WithNoSuchKeyError._state = 'ThisIsACoolEtag';
+
+    s3WithNoSuchKeyError.start();
+  });
+
   it('doesn\'t do anything if getRequest returns a NotModified error', (done) => {
     const errorSpy = sinon.spy();
     const updateSpy = sinon.spy();
@@ -156,6 +171,25 @@ describe('S3 source plugin', function () {
     });
 
     s3OtherError.initialize();
+  });
+
+  it('clears ETag but not properites if getRequest returns an error', (done) => {
+    const Stub = s3Stub({
+      getObject: sinon.stub().callsArgWith(1, {code: 'BigTimeErrorCode', message: 'This is the error message'}, null)
+    });
+    const s3OtherError = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json'});
+
+    s3OtherError.once('error', () => {
+      should(s3OtherError.status().etag).be.null();
+      should(s3OtherError.properties).eql({foo: 'bar'});
+      done();
+    });
+
+    s3OtherError.state = Source.RUNNING;
+    s3OtherError._state = 'ThisIsACoolEtag';
+    s3OtherError.properties = {foo: 'bar'};
+
+    s3OtherError.start();
   });
 
   it('can\'t shutdown a plugin that\'s already shut down', (done) => {

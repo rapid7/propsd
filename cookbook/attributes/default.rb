@@ -8,3 +8,5 @@ default['propsd']['paths']['configuration'] = '/etc/propsd/config.json'
 
 default['propsd']['config'] = Mash.new
 default['propsd']['version'] = nil
+
+default['propsd']['ohai_plugin_path'] = nil

@@ -61,7 +61,6 @@ link node['propsd']['paths']['directory'] do
   to version_dir
   owner node['propsd']['user']
   group node['propsd']['group']
-  mode '0755'
 end
 
 ## Chown the contents of the versioned propsd directory to the propsd user/group

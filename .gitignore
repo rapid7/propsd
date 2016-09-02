@@ -37,5 +37,6 @@ node_modules
 .node_repl_history
 .bundle/
 .builderator/
+.idea/
 
 cookbook/metadata.json

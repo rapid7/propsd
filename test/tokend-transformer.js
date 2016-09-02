@@ -84,7 +84,7 @@ describe('TokendTransformer', function () {
 
     transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
-        expect(untransformedProperties).to.eql(transformedProperties);
+        expect(transformedProperties).to.eql({});
 
         done();
       })

@@ -8,3 +8,5 @@ rules:
   prefer-arrow-callback: 0
   # Nested callbacks happen when writing BDD style tests. It's okay.
   max-nested-callbacks: 0
+  # Magic numbers are legit in tests. Just don't abuse them.
+  rapid7/static-magic-numbers: 0

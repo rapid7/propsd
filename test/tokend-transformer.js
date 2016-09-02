@@ -5,6 +5,23 @@ const nock = require('nock');
 const TokendTransformer = require('../lib/transformers/tokend');
 
 describe('TokendTransformer', function () {
+  it('finds tokend on 127.0.0.1:4500 by default', function () {
+    const transformer = new TokendTransformer();
+
+    expect(transformer.host).to.equal('127.0.0.1');
+    expect(transformer.port).to.equal(4500);
+  });
+
+  it('allows tokend to be found on a non-default host:port', function () {
+    const transformer = new TokendTransformer({
+      host: 'tokend.d',
+      port: 2600
+    });
+
+    expect(transformer.host).to.equal('tokend.d');
+    expect(transformer.port).to.equal(2600);
+  });
+
   it('transforms $tokend properties', function (done) {
     const untransformedProperties = {
       password: {
@@ -22,8 +39,7 @@ describe('TokendTransformer', function () {
       });
 
     const transformer = new TokendTransformer({
-      host: 'token.d',
-      port: 4500
+      host: 'token.d'
     });
 
     transformer.transform(untransformedProperties)
@@ -57,8 +73,7 @@ describe('TokendTransformer', function () {
       });
 
     const transformer = new TokendTransformer({
-      host: 'token.d',
-      port: 4500
+      host: 'token.d'
     });
 
     transformer.transform(untransformedProperties)

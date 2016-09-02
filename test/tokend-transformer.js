@@ -105,4 +105,64 @@ describe('TokendTransformer', function () {
       })
       .catch(done);
   });
+
+  it('throws an error if $tokend has no "resource" key', function (done) {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'secret',
+
+          // This is "resources" instead of "resource"
+          resources: '/v1/secret/default/kali/root/password'
+        }
+      }
+    };
+
+    nock('http://token.d:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+          secret: 'toor'
+        });
+
+    const transformer = new TokendTransformer({
+      host: 'token.d'
+    });
+
+    transformer.transform(untransformedProperties)
+      .then(() => done(new Error('No error for invalid $tokend.resource key')))
+      .catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        done();
+      });
+  });
+
+  it('throws an error if $tokend.type is not "secret"', function (done) {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+
+          // This is "secrets" instead of "secret"
+          type: 'secrets',
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    };
+
+    nock('http://token.d:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+          secret: 'toor'
+        });
+
+    const transformer = new TokendTransformer({
+      host: 'token.d'
+    });
+
+    transformer.transform(untransformedProperties)
+      .then(() => done(new Error('No error for invalid $tokend.type key')))
+      .catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        done();
+      });
+  });
 });

@@ -32,14 +32,6 @@ Ohai.plugin(:Propsd) do
     connected
   end
 
-  def get_properties_from_file
-    f = ::File.open('/vagrant/properties.json', 'r').read
-    props = ::JSON.parse(f)
-    props
-  rescue Exception => e
-    Ohai::Log.error(e)
-  end
-
   def get_properties
     response = http_client.get('/v1/properties')
     if response.code != "200"

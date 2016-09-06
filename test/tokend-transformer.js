@@ -90,6 +90,53 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
+  it('transforms multiple $tokend properties', function (done) {
+    const untransformedProperties = {
+      database: {
+        'root-password': {
+          $tokend: {
+            type: 'secret',
+            resource: '/v1/secret/default/kali/root/password'
+          }
+        },
+        'user-password': {
+          $tokend: {
+            type: 'secret',
+            resource: '/v1/secret/default/kali/user/password'
+          }
+        }
+      }
+    };
+
+    nock('http://token.d:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+          secret: 'toor'
+        })
+        .get('/v1/secret/default/kali/user/password')
+        .reply(200, {
+          secret: 'resu'
+        });
+
+    const transformer = new TokendTransformer({
+      host: 'token.d'
+    });
+
+    transformer.transform(untransformedProperties)
+      .then((transformedProperties) => {
+        expect(untransformedProperties).to.not.eql(transformedProperties);
+        expect(transformedProperties).to.eql({
+          database: {
+            'root-password': 'toor',
+            'user-password': 'resu'
+          }
+        });
+
+        done();
+      })
+      .catch(done);
+  });
+
   it('ignores non-$tokend properties', function (done) {
     const untransformedProperties = {
       key: 'value'

@@ -32,7 +32,8 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock('http://token.d:4500')
+    nock.cleanAll();
+    const tokend = nock('http://token.d:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
         plaintext: 'toor'
@@ -49,6 +50,7 @@ describe('TokendTransformer', function () {
           password: 'toor'
         });
 
+        tokend.done();
         done();
       })
       .catch(done);
@@ -66,7 +68,8 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock('http://token.d:4500')
+    nock.cleanAll();
+    const tokend = nock('http://token.d:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
         plaintext: 'toor'
@@ -85,6 +88,7 @@ describe('TokendTransformer', function () {
           }
         });
 
+        tokend.done();
         done();
       })
       .catch(done);
@@ -108,7 +112,8 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock('http://token.d:4500')
+    nock.cleanAll();
+    const tokend = nock('http://token.d:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
           plaintext: 'toor'
@@ -132,6 +137,7 @@ describe('TokendTransformer', function () {
           }
         });
 
+        tokend.done();
         done();
       })
       .catch(done);
@@ -165,12 +171,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock('http://token.d:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
-
     const transformer = new TokendTransformer({
       host: 'token.d'
     });
@@ -179,6 +179,7 @@ describe('TokendTransformer', function () {
       .then(() => done(new Error('No error for invalid $tokend.resource key')))
       .catch((err) => {
         expect(err).to.be.instanceOf(Error);
+
         done();
       });
   });
@@ -195,12 +196,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock('http://token.d:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
-
     const transformer = new TokendTransformer({
       host: 'token.d'
     });
@@ -209,6 +204,7 @@ describe('TokendTransformer', function () {
       .then(() => done(new Error('No error for invalid $tokend.type key')))
       .catch((err) => {
         expect(err).to.be.instanceOf(Error);
+
         done();
       });
   });
@@ -240,6 +236,7 @@ describe('TokendTransformer', function () {
       .then(() => done(new Error('No error for invalid "plaintext" key in Vault')))
       .catch((err) => {
         expect(err).to.be.instanceOf(Error);
+
         tokend.done();
         done();
       });

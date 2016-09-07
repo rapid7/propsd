@@ -1,18 +1,18 @@
-# How to use propsd #
+# How to use Propsd #
 
-The propsd service is the core process in propsd. It's responsible for
+The Propsd service is the core process in Propsd. It's responsible for
 providing the HTTP API and fetching properties from sources like Amazon S3 and
 Consul. Propsd is machine aware, and is designed to run on every server that
 needs to retrieve properties.
 
-## Running propsd ##
+## Running Propsd ##
 
-The propsd service is started by running the `bin/server.js` binary. The binary
-can be found in the folder where [propsd is installed][installation]. The
+The Propsd service is started by running the `bin/server.js` binary. The binary
+can be found in the folder where [Propsd is installed][installation]. The
 service blocks, running forever or until it's told to quit. The binary supports
 several [configuration options][configuration].
 
-When running propsd you should see output similar to this:
+When running Propsd you should see output similar to this:
 
 ~~~text
 {"level":"info","message":"Initializing index and metadata","timestamp":"2016-04-29T15:28:39.574Z"}
@@ -24,15 +24,15 @@ When running propsd you should see output similar to this:
 {"source":"s3-propsd-s3-global.json","type":"s3","level":"info","message":"Initializing s3 source s3-propsd-s3-global.json","timestamp":"2016-04-29T15:28:39.659Z"}
 ~~~
 
-## Stopping propsd ##
+## Stopping Propsd ##
 
 Propsd can be stopped by sending it an interrupt signal. This is usually done
 by sending `Ctrl-C` from a terminal or by running `kill -INT $propsd_pid`.
 
-## Monitoring propsd ##
+## Monitoring Propsd ##
 
 Propsd provides two HTTP endpoints for monitoring its status. The first is
-a health endpoint that provides basic information about propsd. Issue a GET
+a health endpoint that provides basic information about Propsd. Issue a GET
 request to `/v1/health` and you'll see output similar to this:
 
 ~~~json
@@ -51,10 +51,10 @@ The "status" attribute is the response code. Response codes from the health
 endpoint are compatible with [Consul's HTTP health checks][consul]. The
 "uptime" attribute is the number of milliseconds the service has been running.
 The "plugins" attribute is a map from plugin type to the number of instances of
-the plugin that are running. The "version" attribute is the version of propsd.
+the plugin that are running. The "version" attribute is the version of Propsd.
 
 The second endpoint is a status endpoint that provides detailed information
-about propsd. Issue a GET request to `/v1/status` and you'll see output
+about Propsd. Issue a GET request to `/v1/status` and you'll see output
 similar to this:
 
 ~~~json
@@ -101,14 +101,14 @@ similar to this:
 The "status", "uptime", and "version" attributes match the ones from the health
 endpoint. The "index" attribute provides metadata about the index property file,
 such as the last time it was updated. The "sources" array provides metadata
-about each of the sources propsd is reading properties from.
+about each of the sources Propsd is reading properties from.
 
 ## Index Files ##
 
-The first file propsd reads is called the index file. Index files are JSON
+The first file Propsd reads is called the index file. Index files are JSON
 formatted. They are a single JSON object containing a version identifier and
 a list of sources to read properties from. You must set [configuration
-options][configuration] to tell propsd where to find the index file.
+options][configuration] to tell Propsd where to find the index file.
 
 ### Minimal Index File ###
 
@@ -199,7 +199,7 @@ overwrite those read before them.
 
 ### Property Files Key Reference ###
 
-* `version` - A string that tells propsd what version of the properties file
+* `version` - A string that tells Propsd what version of the properties file
   it's reading. Must be "1.0".
 
 * `properties` - A JSON object of properties.
@@ -209,7 +209,7 @@ overwrite those read before them.
   periods. Arrays are converted into numbered properties e.g. the first item is
   "key.0", the second item is "key.1", the third item is "key.2", etc.
 
-  The keys "instance", "consul", and "conqueso" are reserved for use by propsd
+  The keys "instance", "consul", and "conqueso" are reserved for use by Propsd
   internally. Defining your own properties with those keys may result in
   unexpected behavior.
 

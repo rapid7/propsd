@@ -26,7 +26,7 @@ describe('TokendTransformer', function () {
     const untransformedProperties = {
       password: {
         $tokend: {
-          type: 'secret',
+          type: 'generic',
           resource: '/v1/secret/default/kali/root/password'
         }
       }
@@ -59,7 +59,7 @@ describe('TokendTransformer', function () {
       database: {
         password: {
           $tokend: {
-            type: 'secret',
+            type: 'generic',
             resource: '/v1/secret/default/kali/root/password'
           }
         }
@@ -95,13 +95,13 @@ describe('TokendTransformer', function () {
       database: {
         'root-password': {
           $tokend: {
-            type: 'secret',
+            type: 'generic',
             resource: '/v1/secret/default/kali/root/password'
           }
         },
         'user-password': {
           $tokend: {
-            type: 'secret',
+            type: 'generic',
             resource: '/v1/secret/default/kali/user/password'
           }
         }
@@ -157,7 +157,7 @@ describe('TokendTransformer', function () {
     const untransformedProperties = {
       password: {
         $tokend: {
-          type: 'secret',
+          type: 'generic',
 
           // This is "resources" instead of "resource"
           resources: '/v1/secret/default/kali/root/password'
@@ -183,13 +183,13 @@ describe('TokendTransformer', function () {
       });
   });
 
-  it('throws an error if $tokend.type is not "secret"', function (done) {
+  it('throws an error if $tokend.type is not "generic"', function (done) {
     const untransformedProperties = {
       password: {
         $tokend: {
 
-          // This is "secrets" instead of "secret"
-          type: 'secrets',
+          // This is "generics" instead of "generic"
+          type: 'generics',
           resource: '/v1/secret/default/kali/root/password'
         }
       }

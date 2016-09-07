@@ -7,6 +7,6 @@ cookbook.depends 'propsd' do |propsd|
   propsd.path './cookbook'
 end
 
-profile :default do |default|
-  default.chef.run_list 'propsd::default'
+profile :default do |test|
+  test.chef.run_list 'propsd::test'
 end

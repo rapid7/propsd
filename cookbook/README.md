@@ -4,11 +4,11 @@
 
 ### default.rb
 
-Install and configure propsd.  You will need to overide the `propsd-configuration` and the `props-service` to do anything useful; see the `test.rb` recipe for an example.  
+Install and configure Propsd.  You will need to overide the `propsd-configuration` and the `props-service` to do anything useful; see the `test.rb` recipe for an example.  
 
 ### ohai_plugin.rb
 
-Install propsd ohai plugin
+Install Propsd Ohai plugin
 
 ## Attributes
 

@@ -35,7 +35,7 @@ describe('TokendTransformer', function () {
     nock('http://token.d:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
-        secret: 'toor'
+        plaintext: 'toor'
       });
 
     const transformer = new TokendTransformer({
@@ -69,7 +69,7 @@ describe('TokendTransformer', function () {
     nock('http://token.d:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
-        secret: 'toor'
+        plaintext: 'toor'
       });
 
     const transformer = new TokendTransformer({
@@ -111,11 +111,11 @@ describe('TokendTransformer', function () {
     nock('http://token.d:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
-          secret: 'toor'
+          plaintext: 'toor'
         })
         .get('/v1/secret/default/kali/user/password')
         .reply(200, {
-          secret: 'resu'
+          plaintext: 'resu'
         });
 
     const transformer = new TokendTransformer({
@@ -168,7 +168,7 @@ describe('TokendTransformer', function () {
     nock('http://token.d:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
-          secret: 'toor'
+          plaintext: 'toor'
         });
 
     const transformer = new TokendTransformer({
@@ -198,7 +198,7 @@ describe('TokendTransformer', function () {
     nock('http://token.d:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
-          secret: 'toor'
+          plaintext: 'toor'
         });
 
     const transformer = new TokendTransformer({
@@ -228,8 +228,8 @@ describe('TokendTransformer', function () {
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
 
-        // This is "secrets" instead of "secret"
-        secrets: 'toor'
+        // This is "plaintexts" instead of "plaintext"
+        plaintexts: 'toor'
       });
 
     const transformer = new TokendTransformer({
@@ -237,7 +237,7 @@ describe('TokendTransformer', function () {
     });
 
     transformer.transform(untransformedProperties)
-      .then(() => done(new Error('No error for invalid "secret" key in Vault')))
+      .then(() => done(new Error('No error for invalid "plaintext" key in Vault')))
       .catch((err) => {
         expect(err).to.be.instanceOf(Error);
         tokend.done();

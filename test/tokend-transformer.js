@@ -212,4 +212,34 @@ describe('TokendTransformer', function () {
         done();
       });
   });
+
+  it('throws an error if the secret is not in a "secret" key', function (done) {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'generic',
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    };
+
+    nock('http://token.d:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+
+          // This is "secrets" instead of "secret"
+          secrets: 'toor'
+        });
+
+    const transformer = new TokendTransformer({
+      host: 'token.d'
+    });
+
+    transformer.transform(untransformedProperties)
+      .then(() => done(new Error('No error for invalid "secret" key in Vault')))
+      .catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        done();
+      });
+  });
 });

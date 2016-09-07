@@ -209,7 +209,7 @@ describe('TokendTransformer', function () {
       });
   });
 
-  it('throws an error if the secret is not in a "secret" key', function (done) {
+  it('throws an error if the secret is not in a "plaintext" key', function (done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -233,7 +233,36 @@ describe('TokendTransformer', function () {
     });
 
     transformer.transform(untransformedProperties)
-      .then(() => done(new Error('No error for invalid "plaintext" key in Vault')))
+      .then(() => done(new Error('No error for missing "plaintext" key in Vault')))
+      .catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+
+        tokend.done();
+        done();
+      });
+  });
+
+  it('throws an error if the secret is not JSON', function (done) {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'generic',
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    };
+
+    nock.cleanAll();
+    const tokend = nock('http://token.d:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, 'toor');
+
+    const transformer = new TokendTransformer({
+      host: 'token.d'
+    });
+
+    transformer.transform(untransformedProperties)
+      .then(() => done(new Error('No error for invalid JSON secret in Vault')))
       .catch((err) => {
         expect(err).to.be.instanceOf(Error);
 

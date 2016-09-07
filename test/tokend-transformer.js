@@ -22,6 +22,42 @@ describe('TokendTransformer', function () {
     expect(transformer.port).to.equal(2600);
   });
 
+  it('transforms null properties', function (done) {
+    const transformer = new TokendTransformer();
+
+    transformer.transform(null)
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({});
+
+        done();
+       })
+      .catch(done);
+  });
+
+  it('transforms undefined properties', function (done) {
+    const transformer = new TokendTransformer();
+
+    transformer.transform(undefined)
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({});
+
+        done();
+      })
+      .catch(done);
+  });
+
+  it('transforms empty properties', function (done) {
+    const transformer = new TokendTransformer();
+
+    transformer.transform({})
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({});
+
+        done();
+      })
+      .catch(done);
+  });
+
   it('transforms $tokend properties', function (done) {
     const untransformedProperties = {
       password: {

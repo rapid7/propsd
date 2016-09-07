@@ -30,7 +30,7 @@ describe('TokendTransformer', function () {
         expect(transformedProperties).to.eql({});
 
         done();
-       })
+      })
       .catch(done);
   });
 

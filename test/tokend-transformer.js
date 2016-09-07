@@ -223,13 +223,14 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock('http://token.d:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
+    nock.cleanAll();
+    const tokend = nock('http://token.d:4500')
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
 
-          // This is "secrets" instead of "secret"
-          secrets: 'toor'
-        });
+        // This is "secrets" instead of "secret"
+        secrets: 'toor'
+      });
 
     const transformer = new TokendTransformer({
       host: 'token.d'
@@ -239,6 +240,7 @@ describe('TokendTransformer', function () {
       .then(() => done(new Error('No error for invalid "secret" key in Vault')))
       .catch((err) => {
         expect(err).to.be.instanceOf(Error);
+        tokend.done();
         done();
       });
   });

@@ -54,9 +54,9 @@ const properties = new Properties();
 const sources = new Sources(properties);
 
 // Add metadata and some statics
-properties.static(Config.get('properties'));
-properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
 properties.dynamic(new Consul('consul', Config.get('consul')), 'consul');
+properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
+properties.static(Config.get('properties'));
 
 // Create the Index source
 sources.index(new S3('index', Config.get('index')));

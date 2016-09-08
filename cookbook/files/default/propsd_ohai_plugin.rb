@@ -55,7 +55,7 @@ Ohai.plugin(:Propsd) do
     if can_propsd_connect?(PROPSD_HOST, PROPSD_PORT)
       props = get_properties
       props.each_pair do |k,v|
-        propsd[k] = v
+        propsd_plugin[k] = v
       end
     end
   end

@@ -6,5 +6,8 @@
   "plugins": [
     "rapid7"
   ],
-  "extends": "rapid7"
+  "extends": "rapid7",
+  "rules": {
+    "prefer-spread": 0
+  }
 }

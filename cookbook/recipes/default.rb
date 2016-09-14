@@ -61,6 +61,8 @@ link node['propsd']['paths']['directory'] do
   to version_dir
   owner node['propsd']['user']
   group node['propsd']['group']
+
+  notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 
 ## Chown the contents of the versioned propsd directory to the propsd user/group
@@ -84,6 +86,8 @@ template '/etc/init/propsd.conf' do
       "-c #{node['propsd']['paths']['configuration']}"
     ]
   )
+
+  notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 
 directory 'propsd-configuration-directory' do
@@ -104,11 +108,10 @@ template 'propsd-configuration' do
   group node['propsd']['group']
 
   variables(:properties => node['propsd']['config'])
+  notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 
 service 'propsd' do
-  ## The wrapping cookbook must call `action` on this resource to start/enable
-  action :nothing
-
+  action node['propsd']['enable'] ? [:start, :enable] : [:stop, :disable]
   provider Chef::Provider::Service::Upstart
 end

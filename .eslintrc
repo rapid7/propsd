@@ -12,6 +12,13 @@
   ],
   "extends": "rapid7",
   "rules": {
-    "prefer-spread": 0
+    "prefer-spread": 0,
+    "require-jsdoc": [2, {
+      "require": {
+        "FunctionDeclaration": true,
+        "MethodDefinition": true,
+        "ClassDeclaration": true
+      }
+    }]
   }
 }

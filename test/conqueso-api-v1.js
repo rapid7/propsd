@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks */
-
 require('./lib/helpers');
 
 const ConsulStub = require('./lib/stub/consul');

@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks */
-
 require('./lib/helpers');
 
 const should = require('should');
@@ -18,9 +14,8 @@ const DEFAULT_BUCKET = 'fake-bucket';
 const Source = require('../lib/source/common');
 const s3Stub = require('./utils/s3-stub');
 
-/* eslint-disable func-names, max-nested-callbacks */
 describe('S3 source plugin', function () {
-  this.timeout(2000); // eslint-disable-line rapid7/static-magic-numbers
+  this.timeout(2000);
 
   const fakeResponse = {
     ETag: 'ThisIsACoolEtag',
@@ -42,11 +37,11 @@ describe('S3 source plugin', function () {
 
   it('throws an error if instantiated without bucket or path', () => {
     should.throws(() => {
-      new S3('test'); // eslint-disable-line no-new
+      new S3('test');
     }, Error);
 
     should.throws(() => {
-      new S3('test', {  // eslint-disable-line no-new
+      new S3('test', {
         bucket: DEFAULT_BUCKET
       });
     }, Error);
@@ -261,7 +256,7 @@ describe('S3 source plugin', function () {
 
     const endpoint = 'www.somecoolendpoint.com';
     const s3Source = require('../lib/source/s3');
-    const s3 = new s3Source('foo.json', { // eslint-disable-line new-cap
+    const s3 = new s3Source('foo.json', {
       bucket: DEFAULT_BUCKET,
       path: 'foo.json',
       interval: DEFAULT_INTERVAL,

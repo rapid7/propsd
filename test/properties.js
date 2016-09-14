@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
-
 require('./lib/helpers');
 
 const Properties = require('../lib/properties');
@@ -160,7 +156,7 @@ describe('Properties', function _() {
     });
 
     sources.forEach((source, i) => {
-      source.properties = { // eslint-disable-line no-param-reassign
+      source.properties = {
         indexNumber: i
       };
 

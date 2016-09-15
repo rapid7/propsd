@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const nock = require('nock');
 const TokendTransformer = require('../lib/transformers/tokend');
+const Properties = require('../lib/properties');
 
 describe('TokendTransformer', function () {
   it('finds tokend on 127.0.0.1:4500 by default', function () {
@@ -305,5 +306,39 @@ describe('TokendTransformer', function () {
         tokend.done();
         done();
       });
+  });
+});
+
+describe('Properties#build', function () {
+  it('transformers $tokend values in static properties', function (done) {
+    nock.cleanAll();
+    const tokend = nock('http://127.0.0.1:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+          plaintext: 'toor'
+        });
+
+    const properties = new Properties();
+
+    properties.static({
+      password: {
+        $tokend: {
+          type: 'generic',
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    });
+
+    properties.once('build', (transformedProperties) => {
+      expect(transformedProperties).to.be.instanceOf(Object);
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+      done();
+    });
+
+    properties.build();
   });
 });

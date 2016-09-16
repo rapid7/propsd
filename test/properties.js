@@ -8,7 +8,6 @@ require('./lib/helpers');
 
 const Properties = require('../lib/properties');
 const Source = require('./lib/stub/source');
-const S3 = require('../lib/source/s3');
 
 // Shorten build hold-down timeout for testing
 Properties.BUILD_HOLD_DOWN = 100;
@@ -37,22 +36,23 @@ describe('Properties', function _() {
 
   it('does not reorder source layers if build is called multiple times', function __(done) {
     const localProps = new Properties();
-    const correctOrder = ['hello', 'world'];
+    const correctOrder = ['first', 'second'];
 
     localProps.static({
       hello: 'world'
-    });
+    }, 'first');
     localProps.static({
       world: 'hello'
-    });
+    }, 'second');
 
     let ranOnce = false;
 
     localProps.on('build', () => {
-      const layerKeys = [].concat.apply([], localProps.layers.map((i) => Object.keys(i.properties)));
+      const layerKeys = localProps.layers.map((i) => i.namespace);
 
       expect(layerKeys).to.eql(correctOrder);
       if (ranOnce) {
+        expect(layerKeys).to.eql(correctOrder);
         done();
       }
       ranOnce = true;
@@ -64,27 +64,22 @@ describe('Properties', function _() {
   });
 
   it('does not reorder layers if the properties sources getter is called', function ___(done) {
-    const localProps = new Properties();
-    const correctOrder = ['foo-bar-baz.json', 'foo-quiz-buzz.json'];
+    const props = new Properties();
+    const sources = [
+      new Source.Stub({path: 'foo'}),
+      new Source.Stub({path: 'bar'}),
+      new Source.Stub({path: 'baz'})
+    ];
+    const view = props.view(sources);
 
-    localProps.dynamic(new S3('foo-bar-baz.json', {
-      bucket: 'test-bucket',
-      path: 'foo-bar-baz.json'
-    }), 'test');
-
-    localProps.dynamic(new S3('foo-quiz-buzz.json', {
-      bucket: 'test-bucket',
-      path: 'foo-quiz-buzz.json'
-    }), 'test');
-
-    const view = localProps.view();
-
-    localProps.on('build', () => {
-      expect(localProps.sources.map((s) => s.name)).to.eql(correctOrder);
-      done();
+    props.once('build', () => {
+      expect(props.sources.map((s) => s.properties.path)).to.eql(['foo', 'bar', 'baz']);
     });
 
-    view.activate();
+    view.activate().then(() => {
+      expect(props.sources.map((s) => s.properties.path)).to.eql(['foo', 'bar', 'baz']);
+      done();
+    });
   });
 
   it('adds layers with namespaces', function __(done) {

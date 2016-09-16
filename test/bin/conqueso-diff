@@ -7,7 +7,6 @@
 const HTTP = require('http');
 const ONE_MINUTE = 60000;
 
-/* eslint-disable no-console */
 function requestProperties(uri) {
   console.log(`Polling ${uri}`);
   return new Promise((resolve, reject) => {

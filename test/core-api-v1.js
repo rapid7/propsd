@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 'use strict';
 
 const request = require('supertest');
@@ -22,7 +21,7 @@ const expectedStatusResponse = {
   index: {
     ok: true,
     updated: null,
-    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
+    interval: 60000,
     running: false,
     etag: null,
     state: 'CREATED',
@@ -33,7 +32,7 @@ const expectedStatusResponse = {
   indices: [{
     ok: true,
     updated: null,
-    interval: 60000, // eslint-disable-line rapid7/static-magic-numbers
+    interval: 60000,
     running: false,
     etag: null,
     state: 'CREATED',
@@ -50,7 +49,7 @@ const expectedStatusResponse = {
     state: 'CREATED',
     resource: 's3://test-bucket/foo-bar-baz.json',
     ok: true,
-    interval: 60000 // eslint-disable-line rapid7/static-magic-numbers
+    interval: 60000
   }, {
     name: 'foo-quiz-buzz.json',
     type: 's3',
@@ -60,7 +59,7 @@ const expectedStatusResponse = {
     state: 'CREATED',
     resource: 's3://test-bucket/foo-quiz-buzz.json',
     ok: true,
-    interval: 60000 // eslint-disable-line rapid7/static-magic-numbers
+    interval: 60000
   }]
 };
 
@@ -111,7 +110,6 @@ describe('Core API v1', () => {
       continue;
     }
 
-    /* eslint-disable no-loop-func */
     it(`acknowledges GET requests to the ${endpoint} endpoint`, (done) => {
       request(server)
         .get(endpoints[endpoint])
@@ -138,8 +136,6 @@ describe('Core API v1', () => {
         .expect(HTTP_METHOD_NOT_ALLOWED)
         .end(done);
     });
-
-    /* eslint-enable no-loop-func */
   }
 
   it('responds correctly to a request to the /status endpoint', (done) => {

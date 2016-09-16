@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks, no-unused-expressions, rapid7/static-magic-numbers */
-
 require('./lib/helpers');
 
 const Stub = require('./lib/stub/consul');

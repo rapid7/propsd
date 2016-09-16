@@ -1,6 +1,5 @@
 'use strict';
 
-/* eslint-disable rapid7/static-magic-numbers */
 const Common = require('../../../lib/source/common');
 
 class Parser {
@@ -15,7 +14,7 @@ class Parser {
   }
 }
 
-class Stub extends Common(Parser) { // eslint-disable-line new-cap
+class Stub extends Common(Parser) {
   constructor(properties, opts) {
     // Inject defaults into options
     const options = Object.assign({
@@ -90,7 +89,7 @@ class PollingStub extends Common.Polling(Parser) {
   }
 }
 
-class IndexStub extends Common(Parser) { // eslint-disable-line new-cap
+class IndexStub extends Common(Parser) {
   constructor(sources) {
     super('index', {});
     this.sources = sources;

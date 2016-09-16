@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
-
 require('./lib/helpers');
 
 const expect = require('chai').expect;

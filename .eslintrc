@@ -1,4 +1,8 @@
 {
+  "env": {
+    "node": true,
+    "es6": true
+  },
   "globals": {
     "Config": true,
     "Log": true
@@ -6,5 +10,15 @@
   "plugins": [
     "rapid7"
   ],
-  "extends": "rapid7"
+  "extends": "rapid7",
+  "rules": {
+    "prefer-spread": 0,
+    "require-jsdoc": [2, {
+      "require": {
+        "FunctionDeclaration": true,
+        "MethodDefinition": true,
+        "ClassDeclaration": true
+      }
+    }]
+  }
 }

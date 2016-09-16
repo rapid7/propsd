@@ -4,6 +4,10 @@ const expect = require('chai').expect;
 const nock = require('nock');
 const TokendTransformer = require('../lib/transformers/tokend');
 const Properties = require('../lib/properties');
+const Source = require('./lib/stub/source');
+
+// Speed up testing by shortening the time we wait for properties to build.
+Properties.BUILD_HOLD_DOWN = 100;
 
 describe('TokendTransformer', function () {
   it('finds tokend on 127.0.0.1:4500 by default', function () {
@@ -310,7 +314,7 @@ describe('TokendTransformer', function () {
 });
 
 describe('Properties#build', function () {
-  it('transformers $tokend values in static properties', function (done) {
+  it('transformers $tokend objects in static properties', function (done) {
     nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
@@ -328,6 +332,83 @@ describe('Properties#build', function () {
         }
       }
     });
+
+    properties.once('build', (transformedProperties) => {
+      expect(transformedProperties).to.be.instanceOf(Object);
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+      done();
+    });
+
+    properties.build();
+  });
+
+  it('transforms $tokend objects in dynamic properties', function (done) {
+    nock.cleanAll();
+    const tokend = nock('http://127.0.0.1:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+          plaintext: 'toor'
+        });
+
+    const properties = new Properties();
+
+    properties.dynamic(new Source.Stub({
+      password: {
+        $tokend: {
+          type: 'generic',
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    }));
+
+    properties.once('build', (transformedProperties) => {
+      expect(transformedProperties).to.be.instanceOf(Object);
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+      done();
+    });
+
+    properties.build();
+  });
+
+  it('transforms $tokend objects after they are merged', function (done) {
+    nock.cleanAll();
+    const tokend = nock('http://127.0.0.1:4500')
+        .get('/v1/secret/default/kali/root/password')
+        .reply(200, {
+          plaintext: 'toor'
+        });
+
+    const properties = new Properties();
+
+    properties.dynamic(new Source.Stub({
+      password: {
+        $tokend: {
+          type: 'generic',
+
+          // This kali/root/password will overwrite the kali/user/password.
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    }));
+
+    properties.dynamic(new Source.Stub({
+      password: {
+        $tokend: {
+          type: 'generic',
+
+          // This is looking for a kali/user/password key which doesn't exist.
+          resource: '/v1/secret/default/kali/user/password'
+        }
+      }
+    }));
 
     properties.once('build', (transformedProperties) => {
       expect(transformedProperties).to.be.instanceOf(Object);

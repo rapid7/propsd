@@ -30,6 +30,55 @@ describe('Properties', function _() {
     properties.build();
   });
 
+  it('does not reorder source layers if build is called multiple times', function __(done) {
+    const localProps = new Properties();
+    const correctOrder = ['first', 'second'];
+
+    localProps.static({
+      hello: 'world'
+    }, 'first');
+    localProps.static({
+      world: 'hello'
+    }, 'second');
+
+    let ranOnce = false;
+
+    localProps.on('build', () => {
+      const layerKeys = localProps.layers.map((i) => i.namespace);
+
+      expect(layerKeys).to.eql(correctOrder);
+      if (ranOnce) {
+        expect(layerKeys).to.eql(correctOrder);
+        done();
+      }
+      ranOnce = true;
+    });
+
+    localProps.build().then(() => {
+      localProps.build();
+    });
+  });
+
+  it('does not reorder layers if the properties sources getter is called', function ___(done) {
+    const props = new Properties();
+    const sources = [
+      new Source.Stub({path: 'foo'}),
+      new Source.Stub({path: 'bar'}),
+      new Source.Stub({path: 'baz'})
+    ];
+    const view = props.view(sources);
+    const expected = ['foo', 'bar', 'baz'];
+    const reversed = ['baz', 'bar', 'foo'];
+
+    props.once('build', () => {
+      expect(props.sources.map((s) => s.properties.path)).to.eql(reversed);
+      expect(props.active.sources.map((s) => s.properties.path)).to.eql(expected);
+      done();
+    });
+
+    view.activate();
+  });
+
   it('adds layers with namespaces', function __(done) {
     properties.static({
       cruel: 'world'

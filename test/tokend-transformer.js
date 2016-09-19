@@ -1,5 +1,7 @@
 'use strict';
 
+require('./lib/helpers');
+
 const expect = require('chai').expect;
 const nock = require('nock');
 const TokendTransformer = require('../lib/transformers/tokend');
@@ -13,18 +15,18 @@ describe('TokendTransformer', function () {
   it('finds tokend on 127.0.0.1:4500 by default', function () {
     const transformer = new TokendTransformer();
 
-    expect(transformer.host).to.equal('127.0.0.1');
-    expect(transformer.port).to.equal(4500);
+    expect(transformer._client._host).to.equal('127.0.0.1');
+    expect(transformer._client._port).to.equal(4500);
   });
 
   it('allows tokend to be found on a non-default host:port', function () {
     const transformer = new TokendTransformer({
-      host: 'tokend.d',
+      host: 'token.d',
       port: 2600
     });
 
-    expect(transformer.host).to.equal('tokend.d');
-    expect(transformer.port).to.equal(2600);
+    expect(transformer._client._host).to.equal('token.d');
+    expect(transformer._client._port).to.equal(2600);
   });
 
   it('transforms null properties', function (done) {

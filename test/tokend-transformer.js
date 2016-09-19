@@ -12,23 +12,6 @@ const Source = require('./lib/stub/source');
 Properties.BUILD_HOLD_DOWN = 100;
 
 describe('TokendTransformer', function () {
-  it('finds tokend on 127.0.0.1:4500 by default', function () {
-    const transformer = new TokendTransformer();
-
-    expect(transformer._client._host).to.equal('127.0.0.1');
-    expect(transformer._client._port).to.equal(4500);
-  });
-
-  it('allows tokend to be found on a non-default host:port', function () {
-    const transformer = new TokendTransformer({
-      host: 'token.d',
-      port: 2600
-    });
-
-    expect(transformer._client._host).to.equal('token.d');
-    expect(transformer._client._port).to.equal(2600);
-  });
-
   it('transforms null properties', function (done) {
     const transformer = new TokendTransformer();
 
@@ -76,15 +59,13 @@ describe('TokendTransformer', function () {
     };
 
     nock.cleanAll();
-    const tokend = nock('http://token.d:4500')
+    const tokend = nock('http://127.0.0.1:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
         plaintext: 'toor'
       });
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
@@ -112,15 +93,13 @@ describe('TokendTransformer', function () {
     };
 
     nock.cleanAll();
-    const tokend = nock('http://token.d:4500')
+    const tokend = nock('http://127.0.0.1:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
         plaintext: 'toor'
       });
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
@@ -156,7 +135,7 @@ describe('TokendTransformer', function () {
     };
 
     nock.cleanAll();
-    const tokend = nock('http://token.d:4500')
+    const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
           plaintext: 'toor'
@@ -166,9 +145,7 @@ describe('TokendTransformer', function () {
           plaintext: 'resu'
         });
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
@@ -214,9 +191,7 @@ describe('TokendTransformer', function () {
       }
     };
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then(() => done(new Error('No error for invalid $tokend.resource key')))
@@ -239,9 +214,7 @@ describe('TokendTransformer', function () {
       }
     };
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then(() => done(new Error('No error for invalid $tokend.type key')))
@@ -263,7 +236,7 @@ describe('TokendTransformer', function () {
     };
 
     nock.cleanAll();
-    const tokend = nock('http://token.d:4500')
+    const tokend = nock('http://127.0.0.1:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
 
@@ -271,9 +244,7 @@ describe('TokendTransformer', function () {
         plaintexts: 'toor'
       });
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then(() => done(new Error('No error for missing "plaintext" key in Vault')))
@@ -296,13 +267,11 @@ describe('TokendTransformer', function () {
     };
 
     nock.cleanAll();
-    const tokend = nock('http://token.d:4500')
+    const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, 'toor');
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
       .then(() => done(new Error('No error for invalid JSON secret in Vault')))
@@ -333,15 +302,13 @@ describe('TokendTransformer', function () {
     // Nock clears a response after it's requested. So processing the same secret more than once will fail when
     // tokend.done() is called.
     nock.cleanAll();
-    const tokend = nock('http://token.d:4500')
+    const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
           plaintext: 'toor'
         });
 
-    const transformer = new TokendTransformer({
-      host: 'token.d'
-    });
+    const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
         .then((transformedProperties) => {

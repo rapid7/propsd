@@ -12,6 +12,10 @@ const Source = require('./lib/stub/source');
 Properties.BUILD_HOLD_DOWN = 100;
 
 describe('TokendTransformer', function () {
+  beforeEach(function () {
+    nock.cleanAll();
+  });
+
   it('transforms null properties', function (done) {
     const transformer = new TokendTransformer();
 
@@ -58,7 +62,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
@@ -92,7 +95,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
@@ -134,7 +136,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -235,7 +236,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
       .get('/v1/secret/default/kali/root/password')
       .reply(200, {
@@ -266,7 +266,6 @@ describe('TokendTransformer', function () {
       }
     };
 
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, 'toor');
@@ -301,7 +300,6 @@ describe('TokendTransformer', function () {
 
     // Nock clears a response after it's requested. So processing the same secret more than once will fail when
     // tokend.done() is called.
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -325,8 +323,11 @@ describe('TokendTransformer', function () {
 });
 
 describe('Properties#build', function () {
-  it('transforms $tokend objects in static properties', function (done) {
+  beforeEach(function () {
     nock.cleanAll();
+  });
+
+  it('transforms $tokend objects in static properties', function (done) {
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -358,7 +359,6 @@ describe('Properties#build', function () {
   });
 
   it('transforms $tokend objects in dynamic properties', function (done) {
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -390,7 +390,6 @@ describe('Properties#build', function () {
   });
 
   it('transforms $tokend objects after they are merged', function (done) {
-    nock.cleanAll();
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {

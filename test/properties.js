@@ -71,13 +71,14 @@ describe('Properties', function _() {
       new Source.Stub({path: 'baz'})
     ];
     const view = props.view(sources);
+    const expected = ['baz', 'bar', 'foo'];
 
     props.once('build', () => {
-      expect(props.sources.map((s) => s.properties.path)).to.eql(['foo', 'bar', 'baz']);
+      expect(props.sources.map((s) => s.properties.path)).to.eql(expected);
     });
 
     view.activate().then(() => {
-      expect(props.sources.map((s) => s.properties.path)).to.eql(['foo', 'bar', 'baz']);
+      expect(props.sources.map((s) => s.properties.path)).to.eql(expected);
       done();
     });
   });

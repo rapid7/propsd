@@ -281,45 +281,6 @@ describe('TokendTransformer', function () {
         done();
       });
   });
-
-  it('only calls Tokend once for each secret', function (done) {
-    const untransformedProperties = {
-      password1: {
-        $tokend: {
-          type: 'generic',
-          resource: '/v1/secret/default/kali/root/password'
-        }
-      },
-      password2: {
-        $tokend: {
-          type: 'generic',
-          resource: '/v1/secret/default/kali/root/password'
-        }
-      }
-    };
-
-    // Nock clears a response after it's requested. So processing the same secret more than once will fail when
-    // tokend.done() is called.
-    const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
-
-    const transformer = new TokendTransformer();
-
-    transformer.transform(untransformedProperties)
-        .then((transformedProperties) => {
-          expect(transformedProperties).to.eql({
-            password1: 'toor',
-            password2: 'toor'
-          });
-
-          tokend.done();
-          done();
-        })
-        .catch((err) => done(err));
-  });
 });
 
 describe('Properties#build', function () {

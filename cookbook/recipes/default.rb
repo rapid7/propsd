@@ -39,14 +39,6 @@ user node['propsd']['user'] do
   home node['propsd']['paths']['directory']
 end
 
-directory node['propsd']['paths']['directory'] do
-  owner node['propsd']['user']
-  group node['propsd']['group']
-  mode '0755'
-
-  recursive true
-end
-
 ## Fetch and install propsd
 remote_file 'propsd' do
   source Propsd::Helpers.github_download('rapid7', 'propsd', node['propsd']['version'])
@@ -56,9 +48,28 @@ remote_file 'propsd' do
   backup false
 end
 
+version_dir = "#{ node['propsd']['paths']['directory'] }-#{ node['propsd']['version'] }"
+
 package 'propsd' do
   source resources('remote_file[propsd]').path
   provider Chef::Provider::Package::Dpkg
+  notifies :run, "execute[chown #{version_dir}]"
+end
+
+## Symlink the version dir to the specified propsd directory
+link node['propsd']['paths']['directory'] do
+  to version_dir
+  owner node['propsd']['user']
+  group node['propsd']['group']
+
+  notifies :restart, 'service[propsd]' if node['propsd']['enable']
+end
+
+## Chown the contents of the versioned propsd directory to the propsd user/group
+execute "chown #{version_dir}" do
+  command "chown -R #{node['propsd']['user']}:#{node['propsd']['group']} #{version_dir}"
+  user 'root'
+  action :nothing
 end
 
 ## Upstart Service
@@ -75,6 +86,8 @@ template '/etc/init/propsd.conf' do
       "-c #{node['propsd']['paths']['configuration']}"
     ]
   )
+
+  notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 
 directory 'propsd-configuration-directory' do
@@ -95,11 +108,10 @@ template 'propsd-configuration' do
   group node['propsd']['group']
 
   variables(:properties => node['propsd']['config'])
+  notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 
 service 'propsd' do
-  ## The wrapping cookbook must call `action` on this resource to start/enable
-  action :nothing
-
+  action node['propsd']['enable'] ? [:start, :enable] : [:stop, :disable]
   provider Chef::Provider::Service::Upstart
 end

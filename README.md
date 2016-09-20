@@ -4,7 +4,7 @@
 Propsd does dynamic property management at scale, across thousands of servers
 and changes from hundreds of developers.
 
-We built propsd with lessons learned from years of running [Conqueso][] on
+We built Propsd with lessons learned from years of running [Conqueso][] on
 large scale systems. High availability is achieved by leveraging [Amazon S3][]
 to deliver properties and [Consul][] to handle service discovery. Composable
 layering lets you set properties for an organization, a single server, and
@@ -12,7 +12,7 @@ everything in between. Plus, flat file storage makes backups and audits
 a breeze.
 
 So if your [Conqueso][] server's starting to heat up or you just want an audit
-trail when things change, give propsd a try.
+trail when things change, give Propsd a try.
 
 ## Features
 Propsd allows the user to supply a [index](https://github.com/rapid7/propsd/blob/master/docs/getting-started/usage.md#index-files) file which defines the layering of configuration sources.  Propsd expects these configuration sources to be in json format.
@@ -32,14 +32,14 @@ global
 ~~~
 Propsd would return flattened configuration where the `service_name.json` value would win (netting a `foo` value of `service_specific`).
 
-Propsd can also consume from various source locations.  This ranges from a Consul catalog, to local files, to remote S3 buckets.  This feature helps the user package once and let the configuration source location contain the differences between environments.  Said another way - with propsd, you won't find yourself repackaging your software in order to move it through your environments.
+Propsd can also consume from various source locations.  This ranges from a Consul catalog, to local files, to remote S3 buckets.  This feature helps the user package once and let the configuration source location contain the differences between environments.  Said another way - with Propsd, you won't find yourself repackaging your software in order to move it through your environments.
 
-Propsd will regularly inspect and reload these configuration settings, include new layers, etc. - no restarts of propsd required.
+Propsd will regularly inspect and reload these configuration settings, include new layers, etc. - no restarts of Propsd required.
 
 ## Usage
 
 See the [getting started guide][gsg] for help installing, configuring, and
-using propsd.
+using Propsd.
 
 ### Development
 

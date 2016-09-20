@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable rapid7/static-magic-numbers, max-nested-callbacks */
-
 require('./lib/helpers');
 
 const Source = require('./lib/stub/source');

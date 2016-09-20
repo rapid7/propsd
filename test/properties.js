@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
-
 require('./lib/helpers');
 
 const Properties = require('../lib/properties');
@@ -32,6 +28,55 @@ describe('Properties', function _() {
     });
 
     properties.build();
+  });
+
+  it('does not reorder source layers if build is called multiple times', function __(done) {
+    const localProps = new Properties();
+    const correctOrder = ['first', 'second'];
+
+    localProps.static({
+      hello: 'world'
+    }, 'first');
+    localProps.static({
+      world: 'hello'
+    }, 'second');
+
+    let ranOnce = false;
+
+    localProps.on('build', () => {
+      const layerKeys = localProps.layers.map((i) => i.namespace);
+
+      expect(layerKeys).to.eql(correctOrder);
+      if (ranOnce) {
+        expect(layerKeys).to.eql(correctOrder);
+        done();
+      }
+      ranOnce = true;
+    });
+
+    localProps.build().then(() => {
+      localProps.build();
+    });
+  });
+
+  it('does not reorder layers if the properties sources getter is called', function ___(done) {
+    const props = new Properties();
+    const sources = [
+      new Source.Stub({path: 'foo'}),
+      new Source.Stub({path: 'bar'}),
+      new Source.Stub({path: 'baz'})
+    ];
+    const view = props.view(sources);
+    const expected = ['foo', 'bar', 'baz'];
+    const reversed = ['baz', 'bar', 'foo'];
+
+    props.once('build', () => {
+      expect(props.sources.map((s) => s.properties.path)).to.eql(reversed);
+      expect(props.active.sources.map((s) => s.properties.path)).to.eql(expected);
+      done();
+    });
+
+    view.activate();
   });
 
   it('adds layers with namespaces', function __(done) {
@@ -160,7 +205,7 @@ describe('Properties', function _() {
     });
 
     sources.forEach((source, i) => {
-      source.properties = { // eslint-disable-line no-param-reassign
+      source.properties = {
         indexNumber: i
       };
 

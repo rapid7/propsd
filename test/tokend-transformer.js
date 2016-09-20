@@ -180,7 +180,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('throws an error if $tokend has no "resource" key', function (done) {
+  it('resolves a null property value if $tokend has no "resource" key', function (done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -195,15 +195,17 @@ describe('TokendTransformer', function () {
     const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
-      .then(() => done(new Error('No error for invalid $tokend.resource key')))
-      .catch((err) => {
-        expect(err).to.be.instanceOf(Error);
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: null
+        });
 
         done();
-      });
+      })
+      .catch(done);
   });
 
-  it('throws an error if $tokend.type is not "generic"', function (done) {
+  it('resolves a null property value if $tokend.type is not "generic"', function (done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -218,15 +220,17 @@ describe('TokendTransformer', function () {
     const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
-      .then(() => done(new Error('No error for invalid $tokend.type key')))
-      .catch((err) => {
-        expect(err).to.be.instanceOf(Error);
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: null
+        });
 
         done();
-      });
+      })
+      .catch(done);
   });
 
-  it('throws an error if the secret is not in a "plaintext" key', function (done) {
+  it('resolves a null property value if the secret is not in a "plaintext" key', function (done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -247,16 +251,18 @@ describe('TokendTransformer', function () {
     const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
-      .then(() => done(new Error('No error for missing "plaintext" key in Vault')))
-      .catch((err) => {
-        expect(err).to.be.instanceOf(Error);
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: null
+        });
 
         tokend.done();
         done();
-      });
+      })
+      .catch(done);
   });
 
-  it('throws an error if the secret is not JSON', function (done) {
+  it('resolves a null property value if the secret is not JSON', function (done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -273,13 +279,15 @@ describe('TokendTransformer', function () {
     const transformer = new TokendTransformer();
 
     transformer.transform(untransformedProperties)
-      .then(() => done(new Error('No error for invalid JSON secret in Vault')))
-      .catch((err) => {
-        expect(err).to.be.instanceOf(Error);
+      .then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: null
+        });
 
         tokend.done();
         done();
-      });
+      })
+      .catch(done);
   });
 });
 

@@ -52,6 +52,6 @@ describe('TokendClient', function () {
       tokend.done();
       done();
     })
-    .catch((err) => done(err));
+    .catch(done);
   });
 });

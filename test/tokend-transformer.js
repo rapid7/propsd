@@ -372,8 +372,8 @@ describe('Properties#build', function () {
         $tokend: {
           type: 'generic',
 
-          // This kali/root/password will overwrite the kali/user/password.
-          resource: '/v1/secret/default/kali/root/password'
+          // This is looking for a kali/user/password key which doesn't exist.
+          resource: '/v1/secret/default/kali/user/password'
         }
       }
     }));
@@ -383,8 +383,8 @@ describe('Properties#build', function () {
         $tokend: {
           type: 'generic',
 
-          // This is looking for a kali/user/password key which doesn't exist.
-          resource: '/v1/secret/default/kali/user/password'
+          // This kali/root/password will overwrite the kali/user/password.
+          resource: '/v1/secret/default/kali/root/password'
         }
       }
     }));

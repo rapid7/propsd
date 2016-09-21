@@ -54,4 +54,52 @@ describe('TokendClient', function () {
     })
     .catch(done);
   });
+
+  it('emits "update" events when secrets in Tokend change', function (done) {
+    // Nock clears a response after it's requested.
+    const tokend = nock('http://127.0.0.1:4500')
+
+      // First request comes from TokendClient.get call
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      })
+
+      // Second request comes from timer to check for changes
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'myvoiceismypassword'
+      });
+
+    const client = new TokendClient({
+      interval: 100
+    });
+
+    client.initialize().then(() => {
+      // First request will resolve with the original secret.
+      client.get('/v1/secret/default/kali/root/password').then((originalSecret) => {
+        expect(originalSecret).to.eql({
+          plaintext: 'toor'
+        });
+
+        // "update" will have fired once from the initialization; watch for subsequent update polling.
+        client.once('update', () => {
+          // Second request should resolve with the new secret.
+          client.get('/v1/secret/default/kali/root/password').then((updatedSecret) => {
+            expect(updatedSecret).to.eql({
+              plaintext: 'myvoiceismypassword'
+            });
+
+            client.shutdown();
+
+            tokend.done();
+            done();
+          })
+          .catch(done);
+        });
+      })
+      .catch(done);
+    })
+    .catch(done);
+  });
 });

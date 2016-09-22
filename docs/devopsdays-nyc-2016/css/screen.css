@@ -467,6 +467,8 @@ ins {
 }
 .timeline p {
   font-family: 'PT Sans Narrow', 'PT Sans', sans-serif;
+  font-size: 6rem;
+  line-height: 1;
 }
 /* PRODUCTS */
 .product h2 {
@@ -476,6 +478,7 @@ ins {
   font-family: 'Anonymous Pro', monospace;
 }
 /* STAMPS */
+.interrupt,
 .pattern,
 .anti-pattern {
   position: relative;
@@ -484,6 +487,7 @@ ins {
   text-align: center;
   font-family: 'Abril Fatface', 'PT Serif', serif;
 }
+.interrupt:before,
 .pattern:before,
 .anti-pattern:before {
   position: absolute;
@@ -510,4 +514,8 @@ ins {
 .anti-pattern:before {
   content: 'Anti-Pattern';
   color: red;
+}
+.interrupt:before {
+  content: 'Interrupt';
+  color: green;
 }

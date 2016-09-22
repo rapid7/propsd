@@ -219,6 +219,75 @@ pre {
   line-height: 9.6rem;
   font-family: 'Anonymous Pro', monospace;
 }
+.rss.icon {
+  position: relative;
+  color: #586e75;
+  overflow: hidden;
+}
+.rss.icon:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 3rem;
+  height: 3rem;
+  background: currentColor;
+  border-radius: 50%;
+}
+.rss.icon:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 50%;
+  height: 50%;
+  background: transparent;
+  border-width: 4rem 4rem 0 0;
+  border-style: double;
+  border-color: currentColor;
+  border-radius: 0 100% 0 0;
+}
+.email.icon {
+  position: relative;
+  color: #586e75;
+}
+.email.icon:before {
+  content: '';
+  z-index: 1;
+  position: absolute;
+  left: 2.4rem;
+  width: 4.8rem;
+  height: 4.8rem;
+  border-width: 0 .4rem .4rem 0;
+  border-style: solid;
+  border-color: rgb(244,242,240);
+  margin-top: -5.2rem;
+  background: transparent;
+  transform: rotate(39deg) skew(-12deg);
+}
+.email.icon span:before {
+  position: absolute;
+  content: '';
+  left: 1.2rem;
+  width: 2.4rem;
+  margin-top: -2.8rem;
+  border-width: 2.4rem;
+  border-style: solid;
+  border-color: currentColor currentColor transparent;
+  background: transparent;
+}
+.email.icon span:after {
+  position: absolute;
+  left: 1.6rem;
+  margin-top: -1.2rem;
+  content: '';
+  border-width: 0 3.2rem 3.6rem;
+  border-style: solid;
+  border-color: currentColor transparent;
+  background: transparent;
+}
 /* CARTOONS */
 .cartoon {
   display: flex;
@@ -317,6 +386,10 @@ del:after {
   text-align: center;
   transform: translate(-50%, -50%) rotate(-3deg) scale(8, .75);
   opacity: .7;
+}
+del.iconic:after {
+  transform: translate(-50%, -50%) rotate(-3deg) scale(4, 4) !important;
+  top: 40%;
 }
 ins {
   position: absolute;

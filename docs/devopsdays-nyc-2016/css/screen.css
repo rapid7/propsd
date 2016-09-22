@@ -29,38 +29,45 @@ header p + p:before {
   content: '|';
   margin: 0 1rem;
 }
+/* SLIDES */
 .step {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   position: relative;
-  width: 90rem;
+  width: 80rem;
+  height: 60rem;
   margin: 0 auto;
   font-size: 4.8rem;
   line-height: 1.5;
 }
 .impress-enabled .step {
-  opacity: 0.3;
-  -webkit-transition: opacity 1s;
-  -moz-transition:    opacity 1s;
-  -ms-transition:     opacity 1s;
-  -o-transition:      opacity 1s;
-  transition:         opacity 1s;
+}
+.impress-enabled .step.active {
 }
 
-.impress-enabled .step.active {
-  opacity: 1;
+/* CODE */
+pre {
+  font-size: 3.6rem;
+  line-height: 1.25;
+  font-family: 'Anonymous Pro', monospace;
 }
 
 .row {
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
 }
 
 .col {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .ops {
@@ -74,9 +81,8 @@ header p + p:before {
 .infographic {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10rem;
+  justify-content: space-around;
+  align-items: stretch;
 }
 
 .infographic > .row {
@@ -208,13 +214,119 @@ header p + p:before {
   border: 0.1rem solid #586e75;
   border-radius: 6.25% 6.25% 0 0;
 }
+/* CARTOONS */
+.cartoon {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.spoken {
+  position: relative;
+  display: block;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 1rem;
+  padding: 1rem;
+  font-size: 3.6rem;
+  line-height: 1.5;
+  z-index: 1;
+}
+.spoken:before {
+  content: '';
+  position: absolute;
+  bottom: -2rem; /* value = -(border-top-wdith - border-bottom-width) */
+  left: 8rem;
+  border-width: 2rem 2rem 0;
+  border-style: solid;
+  border-color: #000 transparent;
+  display: block;
+  width: 0;
+}
+.spoken:after {
+  content: '';
+  position: absolute;
+  bottom: -1.8rem; /* value = -(border-top-wdith - border-bottom-width) */
+  left: 8.2rem; /* value = before:left + before:border-left - after:border-left */
+  border-width: 1.8rem 1.8rem 0;
+  border-style: solid;
+  border-color: #fff transparent;
+  display: block;
+  width: 0;
+}
+.informative {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: .1rem solid #000;
+  border-right: none;
+  background: #fff;
+  font-size: 3.6rem;
+  line-height: 1;
+  padding: 1rem;
+}
+.informative:before {
+  content: '';
+  position: absolute;
+  top: -.1rem;
+  right: -3rem;
+  background: transparent;
+  border-width: 5.9rem 3rem 0 0;
+  border-style: solid;
+  border-color: #000 transparent;
+  display: block;
+  width: 0;
+  z-index: -1;
+}
+.informative:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -2.8rem;
+  background: transparent;
+  border-width: 5.9rem 3rem 0 0;
+  border-style: solid;
+  border-color: #fff transparent;
+  display: block;
+  width: 0;
+  z-index: -1;
+}
+/* EDITS */
+.edited {
+  position: relative;
+  font-size: 4.8rem;
+  line-height: 1;
+}
+del {
+  position: relative;
+  text-decoration: none;
+}
+del:after {
+  content: 'X';
+  color: red;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  transform: translate(-50%, -50%) rotate(-3deg) scale(8, .75);
+  opacity: .7;
+}
+ins {
+  position: absolute;
+  top: -150%;
+  right: -75%;
+  text-decoration: none;
+  white-space: pre;
+  transform: rotate(-11deg);
+}
 /* PHOTOS */
-.photos {
+.album {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-around;
   align-items: center;
+  width: 100%;
 }
 .photo {
   display: flex;
@@ -223,6 +335,7 @@ header p + p:before {
   align-items: center;
   background: rgba(255,255,255,1);
   padding: 1.5%;
+  padding: 1.2rem;
   border: .1rem solid rgba(0,0,0,.4);
   font-size: 3.2rem;
   line-height: 4.8rem;
@@ -231,28 +344,24 @@ header p + p:before {
 }
 .photo > img {
   display: block;
-  width: 20rem;
-  height: 20rem;
+  width: 18rem;
+  height: 18rem;
   border: .1rem solid rgba(0,0,0,.3);
 }
-.photo:nth-child(even) {
+.photo.r2,
+.photo.r4 {
   transform: rotate(2deg);
 }
-.photo:nth-child(3n) {
+.photo.r3 {
   position: relative;
   top: -.5rem;
 }
-.photo:nth-child(5n) {
+.photo.r5 {
   transform: rotate(5deg);
   position: relative;
   right: .5rem;
 }
-.photo:nth-child(11n) {
-  position: relative;
-  top: .8rem;
-  right: .5rem;
-}
-.photo:nth-child(6n) {
+.photo.r6 {
   position: relative;
   top: .3rem;
   left: -.5rem;

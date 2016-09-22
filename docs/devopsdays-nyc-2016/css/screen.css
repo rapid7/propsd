@@ -9,9 +9,12 @@ html {
 }
 body {
   /* http://uigradients.com/#Clouds */
+  /*
   background: #ece9e6;
   background: -webkit-linear-gradient(to left, #ece9e6, #ffffff);
   background: linear-gradient(to left, #ece9e6, #ffffff);
+  */
+  background: rgb(244,242,240);
   color: #333;
 }
 a, a:visited, a:hover {
@@ -119,6 +122,7 @@ pre {
 
 .title {
   font-family: 'Abril Fatface', 'PT Serif', serif;
+  text-align: center;
 }
 
 .stage h2 {
@@ -132,50 +136,13 @@ pre {
   line-height: 9.6rem;
 }
 
-.anti-pattern {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.anti-pattern h2 {
-  font-family: 'PT Sans Narrow', sans-serif;
-  font-size: 2.4rem;
-  line-height: 2.4rem;
-}
-.anti-pattern h3 {
-  font-family: 'Abril Fatface', 'PT Serif', serif;
-  font-size: 9.6rem;
-  line-height: 9.6rem;
-}
-.anti-pattern .row {
-  justify-content: space-around;
-  width: 100%;
-}
-.anti-pattern .icon {
-  transform: none !important;
-}
-
-.pattern h2 {
-  font-family: 'PT Sans Narrow', sans-serif;
-  font-size: 2.4rem;
-  line-height: 2.4rem;
-}
-
-.pattern h3 {
-  font-family: 'Abril Fatface', 'PT Serif', serif;
-  font-size: 9.6rem;
-  line-height: 9.6rem;
-}
-
-#dev .infographic,
-#ops .infographic {
-  width: 50%;
-}
-
 .icon {
   display: inline-block;
   width: 9.6rem;
   height: 9.6rem;
+  font-size: 4.8rem;
+  line-height: 9.6rem;
+  white-space: pre;
 }
 .icon:before,
 .icon:after {
@@ -185,6 +152,9 @@ pre {
   background: silver;
 }
 
+.human.icon {
+  transform: none !important;
+}
 .human.icon:before {
   width: 31.25%;
   height: 34.375%;
@@ -214,6 +184,41 @@ pre {
   border: 0.1rem solid #586e75;
   border-radius: 6.25% 6.25% 0 0;
 }
+.document.icon {
+  position: relative;
+  width: 7.8rem;
+  border: .4rem solid #586e75;
+  margin: 0 auto;
+}
+.document.icon:before {
+  content: '';
+  position: absolute;
+  top: -.4rem;
+  left: -.4rem;
+  background: transparent;
+  border: 1.5rem solid transparent;
+  border-color: rgb(244,242,240) #586e75 #586e75 rgb(244,242,240);
+  display: block;
+  width: 0;
+}
+.document.icon:after {
+  content: '\2263';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: transparent;
+  font-size: 9.6rem;
+  line-height: 1;
+  color: #586e75;
+  transform: translate(-50%, -50%);
+}
+.document.code:after {
+  content: '{}';
+  font-size: 4.8rem;
+  font-weight: bold;
+  line-height: 9.6rem;
+  font-family: 'Anonymous Pro', monospace;
+}
 /* CARTOONS */
 .cartoon {
   display: flex;
@@ -236,23 +241,25 @@ pre {
   content: '';
   position: absolute;
   bottom: -2rem; /* value = -(border-top-wdith - border-bottom-width) */
-  left: 8rem;
+  left: 50%;
   border-width: 2rem 2rem 0;
   border-style: solid;
   border-color: #000 transparent;
   display: block;
   width: 0;
+  transform: translate(-50%, 0);
 }
 .spoken:after {
   content: '';
   position: absolute;
   bottom: -1.8rem; /* value = -(border-top-wdith - border-bottom-width) */
-  left: 8.2rem; /* value = before:left + before:border-left - after:border-left */
+  left: 50%; /* value = before:left + before:border-left - after:border-left */
   border-width: 1.8rem 1.8rem 0;
   border-style: solid;
   border-color: #fff transparent;
   display: block;
   width: 0;
+  transform: translate(-50%, 0);
 }
 .informative {
   position: absolute;
@@ -394,4 +401,40 @@ ins {
 }
 .product a {
   font-family: 'Anonymous Pro', monospace;
+}
+/* STAMPS */
+.pattern,
+.anti-pattern {
+  position: relative;
+  font-size: 6rem;
+  line-height: 1;
+  text-align: center;
+  font-family: 'Abril Fatface', 'PT Serif', serif;
+}
+.pattern:before,
+.anti-pattern:before {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  text-transform: uppercase;
+  letter-spacing: .5rem;
+  text-align: center;
+  font-size: 3.6rem;
+  line-height: 1;
+  border: .5rem solid currentColor;
+  border-radius: 1rem;
+  padding: 1rem;
+  transform: translate(-50%, -50%) rotate(-7deg);
+  opacity: .5;
+  font-weight: bold;
+  white-space: pre;
+  font-family: 'PT Sans Narrow', 'PT Sans', sans-serif;
+}
+.pattern:before {
+  content: 'Pattern';
+  color: green;
+}
+.anti-pattern:before {
+  content: 'Anti-Pattern';
+  color: red;
 }

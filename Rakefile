@@ -52,7 +52,7 @@ def base_dir
 end
 
 task :install do
-  sh 'npm install --only=prod'
+  sh 'npm install --production'
 end
 
 task :shrinkwrap => [:install] do

@@ -288,6 +288,65 @@ pre {
   border-color: currentColor transparent;
   background: transparent;
 }
+.storage {
+  position: relative;
+  color: #586e75;
+  background: currentColor;
+  width: 9.6rem;
+}
+.storage:before {
+  position: absolute;
+  left: 0;
+  bottom: -25%;
+  content: '';
+  width: 9.6rem;
+  height: 50%;
+  background: currentColor;
+  border-radius: 50%;
+}
+.storage:after {
+  position: absolute;
+  left: 0;
+  top: -25%;
+  content: '';
+  width: 9.2rem;
+  height: 50%;
+  background: rgb(244,242,240);
+  border: .2rem solid currentColor;
+  border-radius: 50%;
+}
+/* http://one-div.com/pictos/cloud/ */
+.cloud {
+  position: relative;
+  margin-top: .5rem;
+  width: 3rem;
+  height: 1rem;
+  color: #586e75;
+  background: currentColor;
+  background-image: linear-gradient(hsla(0,0%,0%,0), hsla(0,0%,0%,.1));
+  border-radius: 1rem;
+}
+.cloud:before {
+  content: '';
+  position: absolute;
+  top: -.75rem;
+  left: .4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: currentColor;
+  background-image: linear-gradient(hsla(0,0%,0%,0) 50%, hsla(0,0%,0%,.075));
+  border-radius: 100%;
+}
+.cloud:after {
+  position: absolute;
+  top: -.5rem;
+  right: .4rem;
+  width: 1rem;
+  height: 1rem;
+  background: currentColor;
+  background-image: linear-gradient(hsla(0,0%,0%,0) 50%, hsla(0,0%,0%,.025));
+  border-radius: 100%;
+}
 /* CARTOONS */
 .cartoon {
   display: flex;
@@ -478,6 +537,7 @@ ins {
   font-family: 'Anonymous Pro', monospace;
 }
 /* STAMPS */
+.costly,
 .interrupt,
 .pattern,
 .anti-pattern {
@@ -487,6 +547,7 @@ ins {
   text-align: center;
   font-family: 'Abril Fatface', 'PT Serif', serif;
 }
+.costly:before,
 .interrupt:before,
 .pattern:before,
 .anti-pattern:before {
@@ -518,4 +579,8 @@ ins {
 .interrupt:before {
   content: 'Interrupt';
   color: green;
+}
+.costly:before {
+  content: '$$$';
+  color: red;
 }

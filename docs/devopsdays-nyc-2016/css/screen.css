@@ -19,6 +19,7 @@ body {
 }
 a, a:visited, a:hover {
   text-decoration: none;
+  color: #333;
 }
 header {
   display: flex;
@@ -95,25 +96,22 @@ pre {
 }
 
 .infographic .icon + .icon {
-  margin-bottom: 2rem;
+  margin-top: 1rem;
 }
 
 .infographic .icon:nth-child(even) {
   transform: rotate(4deg);
   position: relative;
-  top: .5rem;
 }
 
 .infographic .icon:nth-child(3n) {
   transform: rotate(-3deg);
   position: relative;
-  top: -.5rem;
 }
 
 .infographic .icon:nth-child(5n) {
   transform: rotate(5deg);
   position: relative;
-  top: -1rem;
 }
 
 .infographic p {
@@ -149,11 +147,12 @@ pre {
   display: block;
   margin: 0 auto;
   content: '';
-  background: silver;
+  background: currentColor;
 }
 
 .human.icon {
   transform: none !important;
+  color: silver;
 }
 .human.icon:before {
   width: 31.25%;
@@ -167,7 +166,14 @@ pre {
   border: 0.1rem solid #586e75;
   border-radius: 50% 50% 0 0;
 }
+.computer.icon {
+  color: silver;
+}
 .computer.icon:before {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  content: attr(data-type);
   width: 75%;
   height: 50%;
   border: .8rem solid transparent;
@@ -183,6 +189,13 @@ pre {
   height: 30%;
   border: 0.1rem solid #586e75;
   border-radius: 6.25% 6.25% 0 0;
+}
+.server.icon:before {
+  box-shadow:
+    0 0 0 0.1rem rgba(88,110,117,1)
+  , inset 0 0 0 0.1rem rgba(88,110,117,1)
+  , inset 0 100rem 0 0.1rem rgba(190,80,27,1)
+  ;
 }
 .document.icon {
   position: relative;
@@ -288,13 +301,13 @@ pre {
   border-color: currentColor transparent;
   background: transparent;
 }
-.storage {
+.storage.icon {
   position: relative;
   color: #586e75;
   background: currentColor;
   width: 9.6rem;
 }
-.storage:before {
+.storage.icon:before {
   position: absolute;
   left: 0;
   bottom: -25%;
@@ -304,7 +317,7 @@ pre {
   background: currentColor;
   border-radius: 50%;
 }
-.storage:after {
+.storage.icon:after {
   position: absolute;
   left: 0;
   top: -25%;
@@ -316,36 +329,85 @@ pre {
   border-radius: 50%;
 }
 /* http://one-div.com/pictos/cloud/ */
-.cloud {
+.cloud.icon {
   position: relative;
-  margin-top: .5rem;
-  width: 3rem;
-  height: 1rem;
+  margin-top: 1.6rem;
+  width: 9.6rem;
+  height: 3.2rem;
   color: #586e75;
   background: currentColor;
   background-image: linear-gradient(hsla(0,0%,0%,0), hsla(0,0%,0%,.1));
-  border-radius: 1rem;
+  border-radius: 3.2rem;
 }
-.cloud:before {
+.cloud.icon:before {
   content: '';
   position: absolute;
-  top: -.75rem;
-  left: .4rem;
-  width: 1.6rem;
-  height: 1.6rem;
+  top: -2.4rem;
+  left: 1.3rem;
+  width: 5.1rem;
+  height: 5.1rem;
   background: currentColor;
   background-image: linear-gradient(hsla(0,0%,0%,0) 50%, hsla(0,0%,0%,.075));
-  border-radius: 100%;
+  border-radius: 50%;
 }
-.cloud:after {
+.cloud.icon:after {
   position: absolute;
-  top: -.5rem;
-  right: .4rem;
-  width: 1rem;
-  height: 1rem;
+  top: -1.6rem;
+  right: 1.3rem;
+  width: 3.2rem;
+  height: 3.2rem;
   background: currentColor;
   background-image: linear-gradient(hsla(0,0%,0%,0) 50%, hsla(0,0%,0%,.025));
-  border-radius: 100%;
+  border-radius: 50%;
+}
+.lock.icon {
+  position: relative;
+  color: #586e75;
+  background: transparent;
+}
+.lock.icon:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+.lock.icon:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 25%;
+  height: 25%;
+  border: .8rem solid currentColor;
+  border-bottom: 0;
+  background: transparent;
+  border-radius: 100% 100% 0 0;
+  transform: translateX(-50%);
+}
+.lock.icon span:before {
+  content: '';
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 19%;
+  height: 19%;
+  border-radius: 50%;
+  background: rgb(244,242,240);
+  transform: translate(-50%, -50%);
+}
+.lock.icon span:after {
+  content: '';
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  width: 10%;
+  height: 20%;
+  background: rgb(244,242,240);
+  transform: translate(-50%, -50%);
 }
 /* CARTOONS */
 .cartoon {
@@ -481,7 +543,7 @@ ins {
   box-shadow: .1rem .1rem .3rem rgba(0,0,0,.3);
   transform: rotate(-2deg);
 }
-.photo > img {
+.photo > * {
   display: block;
   width: 18rem;
   height: 18rem;

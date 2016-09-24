@@ -134,6 +134,7 @@ pre {
   line-height: 9.6rem;
 }
 
+/* http://nicolasgallagher.com/pure-css-gui-icons/ */
 .icon {
   display: inline-block;
   width: 9.6rem;
@@ -599,6 +600,7 @@ ins {
   font-family: 'Anonymous Pro', monospace;
 }
 /* STAMPS */
+.xp,
 .costly,
 .interrupt,
 .pattern,
@@ -609,6 +611,7 @@ ins {
   text-align: center;
   font-family: 'Abril Fatface', 'PT Serif', serif;
 }
+.xp:before,
 .costly:before,
 .interrupt:before,
 .pattern:before,
@@ -645,4 +648,8 @@ ins {
 .costly:before {
   content: '$$$';
   color: red;
+}
+.xp:before {
+  content: 'Level Up';
+  color: green;
 }

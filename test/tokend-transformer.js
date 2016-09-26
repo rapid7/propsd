@@ -12,14 +12,26 @@ const Source = require('./lib/stub/source');
 Properties.BUILD_HOLD_DOWN = 100;
 
 describe('TokendTransformer', function () {
+  let _transformer = null;
+
   beforeEach(function () {
     nock.cleanAll();
+
+    if (_transformer) {
+      _transformer._client.shutdown();
+    }
+  });
+
+  afterEach(function () {
+    if (_transformer) {
+      _transformer._client.shutdown();
+    }
   });
 
   it('transforms null properties', function (done) {
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(null)
+    _transformer.transform(null)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -29,9 +41,9 @@ describe('TokendTransformer', function () {
   });
 
   it('transforms undefined properties', function (done) {
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(undefined)
+    _transformer.transform(undefined)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -41,9 +53,9 @@ describe('TokendTransformer', function () {
   });
 
   it('transforms empty properties', function (done) {
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform({})
+    _transformer.transform({})
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -68,9 +80,9 @@ describe('TokendTransformer', function () {
         plaintext: 'toor'
       });
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(untransformedProperties).to.not.eql(transformedProperties);
         expect(transformedProperties).to.eql({
@@ -101,9 +113,9 @@ describe('TokendTransformer', function () {
         plaintext: 'toor'
       });
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(untransformedProperties).to.not.eql(transformedProperties);
         expect(transformedProperties).to.eql({
@@ -146,9 +158,9 @@ describe('TokendTransformer', function () {
           plaintext: 'resu'
         });
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(untransformedProperties).to.not.eql(transformedProperties);
         expect(transformedProperties).to.eql({
@@ -169,9 +181,9 @@ describe('TokendTransformer', function () {
       key: 'value'
     };
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -192,9 +204,9 @@ describe('TokendTransformer', function () {
       }
     };
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({
           password: null
@@ -217,9 +229,9 @@ describe('TokendTransformer', function () {
       }
     };
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({
           password: null
@@ -248,9 +260,9 @@ describe('TokendTransformer', function () {
         plaintexts: 'toor'
       });
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({
           password: null
@@ -276,9 +288,9 @@ describe('TokendTransformer', function () {
         .get('/v1/secret/default/kali/root/password')
         .reply(200, 'toor');
 
-    const transformer = new TokendTransformer();
+    _transformer = new TokendTransformer();
 
-    transformer.transform(untransformedProperties)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({
           password: null
@@ -292,8 +304,20 @@ describe('TokendTransformer', function () {
 });
 
 describe('Properties#build', function () {
+  let _properties = null;
+
   beforeEach(function () {
     nock.cleanAll();
+
+    if (_properties) {
+      _properties.tokendTransformer._client.shutdown();
+    }
+  });
+
+  afterEach(function () {
+    if (_properties) {
+      _properties.tokendTransformer._client.shutdown();
+    }
   });
 
   it('transforms $tokend objects in static properties', function (done) {
@@ -303,9 +327,9 @@ describe('Properties#build', function () {
           plaintext: 'toor'
         });
 
-    const properties = new Properties();
+    _properties = new Properties();
 
-    properties.static({
+    _properties.static({
       password: {
         $tokend: {
           type: 'generic',
@@ -314,7 +338,7 @@ describe('Properties#build', function () {
       }
     });
 
-    properties.once('build', (transformedProperties) => {
+    _properties.once('build', (transformedProperties) => {
       expect(transformedProperties).to.be.instanceOf(Object);
       expect(transformedProperties).to.eql({
         password: 'toor'
@@ -324,7 +348,7 @@ describe('Properties#build', function () {
       done();
     });
 
-    properties.build();
+    _properties.build();
   });
 
   it('transforms $tokend objects in dynamic properties', function (done) {
@@ -334,9 +358,9 @@ describe('Properties#build', function () {
           plaintext: 'toor'
         });
 
-    const properties = new Properties();
+    _properties = new Properties();
 
-    properties.dynamic(new Source.Stub({
+    _properties.dynamic(new Source.Stub({
       password: {
         $tokend: {
           type: 'generic',
@@ -345,7 +369,7 @@ describe('Properties#build', function () {
       }
     }));
 
-    properties.once('build', (transformedProperties) => {
+    _properties.once('build', (transformedProperties) => {
       expect(transformedProperties).to.be.instanceOf(Object);
       expect(transformedProperties).to.eql({
         password: 'toor'
@@ -355,7 +379,7 @@ describe('Properties#build', function () {
       done();
     });
 
-    properties.build();
+    _properties.build();
   });
 
   it('transforms $tokend objects after they are merged', function (done) {
@@ -365,9 +389,9 @@ describe('Properties#build', function () {
           plaintext: 'toor'
         });
 
-    const properties = new Properties();
+    _properties = new Properties();
 
-    properties.dynamic(new Source.Stub({
+    _properties.dynamic(new Source.Stub({
       password: {
         $tokend: {
           type: 'generic',
@@ -378,7 +402,7 @@ describe('Properties#build', function () {
       }
     }));
 
-    properties.dynamic(new Source.Stub({
+    _properties.dynamic(new Source.Stub({
       password: {
         $tokend: {
           type: 'generic',
@@ -389,7 +413,7 @@ describe('Properties#build', function () {
       }
     }));
 
-    properties.once('build', (transformedProperties) => {
+    _properties.once('build', (transformedProperties) => {
       expect(transformedProperties).to.be.instanceOf(Object);
       expect(transformedProperties).to.eql({
         password: 'toor'
@@ -399,7 +423,7 @@ describe('Properties#build', function () {
       done();
     });
 
-    properties.build();
+    _properties.build();
   });
 
   it('builds new properties when values in Tokend change', function (done) {
@@ -417,9 +441,9 @@ describe('Properties#build', function () {
         plaintext: 'myvoiceismypassword'
       });
 
-    const properties = new Properties();
+    _properties = new Properties();
 
-    properties.dynamic(new Source.Stub({
+    _properties.dynamic(new Source.Stub({
       password: {
         $tokend: {
           type: 'generic',
@@ -430,14 +454,14 @@ describe('Properties#build', function () {
       }
     }));
 
-    properties.initialize().then((initializedProperties) => {
+    _properties.initialize().then((initializedProperties) => {
       // First request will resolve with the original secret.
       expect(initializedProperties.properties).to.eql({
         password: 'toor'
       });
 
       // "build" will have fired once from the initialization; watch for updates from polling
-      properties.once('build', (updatedProperties) => {
+      _properties.once('build', (updatedProperties) => {
         expect(updatedProperties).to.eql({
           password: 'myvoiceismypassword'
         });

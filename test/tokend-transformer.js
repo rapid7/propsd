@@ -401,4 +401,51 @@ describe('Properties#build', function () {
 
     properties.build();
   });
+
+  it('builds new properties when values in Tokend change', function (done) {
+    const tokend = nock('http://127.0.0.1:4500')
+
+      // First request comes from Properties.initialize() call
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      })
+
+      // Second request comes from timer to check for changes
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'myvoiceismypassword'
+      });
+
+    const properties = new Properties();
+
+    properties.dynamic(new Source.Stub({
+      password: {
+        $tokend: {
+          type: 'generic',
+
+          // This kali/root/password will overwrite the kali/user/password.
+          resource: '/v1/secret/default/kali/root/password'
+        }
+      }
+    }));
+
+    properties.initialize().then((initializedProperties) => {
+      // First request will resolve with the original secret.
+      expect(initializedProperties.properties).to.eql({
+        password: 'toor'
+      });
+
+      // "build" will have fired once from the initialization; watch for updates from polling
+      properties.once('build', (updatedProperties) => {
+        expect(updatedProperties).to.eql({
+          password: 'myvoiceismypassword'
+        });
+
+        tokend.done();
+        done();
+      });
+    })
+    .catch(done);
+  });
 });

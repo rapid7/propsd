@@ -83,9 +83,7 @@ describe('TokendClient', function () {
         plaintext: 'myvoiceismypassword'
       });
 
-    _client = new TokendClient({
-      interval: 100
-    });
+    _client = new TokendClient();
 
     _client.initialize().then(() => {
       // First request will resolve with the original secret.

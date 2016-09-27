@@ -29,9 +29,11 @@ describe('TokendTransformer', function () {
   });
 
   it('transforms null properties', function (done) {
+    const untransformedProperties = null;
+
     _transformer = new TokendTransformer();
 
-    _transformer.transform(null)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -41,9 +43,11 @@ describe('TokendTransformer', function () {
   });
 
   it('transforms undefined properties', function (done) {
+    const untransformedProperties = undefined;
+
     _transformer = new TokendTransformer();
 
-    _transformer.transform(undefined)
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -53,9 +57,11 @@ describe('TokendTransformer', function () {
   });
 
   it('transforms empty properties', function (done) {
+    const untransformedProperties = {};
+
     _transformer = new TokendTransformer();
 
-    _transformer.transform({})
+    _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
         expect(transformedProperties).to.eql({});
 
@@ -84,7 +90,6 @@ describe('TokendTransformer', function () {
 
     _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
-        expect(untransformedProperties).to.not.eql(transformedProperties);
         expect(transformedProperties).to.eql({
           password: 'toor'
         });
@@ -117,7 +122,6 @@ describe('TokendTransformer', function () {
 
     _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
-        expect(untransformedProperties).to.not.eql(transformedProperties);
         expect(transformedProperties).to.eql({
           database: {
             password: 'toor'
@@ -162,7 +166,6 @@ describe('TokendTransformer', function () {
 
     _transformer.transform(untransformedProperties)
       .then((transformedProperties) => {
-        expect(untransformedProperties).to.not.eql(transformedProperties);
         expect(transformedProperties).to.eql({
           database: {
             'root-password': 'toor',
@@ -339,7 +342,6 @@ describe('Properties#build', function () {
     });
 
     _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.be.instanceOf(Object);
       expect(transformedProperties).to.eql({
         password: 'toor'
       });
@@ -370,7 +372,6 @@ describe('Properties#build', function () {
     }));
 
     _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.be.instanceOf(Object);
       expect(transformedProperties).to.eql({
         password: 'toor'
       });
@@ -414,7 +415,6 @@ describe('Properties#build', function () {
     }));
 
     _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.be.instanceOf(Object);
       expect(transformedProperties).to.eql({
         password: 'toor'
       });

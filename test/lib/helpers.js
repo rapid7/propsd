@@ -10,5 +10,10 @@ Config.defaults({
     interval: 30000,
     region: 'us-east-1',
     bucket: 'fake-default-bucket-for-testing'
+  },
+  tokend: {
+    host: '127.0.0.1',
+    port: 4500,
+    interval: 100
   }
 });

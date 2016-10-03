@@ -103,8 +103,7 @@ task :release => [:install, :shrinkwrap, :pack] do
   release = github_client.create_release(
     github_repo,
     "v#{version}",
-    :name => "v#{version}",
-    :draft => true
+    :name => "v#{version}", :draft => true
   )
 
   [

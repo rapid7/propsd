@@ -101,11 +101,14 @@ To cut a release do the following:
 
 This can be accomplished by running the following commands:
 ~~~bash
-npm version minor
-rake
+$ npm version minor
+$ bundle exec rake default
 ~~~
-Then following the steps to create the release on github.com
+To be able to create a new release on [github.com], you must have the following environment variables set:
+* `GITHUB_CLIENT_ID`
+* `GITHUB_CLIENT_TOKEN`
 
+and the user and token must have the appropriate permissions in this repository.
 
 [Node.js]: https://nodejs.org/en/
 [http-api]: docs/http-api.md
@@ -118,3 +121,4 @@ Then following the steps to create the release on github.com
 [Consul]: https://www.consul.io/
 [Amazon S3]: https://aws.amazon.com/s3/
 [gsg]: ./docs/getting-started/
+[github.com]: https://github.com

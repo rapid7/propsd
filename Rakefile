@@ -40,11 +40,11 @@ def repo
 end
 
 def target_version
-  ::File.read(::File.join(@base_dir, '.nvmrc')).strip()
+  ::File.read(::File.join(base_dir, '.nvmrc')).strip.delete('v')
 end
 
 def max_version
-   target_version.split('.').first.to_f + 1
+  target_version.split('.').first.to_f + 1
 end
 
 def install_dir

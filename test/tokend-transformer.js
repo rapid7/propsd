@@ -9,7 +9,7 @@ const Properties = require('../lib/properties');
 const Source = require('./lib/stub/source');
 
 // Speed up testing by shortening the time we wait for properties to build.
-Properties.BUILD_HOLD_DOWN = 100;
+Properties.BUILD_HOLD_DOWN = 10;
 
 describe('TokendTransformer', function () {
   let _transformer = null;

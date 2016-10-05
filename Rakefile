@@ -10,6 +10,7 @@ include FileUtils
 
 CLIENT_ID = ENV['GITHUB_CLIENT_ID']
 CLIENT_TOKEN = ENV['GITHUB_CLIENT_TOKEN']
+ARTIFACT_BUCKET = ENV['ARTIFACT_BUCKET']
 
 def package_json
   @package_json ||= JSON.parse(File.read('package.json'))
@@ -152,16 +153,16 @@ task :deb => [:chdir_pkg, :propsd_source] do
     'opt/'
   ].join(' ')
   sh command
-  mkdir 'copy_to_s3'
-  deb = Dir["#{name}_#{version}_*.deb"].first
-  cp deb, 'copy_to_s3/'
 end
 
 task :upload_packages => [:deb] do
+  mkdir 'copy_to_s3'
+  deb = Dir["#{name}_#{version}_*.deb"].first
+  cp deb, 'copy_to_s3/'
   s3 = Aws::S3::Resource.new(region: 'us-east-1', logger: Logger.new(STDOUT))
   Dir["copy_to_s3/**/#{name}*"].each do |package|
     upload_package = ::File.basename(package)
-    s3.bucket('artifacts.core-0.r7ops.com').object("#{name}/#{upload_package}").upload_file(package)
+    s3.bucket(ARTIFACT_BUCKET).object("#{name}/#{upload_package}").upload_file(package)
   end
 end
 

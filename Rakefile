@@ -56,12 +56,12 @@ def config_dir
   ::File.join(install_dir, 'config')
 end
 
-def base_dir
-  @base_dir ||= File.dirname(File.expand_path(__FILE__))
-end
-
 def pkg_dir
   ::File.join(base_dir, 'pkg')
+end
+
+def base_dir
+  @base_dir ||= File.dirname(File.expand_path(__FILE__))
 end
 
 def github_client
@@ -76,6 +76,9 @@ end
 
 task :install do
   sh 'npm install --production'
+  # This is required because the conditional package bundles a devDependency
+  # that bundles conditional and causes shrinkwrap to complain
+  sh 'npm prune --production'
 end
 
 task :shrinkwrap => [:install] do
@@ -84,38 +87,6 @@ end
 
 task :pack => [:shrinkwrap] do
   sh 'npm pack'
-end
-
-desc "Release #{name} and prepare to create a release on github.com"
-task :release => [:install, :shrinkwrap, :pack] do
-  puts
-  puts "Create a new #{version} release on github.com and upload the #{name} tarball"
-  puts 'You can find directions here: https://github.com/blog/1547-release-your-software'
-  puts 'Make sure you add release notes!'
-
-  cp ::File.join(base_dir, "#{name}-#{version}.tgz"), pkg_dir
-
-  begin
-    latest_release = github_client.latest_release(github_repo)
-  rescue Octokit::NotFound
-    latest_release = OpenStruct.new(name: 'master')
-  end
-
-  release = github_client.create_release(
-    github_repo,
-    "v#{version}",
-    :name => "v#{version}", :draft => true
-  )
-
-  [
-    ::File.join(pkg_dir, "#{name}-#{version}.tgz"),
-    ::File.join(pkg_dir, "#{name}-#{version}_amd64.deb")
-  ].each do |f|
-    github_client.upload_asset(release.url, f)
-  end
-  puts "Draft release created at #{release.html_url}. Make sure you add release notes!"
-  compare_url = "#{github_repo.url}/compare/#{latest_release.name}...#{release.name}"
-  puts "You can find a diff between this release and the previous one here: #{compare_url}"
 end
 
 task :package_dirs do
@@ -165,13 +136,45 @@ task :upload_packages => [:deb] do
   end
 end
 
-desc "Package #{name} and upload package to S3 bucket"
-task :package => [:upload_packages]
+desc "Release #{name} and prepare to create a release on github.com"
+task :release => [:package] do
+  puts
+  puts "Create a new #{version} release on github.com and upload the #{name} tarball"
+  puts 'You can find directions here: https://github.com/blog/1547-release-your-software'
+  puts 'Make sure you add release notes!'
+
+  cp ::File.join(base_dir, "#{name}-#{version}.tgz"), pkg_dir
+
+  begin
+    latest_release = github_client.latest_release(github_repo)
+  rescue Octokit::NotFound
+    latest_release = OpenStruct.new(name: 'master')
+  end
+
+  release = github_client.create_release(
+    github_repo,
+    "v#{version}",
+    :name => "v#{version}", :draft => true
+  )
+
+  [
+    ::File.join(pkg_dir, "#{name}-#{version}.tgz"),
+    ::File.join(pkg_dir, "#{name}-#{version}_amd64.deb")
+  ].each do |f|
+    github_client.upload_asset(release.url, f)
+  end
+  puts "Draft release created at #{release.html_url}. Make sure you add release notes!"
+  compare_url = "#{github_repo.url}/compare/#{latest_release.name}...#{release.name}"
+  puts "You can find a diff between this release and the previous one here: #{compare_url}"
+end
+
+desc "Package #{name}"
+task :package => [:install, :shrinkwrap, :pack, :deb]
 
 CLEAN.include 'npm-shrinkwrap.json'
 CLEAN.include "#{name}-*.tgz"
 CLEAN.include 'pkg/'
+CLEAN.include '**/.DS_Store'
+CLEAN.include 'node_modules/'
 
-CLOBBER.include 'node_modules/'
-
-task :default => [:clobber, :release, :package]
+task :default => [:clean, :package, :release]

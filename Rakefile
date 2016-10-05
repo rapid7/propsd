@@ -136,6 +136,8 @@ end
 
 task :deb => [:chdir_pkg, :propsd_source] do
   command = [
+    'bundle',
+    'exec',
     'fpm',
     '--deb-no-default-config-files',
     "--depends \"nodejs >= #{target_version}\"",
@@ -148,7 +150,7 @@ task :deb => [:chdir_pkg, :propsd_source] do
     "-n \"#{name}\"",
     "-v #{version}",
     'opt/'
-    ].join(' ')
+  ].join(' ')
   sh command
   mkdir 'copy_to_s3'
   deb = Dir["#{name}_#{version}_*.deb"].first

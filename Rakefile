@@ -41,7 +41,7 @@ def repo
 end
 
 def target_version
-  ::File.read(::File.join(base_dir, '.nvmrc')).strip.delete('v')
+  `node --version`.strip.delete('v')
 end
 
 def max_version

@@ -10,6 +10,7 @@ include FileUtils
 
 CLIENT_ID = ENV['GITHUB_CLIENT_ID']
 CLIENT_TOKEN = ENV['GITHUB_CLIENT_TOKEN']
+ARTIFACT_BUCKET = ENV['ARTIFACT_BUCKET']
 
 def package_json
   @package_json ||= JSON.parse(File.read('package.json'))
@@ -55,12 +56,12 @@ def config_dir
   ::File.join(install_dir, 'config')
 end
 
-def base_dir
-  @base_dir ||= File.dirname(File.expand_path(__FILE__))
-end
-
 def pkg_dir
   ::File.join(base_dir, 'pkg')
+end
+
+def base_dir
+  @base_dir ||= File.dirname(File.expand_path(__FILE__))
 end
 
 def github_client
@@ -75,6 +76,9 @@ end
 
 task :install do
   sh 'npm install --production'
+  # This is required because the conditional package bundles a devDependency
+  # that bundles conditional and causes shrinkwrap to complain
+  sh 'npm prune --production'
 end
 
 task :shrinkwrap => [:install] do
@@ -85,8 +89,56 @@ task :pack => [:shrinkwrap] do
   sh 'npm pack'
 end
 
+task :package_dirs do
+  mkdir_p ::File.join(base_dir, install_dir)
+  mkdir_p ::File.join(base_dir, config_dir)
+end
+
+task :source => [:install] do
+  ['bin/', 'lib/', 'node_modules/', 'LICENSE', 'package.json'].each do |src|
+    cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
+  end
+  cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
+end
+
+task :chdir_pkg => [:package_dirs] do
+  cd pkg_dir
+end
+
+task :deb => [:chdir_pkg, :source] do
+  command = [
+    'bundle',
+    'exec',
+    'fpm',
+    '--deb-no-default-config-files',
+    "--depends \"nodejs >= #{target_version}\"",
+    "--depends \"nodejs << #{max_version}\"",
+    "--license \"#{license}\"",
+    "--url \"#{homepage}\"",
+    "--description \"#{description}\"",
+    '-s dir',
+    '-t deb',
+    "-n \"#{name}\"",
+    "-v #{version}",
+    'opt/'
+  ].join(' ')
+  sh command
+end
+
+task :upload_packages do
+  cd pkg_dir
+  mkdir 'copy_to_s3'
+  deb = Dir["#{name}_#{version}_*.deb"].first
+  cp deb, 'copy_to_s3/'
+  s3 = Aws::S3::Resource.new(region: 'us-east-1', logger: Logger.new(STDOUT))
+  Dir["copy_to_s3/**/#{name}*"].each do |package|
+    upload_package = ::File.basename(package)
+    s3.bucket(ARTIFACT_BUCKET).object("#{name}/#{upload_package}").upload_file(package)
+  end
+end
+
 desc "Release #{name} and prepare to create a release on github.com"
-task :release => [:install, :shrinkwrap, :pack] do
+task :release do
   puts
   puts "Create a new #{version} release on github.com and upload the #{name} tarball"
   puts 'You can find directions here: https://github.com/blog/1547-release-your-software'
@@ -117,61 +169,14 @@ task :release => [:install, :shrinkwrap, :pack] do
   puts "You can find a diff between this release and the previous one here: #{compare_url}"
 end
 
-task :package_dirs do
-  mkdir_p ::File.join(base_dir, install_dir)
-  mkdir_p ::File.join(base_dir, config_dir)
-end
-
-task :propsd_source => [:install] do
-  ['bin/', 'lib/', 'node_modules/', 'LICENSE', 'package.json'].each do |src|
-    cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
-  end
-  cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
-end
-
-
-task :chdir_pkg => [:package_dirs] do
-  cd pkg_dir
-end
-
-task :deb => [:chdir_pkg, :propsd_source] do
-  command = [
-    'bundle',
-    'exec',
-    'fpm',
-    '--deb-no-default-config-files',
-    "--depends \"nodejs >= #{target_version}\"",
-    "--depends \"nodejs << #{max_version}\"",
-    "--license \"#{license}\"",
-    "--url \"#{homepage}\"",
-    "--description \"#{description}\"",
-    '-s dir',
-    '-t deb',
-    "-n \"#{name}\"",
-    "-v #{version}",
-    'opt/'
-  ].join(' ')
-  sh command
-  mkdir 'copy_to_s3'
-  deb = Dir["#{name}_#{version}_*.deb"].first
-  cp deb, 'copy_to_s3/'
-end
-
-task :upload_packages => [:deb] do
-  s3 = Aws::S3::Resource.new(region: 'us-east-1', logger: Logger.new(STDOUT))
-  Dir["copy_to_s3/**/#{name}*"].each do |package|
-    upload_package = ::File.basename(package)
-    s3.bucket('artifacts.core-0.r7ops.com').object("#{name}/#{upload_package}").upload_file(package)
-  end
-end
-
-desc "Package #{name} and upload package to S3 bucket"
-task :package => [:upload_packages]
+desc "Package #{name}"
+task :package => [:install, :shrinkwrap, :pack, :deb]
 
 CLEAN.include 'npm-shrinkwrap.json'
 CLEAN.include "#{name}-*.tgz"
 CLEAN.include 'pkg/'
+CLEAN.include '**/.DS_Store'
+CLEAN.include 'node_modules/'
 
-CLOBBER.include 'node_modules/'
-
-task :default => [:clobber, :release, :package]
+task :default => [:clean, :package, :release]
+task :upload => [:clean, :package, :upload_packages]

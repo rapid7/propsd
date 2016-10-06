@@ -454,20 +454,18 @@ describe('Properties#build', function () {
       }
     }));
 
+    // "build" will have fired once from the initialization; watch for updates from polling
+    _properties.on('build', (updatedProperties) => {
+      if (updatedProperties && updatedProperties.password === 'myvoiceismypassword') {
+        tokend.done();
+        done();
+      }
+    });
+
     _properties.initialize().then((initializedProperties) => {
       // First request will resolve with the original secret.
       expect(initializedProperties.properties).to.eql({
         password: 'toor'
-      });
-
-      // "build" will have fired once from the initialization; watch for updates from polling
-      _properties.once('build', (updatedProperties) => {
-        expect(updatedProperties).to.eql({
-          password: 'myvoiceismypassword'
-        });
-
-        tokend.done();
-        done();
       });
     })
     .catch(done);

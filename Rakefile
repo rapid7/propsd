@@ -47,6 +47,14 @@ def max_version
   target_version.split('.').first.to_f + 1
 end
 
+def sources_dir
+  ::File.join('opt', "#{name}-#{version}")
+end
+
+def sources_archive
+  "#{sources_dir}.tar.gz"
+end
+
 def install_dir
   ::File.join('pkg', 'opt', "#{name}-#{version}")
 end
@@ -129,6 +137,15 @@ task :propsd_source => [:install] do
   cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
 end
 
+task :test_source do
+  ['test/'].each do |src|
+    cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
+  end
+end
+
+task :package_source => %i(package_dirs propsd_source test_source chdir_pkg) do
+  sh "tar zcf #{sources_archive} #{sources_dir}"
+end
 
 task :chdir_pkg => [:package_dirs] do
   cd pkg_dir

@@ -1,0 +1,4 @@
+.gitignore
+initialize-context.sh
+propsd-*.tar.gz
+README.md

@@ -1,4 +1,4 @@
-FROM node:4
+FROM node:argon
 MAINTAINER PlatformDeliveryBelfast <PlatformDelivery_BFS@rapid7.com>
 
 # TODO: Make this dynamic?

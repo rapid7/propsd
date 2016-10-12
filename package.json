@@ -9,6 +9,7 @@
   },
   "scripts": {
     "render-dockerfile-template": "dockerfile-template -f docker/Dockerfile.template -d VERSION=$(jq --raw-output '.version' package.json) > docker/Dockerfile",
+    "docker-build": "docker build ./docker -t propsd -t propsd:$(jq --raw-output '.version' package.json)",
     "start": "./bin/server.js",
     "test": "mocha",
     "lint": "eslint bin/** lib/** test/**",

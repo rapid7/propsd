@@ -2,3 +2,4 @@
 initialize-context.sh
 propsd-*.tar.gz
 README.md
+Dockerfile.template

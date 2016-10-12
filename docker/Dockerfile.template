@@ -1,0 +1,11 @@
+FROM node:argon
+MAINTAINER PlatformDeliveryBelfast <PlatformDelivery_BFS@rapid7.com>
+
+# Pull in /opt/propsd-VERSION and link it to /opt/propsd
+ADD resources/propsd-%%VERSION%%.tar.gz /
+RUN ln -s /opt/propsd-%%VERSION%% /opt/propsd
+
+RUN mkdir /etc/propsd
+COPY resources/propsd-config.json /etc/propsd/config.json
+
+CMD node /opt/propsd/bin/server.js -c /etc/propsd/config.json

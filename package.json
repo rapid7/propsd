@@ -8,6 +8,7 @@
     "bin": "bin"
   },
   "scripts": {
+    "render-dockerfile-template": "dockerfile-template -f docker/Dockerfile.template -d VERSION=$(jq --raw-output '.version' package.json) > docker/Dockerfile",
     "start": "./bin/server.js",
     "test": "mocha",
     "lint": "eslint bin/** lib/** test/**",
@@ -32,6 +33,7 @@
     "chai-as-promised": "^5.2.0",
     "chokidar": "^1.4.3",
     "coveralls": "^2.11.8",
+    "dockerfile-template": "^0.0.1",
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^3.1.0",
     "eslint-config-rapid7": "0.0.15",

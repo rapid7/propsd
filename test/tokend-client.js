@@ -40,7 +40,7 @@ describe('TokendClient', function () {
     expect(_client._port).to.equal(2600);
   });
 
-  it('only calls Tokend once for each secret', function (done) {
+  it('only calls Tokend once for each generic secret', function (done) {
     // Nock clears a response after it's requested.
     // Processing the same secret more than once will fail when tokend.done() is called.
     const tokend = nock('http://127.0.0.1:4500')
@@ -67,7 +67,7 @@ describe('TokendClient', function () {
     .catch(done);
   });
 
-  it('emits "update" events when secrets in Tokend change', function (done) {
+  it('emits "update" events when generic secrets in Tokend change', function (done) {
     // Nock clears a response after it's requested.
     const tokend = nock('http://127.0.0.1:4500')
 

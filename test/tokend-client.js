@@ -110,4 +110,34 @@ describe('TokendClient', function () {
     })
     .catch(done);
   });
+
+  it('only calls Tokend once for each transit secret', function (done) {
+    // Nock clears a response after it's requested.
+    // Processing the same secret more than once will fail when tokend.done() is called.
+    const tokend = nock('http://127.0.0.1:4500')
+      .post('/v1/transit/default/decrypt', {
+        key: 'kali',
+        ciphertext: 'gbbe'
+      })
+      .reply(200, {
+        plaintext: 'toor'
+      });
+
+    _client = new TokendClient();
+
+    const secret1 = _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'});
+    const secret2 = _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'});
+
+    Promise.all([secret1, secret2]).then((secrets) => {
+      secrets.forEach((secret) => {
+        expect(secret).to.eql({
+          plaintext: 'toor'
+        });
+      });
+
+      tokend.done();
+      done();
+    })
+    .catch(done);
+  });
 });

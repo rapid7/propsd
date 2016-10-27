@@ -489,8 +489,8 @@ describe('Properties#build', function () {
       }
     }));
 
-    // "build" will have fired once from the initialization; watch for updates from polling
     _properties.on('build', (updatedProperties) => {
+      // Second request will resolve with the updated secret.
       if (updatedProperties && updatedProperties.password === 'myvoiceismypassword') {
         tokend.done();
         done();
@@ -502,6 +502,9 @@ describe('Properties#build', function () {
       expect(initializedProperties.properties).to.eql({
         password: 'toor'
       });
+
+      // Fake a polling event by restarting the client.
+      _properties.tokendTransformer._client.stop().start();
     })
     .catch(done);
   });

@@ -1,0 +1,20 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+
+platforms:
+  - name: ubuntu-14.04
+  - name: ubuntu-16.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[propsd::default]
+    attributes:
+      propsd:
+        config:
+          index:
+            bucket: 'some.bucket.name.that.does.not.exist.com'

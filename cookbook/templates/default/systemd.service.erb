@@ -1,0 +1,11 @@
+[Unit]
+Description=<%= @description %>
+
+[Service]
+ExecStart=<%= ([@executable] + @flags).join(' ') %>
+<% unless @user.nil? %>User=<%= @user %><% end %>
+<% unless @group.nil? %>Group=<%= @group %><% end %>
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 'use strict';
 
 require('should');
@@ -34,7 +33,6 @@ describe('Logging', () => {
 
     fileLog.remove(Winston.transports.Console);
 
-    /* eslint-disable max-nested-callbacks */
     it('writes to the correct file', (done) => {
       fileLog.on('logging', (transport, level, msg) => {
         transport.name.should.equal('file');
@@ -62,7 +60,5 @@ describe('Logging', () => {
 
       require('../lib/logger').attach('info', 'tmp.log');
     });
-
-    /* eslint-enable max-nested-callbacks */
   });
 });

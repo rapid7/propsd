@@ -1,6 +1,5 @@
 'use strict';
 
-/* eslint-disable new-cap, rapid7/static-magic-numbers */
 const EventEmitter = require('events').EventEmitter;
 
 const checks = require('../../data/consul-checks.json');

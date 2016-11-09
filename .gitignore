@@ -37,5 +37,16 @@ node_modules
 .node_repl_history
 .bundle/
 .builderator/
+.idea/
 
 cookbook/metadata.json
+
+# Build artifacts
+Berksfile
+Berksfile.lock
+*.tar.gz
+*.tgz
+.ruby-gemset
+npm-shrinkwrap.json
+cookbook/.kitchen/
+cookbook/.kitchen.local.yml

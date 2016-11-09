@@ -8,5 +8,5 @@ cookbook.depends 'propsd' do |propsd|
 end
 
 profile :default do |test|
-  test.chef.run_list 'propsd::default'
+  test.chef.run_list 'propsd::test'
 end

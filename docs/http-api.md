@@ -1,10 +1,10 @@
 # HTTP API #
 
-The main interface to propsd is a HTTP API. The API can be used to retrieve
+The main interface to Propsd is a HTTP API. The API can be used to retrieve
 properties and perform status checks. The endpoints are versioned to enable
 changes without breaking backwards compatibility.
 
-Each endpoint manages a different aspect of propsd:
+Each endpoint manages a different aspect of Propsd:
 
 * health - Basic health check
 * status - Detailed configuration information
@@ -12,7 +12,7 @@ Each endpoint manages a different aspect of propsd:
 
 ## Health ##
 
-The health endpoint is used to validate propsd is running. The endpoint responds
+The health endpoint is used to validate Propsd is running. The endpoint responds
 to GET requests with a JSON body and a response code. Any other type of
 request returns a 405 (Method Not Allowed) response code and includes an
 `Allow: GET` header.
@@ -34,7 +34,7 @@ The status field is a string with one of the following values: "okay",
 warn status means some of the plugins are working. The fail status means none
 of the plugins are working.
 
-The uptime field is an integer representing the number of milliseconds propsd has been running.
+The uptime field is an integer representing the number of milliseconds Propsd has been running.
 
 The plugins field is an array of strings listing all the installed plugins.
 
@@ -45,7 +45,7 @@ warning status. A 500 (Internal Server Error) is returned with a fail status.
 ## Status ##
 
 The status endpoint is used to retrieve detailed configuration information about
-propsd. The endpoint responds to GET requests with a JSON body and a 200 (OK)
+Propsd. The endpoint responds to GET requests with a JSON body and a 200 (OK)
 response code. Any other type of request returns a 405 (Method Not Allowed)
 response code and includes an `Allow: GET` header.
 

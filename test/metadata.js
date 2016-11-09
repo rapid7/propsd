@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks, rapid7/static-magic-numbers */
-
 require('./lib/helpers');
 
 const expect = require('chai').expect;
@@ -17,9 +13,7 @@ describe('Metadata source plugin', function _() {
   const metadataValues = require('./data/metadata-values.json');
 
   it('traverses metadata paths', function __(done) {
-    Util.traverse(
-      'latest',
-      ['/meta-data/', '/dynamic/'],
+    Util.traverse('latest', Parser.paths,
       (path, cb) => cb(null, metadataPaths[path]),
       (err, data) => {
         if (err) { return done(err); }

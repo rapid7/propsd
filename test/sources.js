@@ -1,9 +1,5 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks, no-unused-expressions, rapid7/static-magic-numbers */
-
 require('./lib/helpers');
 
 const Properties = require('../lib/properties');
@@ -86,6 +82,29 @@ describe('Sources', function _() {
           }
         }
       });
+    });
+
+    it('ignores configuration objects with undefined interpolation parameters', function ___() {
+      const index = new Sources.Index([{
+        name: 'test-source',
+        type: 'test',
+        parameters: {
+          bucket: 'water',
+          path: 'a road covered in {{ surface:gravel }}',
+          waffles: {
+            chocolate: '{{ topping }}'
+          },
+          ignores: 'This {{ thing:because:its:not:defined }}'
+        }
+      }], {
+        surface: {
+          gravel: 'small rocks'
+        },
+        topping: 'fudge!'
+      });
+
+      expect(index.order).to.have.length.of(0);
+      expect(index.configurations).to.be.empty;
     });
 
     it('returns an ordered set of sources', function ___() {

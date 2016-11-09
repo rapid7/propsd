@@ -1,14 +1,11 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks */
-
 require('./lib/helpers');
 
 const ConsulStub = require('./lib/stub/consul');
 const Consul = require('../lib/source/consul');
 
+const expect = require('chai').expect;
 const request = require('supertest');
 
 const testServerPort = 3000;
@@ -203,16 +200,39 @@ describe('Conqueso API v1', () => {
   });
 
   it('formats IP addresses for Consul services', (done) => {
-    const expectedBody = [
+    const expected = [
       'conqueso.postgresql.ips=10.0.0.2',
       'conqueso.redis.ips=10.0.0.1',
       'conqueso.consul.ips=10.0.0.1,10.0.0.2,10.0.0.3'
-    ].join('\n');
+    ];
 
     request(server)
       .get('/v1/conqueso/api/roles')
       .set('Accept', 'text/plain')
       .expect('Content-Type', 'text/plain; charset=utf-8')
-      .expect(HTTP_OK, expectedBody, done);
+      .expect((res) => {
+        expect(res.text.split(/\n/g)).to.members(expected);
+      })
+      .expect(HTTP_OK, done);
+  });
+
+  it('removes reserved "instance" keyword from properties', (done) => {
+    server.close();
+
+    server = makeServer({
+      properties: {
+        instance: {
+          food: 'tacos'
+        },
+        gluten: 'free'
+      },
+      on() {}
+    });
+
+    request(server)
+      .get('/v1/conqueso/api/roles')
+      .set('Accept', 'text/plain')
+      .expect('Content-Type', 'text/plain; charset=utf-8')
+      .expect(HTTP_OK, 'gluten=free', done);
   });
 });

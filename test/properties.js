@@ -1,16 +1,12 @@
 'use strict';
 
-/* eslint-env mocha */
-/* global Config, Log */
-/* eslint-disable max-nested-callbacks */
-
 require('./lib/helpers');
 
 const Properties = require('../lib/properties');
 const Source = require('./lib/stub/source');
 
 // Shorten build hold-down timeout for testing
-Properties.BUILD_HOLD_DOWN = 100; // eslint-disable-line rapid7/static-magic-numbers
+Properties.BUILD_HOLD_DOWN = 100;
 
 const expect = require('chai').expect;
 
@@ -32,6 +28,55 @@ describe('Properties', function _() {
     });
 
     properties.build();
+  });
+
+  it('does not reorder source layers if build is called multiple times', function __(done) {
+    const localProps = new Properties();
+    const correctOrder = ['first', 'second'];
+
+    localProps.static({
+      hello: 'world'
+    }, 'first');
+    localProps.static({
+      world: 'hello'
+    }, 'second');
+
+    let ranOnce = false;
+
+    localProps.on('build', () => {
+      const layerKeys = localProps.layers.map((i) => i.namespace);
+
+      expect(layerKeys).to.eql(correctOrder);
+      if (ranOnce) {
+        expect(layerKeys).to.eql(correctOrder);
+        done();
+      }
+      ranOnce = true;
+    });
+
+    localProps.build().then(() => {
+      localProps.build();
+    });
+  });
+
+  it('does not reorder layers if the properties sources getter is called', function ___(done) {
+    const props = new Properties();
+    const sources = [
+      new Source.Stub({path: 'foo'}),
+      new Source.Stub({path: 'bar'}),
+      new Source.Stub({path: 'baz'})
+    ];
+    const view = props.view(sources);
+    const expected = ['foo', 'bar', 'baz'];
+    const reversed = ['baz', 'bar', 'foo'];
+
+    props.once('build', () => {
+      expect(props.sources.map((s) => s.properties.path)).to.eql(reversed);
+      expect(props.active.sources.map((s) => s.properties.path)).to.eql(expected);
+      done();
+    });
+
+    view.activate();
   });
 
   it('adds layers with namespaces', function __(done) {
@@ -160,7 +205,7 @@ describe('Properties', function _() {
     });
 
     sources.forEach((source, i) => {
-      source.properties = { // eslint-disable-line no-param-reassign
+      source.properties = {
         indexNumber: i
       };
 
@@ -202,5 +247,134 @@ describe('Properties', function _() {
         done();
       });
     }).catch(done);
+  });
+
+  describe('Merge', function __() {
+    it('merges one object into another', function ___() {
+      const a = {};
+      const b = {
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0)
+        }
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(a).to.equal(c);
+      expect(c).to.deep.equal(b);
+    });
+
+    it('merges objects recursively', function ___() {
+      const a = {
+        a: 2, c: {
+          d: 42
+        },
+        e: []
+      };
+      const b = {
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0)
+        }
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(a).to.equal(c);
+      expect(c).to.deep.equal({
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0),
+          d: 42
+        },
+        e: []
+      });
+    });
+
+    it('instantiates a new object for destination when null or undefined are passed', function ___() {
+      const a = null;
+      const b = {a: 1};
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.not.equal(a);
+      expect(c).to.not.equal(b);
+      expect(c).to.deep.equal({a: 1});
+    });
+
+    it('avoids merging source when null or undefined are passed', function ___() {
+      const a = {a: 1};
+      const b = null;
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.equal(a);
+      expect(c).to.deep.equal({a: 1});
+    });
+
+    it('avoids merging keys with null or undefined values', function ___() {
+      const a = {a: 0};
+      const b = {
+        z: 1,
+        n: null,
+        u: undefined
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.equal(a);
+      expect(c).to.deep.equal({
+        a: 0,
+        z: 1
+      });
+    });
+
+    it('always returns an Object', function ___() {
+      const a = [];
+      const b = null;
+
+      const c = Properties.merge(a, b);
+
+      expect(c).to.not.equal(a);
+      expect(c).to.not.equal(b);
+      expect(c).to.be.instanceOf(Object);
+      expect(c).to.deep.equal({});
+    });
+
+    it('does not attempt to merge values that aren\'t direct descendants of Object', function ___() {
+      const a = {
+        a: 2, c: {
+          a: [1, 2, 3],
+          b: {a: 'foo'},
+          d: 42,
+          e: new Date(1),
+          f: []
+        },
+        e: []
+      };
+      const b = {
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0),
+          e: 'bar',
+          f: {a: 123}
+        }
+      };
+
+      const c = Properties.merge(a, b);
+
+      expect(a).to.equal(c);
+      expect(c).to.deep.equal({
+        a: 1, b: 2, c: {
+          a: [],
+          b: new Date(0),
+          d: 42,
+          e: 'bar',
+          f: {a: 123}
+        },
+        e: []
+      });
+    });
   });
 });

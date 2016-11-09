@@ -1,6 +1,6 @@
-# How to configure propsd #
+# How to configure Propsd #
 
-Configuration options for propsd can be specified by providing a configuration
+Configuration options for Propsd can be specified by providing a configuration
 file on the command-line.
 
 ## Command-line Options ##
@@ -20,7 +20,7 @@ containing configuration values.
 ### Minimal Configuration File ###
 
 The configuration file below is the minimal settings that must be specified in
-order for propsd to run.
+order for Propsd to run.
 
 ~~~json
 {
@@ -32,7 +32,7 @@ order for propsd to run.
 
 ### Default Configuration File ###
 
-The configuration file below is the default settings for propsd.
+The configuration file below is the default settings for Propsd.
 
 ~~~json
 {
@@ -65,12 +65,12 @@ The configuration file below is the default settings for propsd.
 
   Propsd treats logging as an event stream and logs to `stdout`. Logged events
   are formatted as JSON objects separated by newlines. If you need routing or
-  storage of logs, you'll want to handle that outside propsd.
+  storage of logs, you'll want to handle that outside Propsd.
 
   The following keys are available:
 
   * `level` - The level to log at. Valid values are "debug", "verbose", "info",
-    "warn", and "error". Each log level encompases all the ones below it. So
+    "warn", and "error". Each log level encompasses all the ones below it. So
     "debug" is the most verbose and "error" is the least verbose. Defaults to
     "info".
 
@@ -78,9 +78,9 @@ The configuration file below is the default settings for propsd.
 
   Propsd reads properties from files stored in Amazon S3. Property files are
   JSON documents. A single property file must be configured as an index that
-  lists other property files to read. Property files are polled periodicaly for
+  lists other property files to read. Property files are polled periodically for
   changes. This allows new property files to be read at run time without
-  requiring a restart of propsd.
+  requiring a restart of Propsd.
 
   * `bucket` - The S3 bucket to read the index property file from. This has no
     default value and must be explicitly configured.
@@ -93,6 +93,24 @@ The configuration file below is the default settings for propsd.
 
   * `interval` - The time in milliseconds to poll the index property file for
     changes. Defaults to 30000 (30 seconds).
+
+* `consul` - These settings control service discovery via [Consul][].
+
+  Propsd can use Consul for service discovery. Services registered with Consul
+  show up in Propsd as properties that look like "conqueso.service.ips=127.0.0.1".
+  IP addresses are comma separated and only services whose health checks are all
+  passing will be reported. Consul is polled periodically for changes. This
+  allows service discovery to happen without requiring a restart of Propsd.
+
+  * `host` - The host to connect to Consul on. Defaults to 127.0.0.1.
+
+  * `port` - The HTTP port to connect to Consul on. Defaults to 8500.
+
+  * `secure` - Whether to use HTTPS when connecting to Consul. Defaults to false
+    and uses HTTP.
+
+  * `interval` - The time in milliseconds to poll Consul for changes. Defaults
+    to 60000 (60 seconds).
 
 * `properties` - An arbitrary JSON object for injecting values into the index.
 
@@ -108,12 +126,12 @@ property documents read from S3. This provides a way to read instance specific
 properties.
 
 Suppose you have two configurations for metrics polling, fast and slow. Fast
-polls every thrity seconds and the configuration for it lives in
+polls every thirty seconds and the configuration for it lives in
 a `metrics/fast.json` document in S3. Slow polls every five minutes, and the
 configuration for it lives in a `metrics/slow.json` document in S3.
 
-Interpolated properties let you configure propsd to read either the fast or
-slow document. You start by adding a `{{speed}}` template paramter to your
+Interpolated properties let you configure Propsd to read either the fast or
+slow document. You start by adding a `{{speed}}` template parameter to your
 `index.json` document in S3.
 
 ~~~json
@@ -129,7 +147,7 @@ slow document. You start by adding a `{{speed}}` template paramter to your
 }
 ~~~
 
-When propsd reads the index template, it tries to replace `{{speed}}` with
+When Propsd reads the index template, it tries to replace `{{speed}}` with
 a value from in the `properties` key in the configuration file. So the
 configuration to read the "fast" document looks like this.
 
@@ -145,6 +163,9 @@ If the `properties:speed` key was configured as "slow", the `metrics/slow.json`
 document would be read instead.
 
 Interpolated properties in templated documents are enclosed in double curly
-braces: `{{` and `}}`. The value betwen the double curly braces is a key from
+braces: `{{` and `}}`. The value between the double curly braces is a key from
 the `properties` object. Nested keys within the `properties` object are
 accessed by separating the keys with colons.
+
+
+[Consul]: https://www.consul.io/

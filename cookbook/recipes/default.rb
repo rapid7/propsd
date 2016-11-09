@@ -72,12 +72,22 @@ execute "chown #{version_dir}" do
   action :nothing
 end
 
-## Upstart Service
-template '/etc/init/propsd.conf' do
+if Chef::VersionConstraint.new("> 14.04").include?(node['platform_version'])
+  service_script_path = '/etc/systemd/system/propsd.service'
+  service_script = 'systemd.service.erb'
+  service_provider = Chef::Provider::Service::Systemd
+else
+  service_script_path = '/etc/init/propsd.conf'
+  service_script = 'upstart.conf.erb'
+  service_provider = Chef::Provider::Service::Upstart
+end
+
+# Set service script
+template service_script_path do
   owner node['propsd']['user']
   group node['propsd']['group']
 
-  source 'upstart.conf.erb'
+  source service_script
   variables(
     :description => 'propsd configuration service',
     :user => node['propsd']['user'],
@@ -113,5 +123,5 @@ end
 
 service 'propsd' do
   action node['propsd']['enable'] ? [:start, :enable] : [:stop, :disable]
-  provider Chef::Provider::Service::Upstart
+  provider service_provider
 end

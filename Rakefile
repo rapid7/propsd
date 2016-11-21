@@ -133,7 +133,9 @@ task :upload_packages do
   s3 = Aws::S3::Resource.new(region: 'us-east-1', logger: Logger.new(STDOUT))
   Dir["copy_to_s3/**/#{name}*"].each do |package|
     upload_package = ::File.basename(package)
-    s3.bucket(ARTIFACT_BUCKET).object("#{name}/#{upload_package}").upload_file(package)
+    s3.bucket(ARTIFACT_BUCKET)
+      .object("#{name}/#{upload_package}")
+      .upload_file(package, :server_side_encryption => :AES256)
   end
 end
 

@@ -96,8 +96,6 @@ template service_script_path do
       "-c #{node['propsd']['paths']['configuration']}"
     ]
   )
-
-  notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 
 directory 'propsd-configuration-directory' do

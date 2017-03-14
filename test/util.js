@@ -3,7 +3,7 @@
 const should = require('should');
 const util = require('../lib/util');
 
-describe('Util/getNestedProperty', function () {
+describe('Util/getNestedProperty', function() {
   const getNestedProperty = util.getNestedProperty;
   const someObject = {
     some: {
@@ -25,17 +25,17 @@ describe('Util/getNestedProperty', function () {
     }
   };
 
-  it('retrieves a nested value', function () {
+  it('retrieves a nested value', function() {
     getNestedProperty(someObject, ['cool', 'tacos', 'status']).should.equal('delicious');
     getNestedProperty(someObject, 'object.with.nested.keys'.split('.')).should.equal('foobar');
   });
 
-  it('returns the correct type when the nested path ends', function () {
+  it('returns the correct type when the nested path ends', function() {
     getNestedProperty(someObject, 'cool.tacos.types'.split('.')).should.be.an.Array();
     getNestedProperty(someObject, 'object.with'.split('.')).should.be.an.Object();
   });
 
-  it('retrieves a nested value at an arbitrary level', function () {
+  it('retrieves a nested value at an arbitrary level', function() {
     getNestedProperty(someObject, ['cool']).should.eql({
       tacos: {
         types: ['carnitas', 'al pastor', 'steak', 'chicken', 'barbacoa', 'lengua'],
@@ -51,7 +51,7 @@ describe('Util/getNestedProperty', function () {
     });
   });
 
-  it('throws a TypeError with info if a key doesn\'t exist', function () {
+  it('throws a TypeError with info if a key doesn\'t exist', function() {
     should.throws(() => {
       getNestedProperty(someObject, 'cool.burgers.status'.split('.'));
     }, TypeError, `Key 'burgers' does not exist in object ${JSON.stringify(someObject.cool)}`);

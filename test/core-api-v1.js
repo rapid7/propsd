@@ -91,6 +91,7 @@ const makeServer = () => {
   const app = require('express')();
 
   require('../lib/control/v1/core').attach(app, sources);
+
   return app.listen(testServerPort);
 };
 

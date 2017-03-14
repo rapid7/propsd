@@ -32,9 +32,7 @@ exports.health = {
     let results = health[name];
 
     if (options.passing) {
-      results = results.filter((node) => {
-        return !!node.Checks.every((check) => check.Status === 'passing');
-      });
+      results = results.filter((node) => !!node.Checks.every((check) => check.Status === 'passing'));
     }
 
     setTimeout(function _() {
@@ -46,7 +44,9 @@ exports.health = {
 
 // Method stubs
 exports.watch = function watch(options) {
-  if (!options.method) { throw ReferenceError('No method provided for watcher!'); }
+  if (!options.method) {
+    throw ReferenceError('No method provided for watcher!');
+  }
 
   return new Watcher(options.method);
 };

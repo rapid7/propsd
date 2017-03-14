@@ -38,7 +38,9 @@ global.Config = require('nconf').env()
     }
   });
 
-if (args.c) { Config.file(Path.resolve(process.cwd(), args.c)); }
+if (args.c) {
+  Config.file(Path.resolve(process.cwd(), args.c));
+}
 Config.defaults(require('../config/defaults.json'));
 
 global.Log = Logger.attach(Config.get('log:level'), Config.get('log:filename'));

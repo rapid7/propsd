@@ -83,6 +83,7 @@ function createTempDirForBucket() {
   } catch (err) {
     throw err;
   }
+
   return tmpDirBucketPath;
 }
 

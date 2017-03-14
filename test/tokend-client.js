@@ -6,10 +6,10 @@ const expect = require('chai').expect;
 const nock = require('nock');
 const TokendClient = require('../lib/transformers/tokend-client');
 
-describe('TokendClient', function () {
+describe('TokendClient', function() {
   let _client = null;
 
-  beforeEach(function () {
+  beforeEach(function() {
     nock.cleanAll();
 
     if (_client) {
@@ -17,20 +17,20 @@ describe('TokendClient', function () {
     }
   });
 
-  afterEach(function () {
+  afterEach(function() {
     if (_client) {
       _client.shutdown();
     }
   });
 
-  it('finds Tokend on 127.0.0.1:4500 by default', function () {
+  it('finds Tokend on 127.0.0.1:4500 by default', function() {
     _client = new TokendClient();
 
     expect(_client._host).to.equal('127.0.0.1');
     expect(_client._port).to.equal(4500);
   });
 
-  it('allows Tokend to be found on a non-default host:port', function () {
+  it('allows Tokend to be found on a non-default host:port', function() {
     _client = new TokendClient({
       host: 'token.d',
       port: 2600
@@ -40,7 +40,7 @@ describe('TokendClient', function () {
     expect(_client._port).to.equal(2600);
   });
 
-  it('only calls Tokend once for each generic secret', function (done) {
+  it('only calls Tokend once for each generic secret', function(done) {
     // Nock clears a response after it's requested.
     // Processing the same secret more than once will fail when tokend.done() is called.
     const tokend = nock('http://127.0.0.1:4500')
@@ -63,11 +63,10 @@ describe('TokendClient', function () {
 
       tokend.done();
       done();
-    })
-    .catch(done);
+    }).catch(done);
   });
 
-  it('emits "update" events when generic secrets in Tokend change', function (done) {
+  it('emits "update" events when generic secrets in Tokend change', function(done) {
     // Nock clears a response after it's requested.
     const tokend = nock('http://127.0.0.1:4500')
 
@@ -102,16 +101,13 @@ describe('TokendClient', function () {
 
             tokend.done();
             done();
-          })
-          .catch(done);
+          }).catch(done);
         });
-      })
-      .catch(done);
-    })
-    .catch(done);
+      }).catch(done);
+    }).catch(done);
   });
 
-  it('only calls Tokend once for each transit secret', function (done) {
+  it('only calls Tokend once for each transit secret', function(done) {
     // Nock clears a response after it's requested.
     // Processing the same secret more than once will fail when tokend.done() is called.
     const tokend = nock('http://127.0.0.1:4500')
@@ -137,7 +133,6 @@ describe('TokendClient', function () {
 
       tokend.done();
       done();
-    })
-    .catch(done);
+    }).catch(done);
   });
 });

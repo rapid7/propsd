@@ -11,10 +11,10 @@ const Source = require('./lib/stub/source');
 // Speed up testing by shortening the time we wait for properties to build.
 Properties.BUILD_HOLD_DOWN = 10;
 
-describe('TokendTransformer', function () {
+describe('TokendTransformer', function() {
   let _transformer = null;
 
-  beforeEach(function () {
+  beforeEach(function() {
     nock.cleanAll();
 
     if (_transformer) {
@@ -22,13 +22,13 @@ describe('TokendTransformer', function () {
     }
   });
 
-  afterEach(function () {
+  afterEach(function() {
     if (_transformer) {
       _transformer._client.shutdown();
     }
   });
 
-  it('transforms null properties', function (done) {
+  it('transforms null properties', function(done) {
     const untransformedProperties = null;
 
     _transformer = new TokendTransformer();
@@ -42,7 +42,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('transforms undefined properties', function (done) {
+  it('transforms undefined properties', function(done) {
     const untransformedProperties = undefined;
 
     _transformer = new TokendTransformer();
@@ -56,7 +56,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('transforms empty properties', function (done) {
+  it('transforms empty properties', function(done) {
     const untransformedProperties = {};
 
     _transformer = new TokendTransformer();
@@ -70,7 +70,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('transforms $tokend properties', function (done) {
+  it('transforms $tokend properties', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -100,7 +100,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('transforms transit $tokend properties', function (done) {
+  it('transforms transit $tokend properties', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -123,19 +123,17 @@ describe('TokendTransformer', function () {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-    .then((transformedProperties) => {
+    _transformer.transform(untransformedProperties).then((transformedProperties) => {
       expect(transformedProperties).to.eql({
         password: 'toor'
       });
 
       tokend.done();
       done();
-    })
-    .catch(done);
+    }).catch(done);
   });
 
-  it('transforms KMS $tokend properties', function (done) {
+  it('transforms KMS $tokend properties', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -157,19 +155,17 @@ describe('TokendTransformer', function () {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-        .then((transformedProperties) => {
-          expect(transformedProperties).to.eql({
-            password: 'toor'
-          });
+    _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
 
-          tokend.done();
-          done();
-        })
-        .catch(done);
+      tokend.done();
+      done();
+    }).catch(done);
   });
 
-  it('transforms nested $tokend properties', function (done) {
+  it('transforms nested $tokend properties', function(done) {
     const untransformedProperties = {
       database: {
         password: {
@@ -203,7 +199,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('transforms multiple $tokend properties', function (done) {
+  it('transforms multiple $tokend properties', function(done) {
     const untransformedProperties = {
       database: {
         'root-password': {
@@ -248,7 +244,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('ignores non-$tokend properties', function (done) {
+  it('ignores non-$tokend properties', function(done) {
     const untransformedProperties = {
       key: 'value'
     };
@@ -264,7 +260,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('resolves a null property value if $tokend has no "resource" key', function (done) {
+  it('resolves a null property value if $tokend has no "resource" key', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -289,7 +285,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('resolves a null property value if $tokend.type is not "generic"', function (done) {
+  it('resolves a null property value if $tokend.type is not "generic"', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -314,7 +310,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('resolves a null property value if the secret is not in a "plaintext" key', function (done) {
+  it('resolves a null property value if the secret is not in a "plaintext" key', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -346,7 +342,7 @@ describe('TokendTransformer', function () {
       .catch(done);
   });
 
-  it('resolves a null property value if the secret is not JSON', function (done) {
+  it('resolves a null property value if the secret is not JSON', function(done) {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -375,10 +371,10 @@ describe('TokendTransformer', function () {
   });
 });
 
-describe('Properties#build', function () {
+describe('Properties#build', function() {
   let _properties = null;
 
-  beforeEach(function () {
+  beforeEach(function() {
     nock.cleanAll();
 
     if (_properties) {
@@ -386,13 +382,13 @@ describe('Properties#build', function () {
     }
   });
 
-  afterEach(function () {
+  afterEach(function() {
     if (_properties) {
       _properties.tokendTransformer._client.shutdown();
     }
   });
 
-  it('transforms $tokend objects in static properties', function (done) {
+  it('transforms $tokend objects in static properties', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -422,7 +418,7 @@ describe('Properties#build', function () {
     _properties.build();
   });
 
-  it('transforms $tokend objects in dynamic properties', function (done) {
+  it('transforms $tokend objects in dynamic properties', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -452,7 +448,7 @@ describe('Properties#build', function () {
     _properties.build();
   });
 
-  it('transforms $tokend objects after they are merged', function (done) {
+  it('transforms $tokend objects after they are merged', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
         .get('/v1/secret/default/kali/root/password')
         .reply(200, {
@@ -498,7 +494,7 @@ describe('Properties#build', function () {
   // This isn't working in Travis CI. There are timing issue regarding populating the cache
   // from the initial fetch and polling for changes. We're not supporting generic secrets
   // right now, and polling doesn't impact transit secrets, so skip this test.
-  it.skip('builds new properties when generic secrets in Tokend change', function (done) {
+  it.skip('builds new properties when generic secrets in Tokend change', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
 
       // First request comes from Properties.initialize() call
@@ -539,7 +535,6 @@ describe('Properties#build', function () {
       expect(initializedProperties.properties).to.eql({
         password: 'toor'
       });
-    })
-    .catch(done);
+    }).catch(done);
   });
 });

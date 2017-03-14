@@ -60,6 +60,7 @@ class NoExistStub extends Stub {
     const initialized = super.initialize();
 
     setImmediate(() => this._update(Common.NO_EXIST));
+
     return initialized;
   }
 }
@@ -73,6 +74,7 @@ class ErrorStub extends Stub {
     const initialized = super.initialize();
 
     setImmediate(() => this._error(new Error('This is a test error')));
+
     return initialized;
   }
 

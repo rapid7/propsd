@@ -14,7 +14,7 @@ const DEFAULT_BUCKET = 'fake-bucket';
 const Source = require('../lib/source/common');
 const s3Stub = require('./utils/s3-stub');
 
-describe('S3 source plugin', function () {
+describe('S3 source plugin', function() {
   this.timeout(2000);
 
   const fakeResponse = {

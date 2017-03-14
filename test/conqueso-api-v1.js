@@ -74,6 +74,7 @@ function makeServer(propsUnderTest) {
   const app = require('express')();
 
   require('../lib/control/v1/conqueso').attach(app, propsUnderTest);
+
   return app.listen(testServerPort);
 }
 

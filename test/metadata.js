@@ -16,7 +16,9 @@ describe('Metadata source plugin', function _() {
     Util.traverse('latest', Parser.paths,
       (path, cb) => cb(null, metadataPaths[path]),
       (err, data) => {
-        if (err) { return done(err); }
+        if (err) {
+          return done(err);
+        }
 
         expect(data).to.eql(metadataValues);
         done();

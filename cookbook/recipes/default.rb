@@ -53,23 +53,13 @@ version_dir = "#{ node['propsd']['paths']['directory'] }-#{ node['propsd']['vers
 package 'propsd' do
   source resources('remote_file[propsd]').path
   provider Chef::Provider::Package::Dpkg
-  notifies :run, "execute[chown #{version_dir}]"
 end
 
 ## Symlink the version dir to the specified propsd directory
 link node['propsd']['paths']['directory'] do
   to version_dir
-  owner node['propsd']['user']
-  group node['propsd']['group']
 
   notifies :restart, 'service[propsd]' if node['propsd']['enable']
-end
-
-## Chown the contents of the versioned propsd directory to the propsd user/group
-execute "chown #{version_dir}" do
-  command "chown -R #{node['propsd']['user']}:#{node['propsd']['group']} #{version_dir}"
-  user 'root'
-  action :nothing
 end
 
 if Chef::VersionConstraint.new("> 14.04").include?(node['platform_version'])
@@ -84,9 +74,6 @@ end
 
 # Set service script
 template service_script_path do
-  owner node['propsd']['user']
-  group node['propsd']['group']
-
   source service_script
   variables(
     :description => 'propsd configuration service',
@@ -100,9 +87,6 @@ end
 
 directory 'propsd-configuration-directory' do
   path ::File.dirname(node['propsd']['paths']['configuration'])
-
-  owner node['propsd']['user']
-  group node['propsd']['group']
   mode '0755'
 
   recursive true
@@ -111,9 +95,6 @@ end
 template 'propsd-configuration' do
   path node['propsd']['paths']['configuration']
   source 'json.erb'
-
-  owner node['propsd']['user']
-  group node['propsd']['group']
 
   variables(:properties => node['propsd']['config'])
   notifies :restart, 'service[propsd]' if node['propsd']['enable']

@@ -115,6 +115,8 @@ task :deb => [:chdir_pkg, :source] do
     "--deb-recommends \"nodejs << #{max_version}\"",
     "--license \"#{license}\"",
     "--url \"#{homepage}\"",
+    '--vendor Rapid7',
+    '--maintainer Rapid7',
     "--description \"#{description}\"",
     '-s dir',
     '-t deb',

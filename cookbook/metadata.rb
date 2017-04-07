@@ -15,5 +15,4 @@ license package_dot_json.fetch('license', 'MIT License, 2016')
 long_description IO.read(::File.join(project_path, 'README.md')) rescue ''
 version package_dot_json.fetch('version', '0.0.1')
 
-depends 'apt'
 depends 'ohai', '~> 4.2'

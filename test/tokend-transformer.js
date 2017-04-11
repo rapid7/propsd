@@ -139,7 +139,8 @@ describe('TokendTransformer', function() {
         $tokend: {
           type: 'kms',
           resource: '/v1/kms/decrypt',
-          ciphertext: 'gbbe'
+          ciphertext: 'gbbe',
+          region: 'eu-central-1'
         }
       }
     };

@@ -1,0 +1,47 @@
+strict digraph {
+  s_created [label="State: CREATED"; shape=box];
+
+  subgraph {
+    rank=same;
+
+    i_initialize [label="#initialize()"];
+    p_initialized [label="Promise: initialized"];
+  }
+
+  subgraph {
+    rank=same;
+
+    s_initializing [label="State: INITIALIZING"; shape=box];
+    e_initialized [label="Event: initialized"];
+  }
+
+
+  subgraph {
+    rank=same;
+
+    i_update [label="#_update(<data>|NO_UPDATE)"; group=running];
+    i_update_no_exist [label="#_update(NO_EXIST)"; group=waiting];
+    i_error [label="#_error(Error)"; group=error];
+  }
+
+  subgraph {
+    rank=same;
+
+    s_running [label="State: RUNNING"; shape=box; group=running];
+    s_waiting [label="State: WAITING"; shape=box; group=waiting];
+    s_error [label="State: ERROR"; shape=box; group=error];
+  }
+
+  i_shutdown [label="#shutdown()"];
+  s_shutdown [label="SHUTDOWN"; shape=box];
+
+  s_created -> i_initialize -> s_initializing;
+  s_initializing -> e_initialized;
+  i_initialize -> p_initialized [label="returns"];
+  e_initialized -> p_initialized [label="resolves"];
+
+  {s_initializing s_running s_waiting s_error} -> i_update -> s_running;
+  {s_initializing s_running s_waiting s_error} -> i_update_no_exist -> s_waiting;
+  {s_initializing s_running s_waiting s_error} -> i_error -> s_error;
+  {s_initializing s_running s_waiting s_error} -> i_shutdown -> s_shutdown;
+}

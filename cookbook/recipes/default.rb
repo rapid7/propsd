@@ -2,28 +2,11 @@
 # Cookbook Name:: propsd
 # Recipe:: default
 #
-# Copyright (C) 2016 Rapid7 LLC.
+# Copyright (C) 2017 Rapid7 LLC.
 #
 # Distributed under terms of the MIT License. All rights not explicitly granted
 # in the MIT license are reserved. See the included LICENSE file for more details.
 #
-
-#######################
-## Install NodeJS 4.x
-#
-# This should be moved into a shared cookbook
-##
-include_recipe 'apt::default'
-
-apt_repository 'nodejs-4x' do
-  uri 'https://deb.nodesource.com/node_4.x'
-  distribution node['lsb']['codename']
-  components ['main']
-  key 'https://deb.nodesource.com/gpgkey/nodesource.gpg.key'
-end
-
-package 'nodejs'
-#######################
 
 node.default['propsd']['version'] = cookbook_version
 

@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: propsd
-# Recipe:: ohai_plugin
+# Recipe:: nodejs
 #
 # Copyright (C) 2017 Rapid7 LLC.
 #
@@ -8,6 +8,7 @@
 # in the MIT license are reserved. See the included LICENSE file for more details.
 #
 
-ohai_plugin 'propsd_ohai_plugin' do
-  path node['propsd']['ohai_plugin_path']
-end
+node.default['nodejs']['version'] = '4.8.2'
+node.default['nodejs']['binary']['checksum'] = '4d4a37f980bb2770c44d7123864650d0823bae696d7db09d9ed83028cab32fd3'
+
+include_recipe 'nodejs::nodejs_from_binary'

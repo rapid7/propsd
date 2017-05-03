@@ -12,6 +12,10 @@ CLIENT_ID = ENV['GITHUB_CLIENT_ID']
 CLIENT_TOKEN = ENV['GITHUB_CLIENT_TOKEN']
 ARTIFACT_BUCKET = ENV['ARTIFACT_BUCKET']
 
+def yarn_exists?
+  @yarn_exists ||= system('which yarn > /dev/null')
+end
+
 def package_json
   @package_json ||= JSON.parse(File.read('package.json'))
 end
@@ -75,14 +79,19 @@ def github_repo
 end
 
 task :install do
-  sh 'npm install --production'
-  # This is required because the conditional package bundles a devDependency
-  # that bundles conditional and causes shrinkwrap to complain
-  sh 'npm prune --production'
+  if yarn_exists?
+    sh 'yarn install --production'
+    sh 'yarn check --production'
+  else
+    sh 'npm install --production'
+    # This is required because the conditional package bundles a devDependency
+    # that bundles conditional and causes shrinkwrap to complain
+    sh 'npm prune --production'
+  end
 end
 
 task :shrinkwrap => [:install] do
-  sh 'npm shrinkwrap'
+  sh 'npm shrinkwrap' unless yarn_exists?
 end
 
 task :pack => [:shrinkwrap] do

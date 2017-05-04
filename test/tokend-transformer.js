@@ -28,49 +28,37 @@ describe('TokendTransformer', function() {
     }
   });
 
-  it('transforms null properties', function(done) {
+  it('transforms null properties', function() {
     const untransformedProperties = null;
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({});
-
-        done();
-      })
-      .catch(done);
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({});
+    });
   });
 
-  it('transforms undefined properties', function(done) {
+  it('transforms undefined properties', function() {
     const untransformedProperties = undefined;
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({});
-
-        done();
-      })
-      .catch(done);
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({});
+    });
   });
 
-  it('transforms empty properties', function(done) {
+  it('transforms empty properties', function() {
     const untransformedProperties = {};
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({});
-
-        done();
-      })
-      .catch(done);
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({});
+    });
   });
 
-  it('transforms $tokend properties', function(done) {
+  it('transforms $tokend properties', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -88,19 +76,16 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          password: 'toor'
-        });
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
 
-        tokend.done();
-        done();
-      })
-      .catch(done);
+      tokend.done();
+    });
   });
 
-  it('transforms transit $tokend properties', function(done) {
+  it('transforms transit $tokend properties', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -123,17 +108,16 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties).then((transformedProperties) => {
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
       expect(transformedProperties).to.eql({
         password: 'toor'
       });
 
       tokend.done();
-      done();
-    }).catch(done);
+    });
   });
 
-  it('transforms KMS $tokend properties with region supplied', function(done) {
+  it('transforms KMS $tokend properties with region supplied', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -157,17 +141,16 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties).then((transformedProperties) => {
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
       expect(transformedProperties).to.eql({
         password: 'toor'
       });
 
       tokend.done();
-      done();
-    }).catch(done);
+    });
   });
 
-  it('transforms KMS $tokend properties without region', function(done) {
+  it('transforms KMS $tokend properties without region', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -189,17 +172,80 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties).then((transformedProperties) => {
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
       expect(transformedProperties).to.eql({
         password: 'toor'
       });
 
       tokend.done();
-      done();
-    }).catch(done);
+    });
   });
 
-  it('transforms nested $tokend properties', function(done) {
+  it('transforms KMS $tokend properties with a datakey value', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        })
+        .reply(200, {
+          plaintext: 'toor',
+          keyid: 'arn:aws:kms:region:account-id:key/key-id'
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+    });
+  });
+
+  it('transforms KMS $tokend properties without a datakey value', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe'
+        }
+      }
+    };
+
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe'
+        })
+        .reply(200, {
+          plaintext: 'toor',
+          keyid: 'arn:aws:kms:region:account-id:key/key-id'
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+    });
+  });
+
+  it('transforms nested $tokend properties', function() {
     const untransformedProperties = {
       database: {
         password: {
@@ -219,21 +265,18 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          database: {
-            password: 'toor'
-          }
-        });
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        database: {
+          password: 'toor'
+        }
+      });
 
-        tokend.done();
-        done();
-      })
-      .catch(done);
+      tokend.done();
+    });
   });
 
-  it('transforms multiple $tokend properties', function(done) {
+  it('transforms multiple $tokend properties', function() {
     const untransformedProperties = {
       database: {
         'root-password': {
@@ -263,38 +306,31 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          database: {
-            'root-password': 'toor',
-            'user-password': 'resu'
-          }
-        });
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        database: {
+          'root-password': 'toor',
+          'user-password': 'resu'
+        }
+      });
 
-        tokend.done();
-        done();
-      })
-      .catch(done);
+      tokend.done();
+    });
   });
 
-  it('ignores non-$tokend properties', function(done) {
+  it('ignores non-$tokend properties', function() {
     const untransformedProperties = {
       key: 'value'
     };
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({});
-
-        done();
-      })
-      .catch(done);
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({});
+    });
   });
 
-  it('resolves a null property value if $tokend has no "resource" key', function(done) {
+  it('resolves a null property value if $tokend has no "resource" key', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -308,18 +344,14 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          password: null
-        });
-
-        done();
-      })
-      .catch(done);
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: null
+      });
+    });
   });
 
-  it('resolves a null property value if $tokend.type is not "generic"', function(done) {
+  it('resolves a null property value if $tokend.type is not "generic"', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -333,18 +365,14 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          password: null
-        });
-
-        done();
-      })
-      .catch(done);
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: null
+      });
+    });
   });
 
-  it('resolves a null property value if the secret is not in a "plaintext" key', function(done) {
+  it('resolves a null property value if the secret is not in a "plaintext" key', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -364,19 +392,16 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          password: null
-        });
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: null
+      });
 
-        tokend.done();
-        done();
-      })
-      .catch(done);
+      tokend.done();
+    });
   });
 
-  it('resolves a null property value if the secret is not JSON', function(done) {
+  it('resolves a null property value if the secret is not JSON', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -392,16 +417,13 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
-    _transformer.transform(untransformedProperties)
-      .then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
-          password: null
-        });
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: null
+      });
 
-        tokend.done();
-        done();
-      })
-      .catch(done);
+      tokend.done();
+    });
   });
 });
 

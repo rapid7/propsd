@@ -180,6 +180,69 @@ describe('TokendTransformer', function() {
       tokend.done();
     });
   });
+
+  it('transforms KMS $tokend properties with a datakey value', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        })
+        .reply(200, {
+          plaintext: 'toor',
+          keyid: 'arn:aws:kms:region:account-id:key/key-id'
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+    });
+  });
+
+  it('transforms KMS $tokend properties without a datakey value', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe'
+        }
+      }
+    };
+
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe'
+        })
+        .reply(200, {
+          plaintext: 'toor',
+          keyid: 'arn:aws:kms:region:account-id:key/key-id'
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(transformedProperties).to.eql({
+        password: 'toor'
+      });
+
+      tokend.done();
+    });
   });
 
   it('transforms nested $tokend properties', function() {

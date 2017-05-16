@@ -33,7 +33,7 @@
     "chokidar": "~1.4.3",
     "coveralls": "~2.11.8",
     "eslint": "~3.17.1",
-    "eslint-config-rapid7": "~2.8.1",
+    "eslint-config-rapid7": "~2.9.0",
     "eslint-plugin-import": "~2.2.0",
     "eslint-plugin-react": "~6.10.0",
     "istanbul": "~0.4.2",

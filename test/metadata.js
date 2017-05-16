@@ -42,6 +42,40 @@ describe('Metadata source plugin', function _() {
     expect(parser.properties.interface).to.be.an('object');
   });
 
+  it('doesn\'t display values that are undefined', function() {
+    const parser = new Parser();
+    const deletedMetadataValues = Object.assign({}, metadataValues);
+
+    deletedMetadataValues['meta-data/instance-id'] = undefined;
+    deletedMetadataValues['dynamic/instance-identity/document'] = undefined;
+
+    parser.update(deletedMetadataValues);
+    expect(parser.properties).to.not.have.property('instance-id');
+    expect(parser.properties.identity).to.not.have.property('document');
+    expect(parser.properties).to.not.have.property('account');
+    expect(parser.properties).to.not.have.property('region');
+  });
+
+  it('handles errors from the AWS SDK gracefully', function(done) {
+    const source = new Metadata({
+      interval: 100
+    });
+
+    // Stub the AWS.MetadataService request method
+    source.service = {
+      request: function request(path, callback) {
+        callback(new Error('some error from the AWS SDK'), null);
+      }
+    };
+
+    source.once('update', () => {
+      expect(source.properties).to.be.a('object');
+      expect(source.properties).to.be.empty;
+      done();
+    });
+    source.initialize();
+  });
+
   it('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 

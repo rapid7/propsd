@@ -3,6 +3,7 @@
 require('./lib/helpers');
 
 const expect = require('chai').expect;
+const AWS = require('aws-sdk-mock');
 
 const Metadata = require('../lib/source/metadata');
 const Parser = require('../lib/source/metadata/parser');
@@ -56,21 +57,20 @@ describe('Metadata source plugin', function _() {
     expect(parser.properties).to.not.have.property('region');
   });
 
-  it('handles errors from the AWS SDK gracefully', function(done) {
+  it('handles errors from the AWS SDK gracefully by not exposing the property', function(done) {
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(new Error('some error from the AWS SDK'), null);
+    });
+
     const source = new Metadata({
       interval: 100
     });
 
-    // Stub the AWS.MetadataService request method
-    source.service = {
-      request: function request(path, callback) {
-        callback(new Error('some error from the AWS SDK'), null);
-      }
-    };
-
     source.once('update', () => {
       expect(source.properties).to.be.a('object');
       expect(source.properties).to.be.empty;
+
+      AWS.restore();
       done();
     });
     source.initialize();
@@ -79,16 +79,17 @@ describe('Metadata source plugin', function _() {
   it('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
+    // Stub the AWS.MetadataService request method
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
+      callback(null, {AutoScalingInstances: []});
+    });
+
     const source = new Metadata({
       interval: 100
     });
-
-    // Stub the AWS.MetadataService request method
-    source.service = {
-      request: function request(path, callback) {
-        callback(null, metadataPaths[path]);
-      }
-    };
 
     source.once('update', () => {
       // Currently used in our Index object.
@@ -104,8 +105,62 @@ describe('Metadata source plugin', function _() {
       source.once('noupdate', () => {
         expect(source.state).to.equal(Metadata.RUNNING);
         source.shutdown();
+
+        AWS.restore();
         done();
       });
+    });
+
+    source.initialize();
+  });
+
+  it('retrieves ASG info for the instance', function(done) {
+    this.timeout(2500);
+
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
+      callback(null, {AutoScalingInstances: [{
+        AutoScalingGroupName: 'my-cool-auto-scaling-group'
+      }]});
+    });
+
+    const source = new Metadata({
+      interval: 100
+    });
+
+    source.once('update', () => {
+      // Currently used in our Index object.
+      expect(source.properties['auto-scaling-group']).to.be.a('string');
+      expect(source.properties['auto-scaling-group']).to.equal('my-cool-auto-scaling-group');
+
+      AWS.restore();
+      done();
+    });
+
+    source.initialize();
+  });
+
+  it('handles ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function(done) {
+    this.timeout(2500);
+
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
+      callback(new Error('some error from the AWS SDK'), null);
+    });
+
+    const source = new Metadata({
+      interval: 100
+    });
+
+    source.once('update', () => {
+      expect(source.properties['auto-scaling-group']).to.be.undefined;
+
+      AWS.restore();
+      done();
     });
 
     source.initialize();

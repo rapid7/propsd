@@ -35,6 +35,7 @@ describe('Metadata source plugin', function _() {
     // Currently used in our Index object.
     expect(parser.properties.account).to.be.a('string');
     expect(parser.properties.region).to.be.a('string');
+    expect(parser.properties['iam-role']).to.eq('fake-fake');
     expect(parser.properties['vpc-id']).to.be.a('string');
     expect(parser.properties['instance-id']).to.be.a('string');
 
@@ -96,6 +97,7 @@ describe('Metadata source plugin', function _() {
       expect(source.properties.account).to.be.a('string');
       expect(source.properties.region).to.be.a('string');
       expect(source.properties['vpc-id']).to.be.a('string');
+      expect(source.properties['iam-role']).to.eq('fake-fake');
       expect(source.properties['instance-id']).to.be.a('string');
 
       expect(source.properties.identity).to.be.an('object');

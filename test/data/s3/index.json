@@ -23,6 +23,13 @@
       }
     },
     {
+      "name": "iam-role",
+      "type": "s3",
+      "parameters": {
+        "path": "role/{{ instance:iam-role }}.json"
+      }
+    },
+    {
       "name": "consul",
       "type": "consul"
     }

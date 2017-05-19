@@ -8,7 +8,7 @@ const Consul = require('../lib/source/consul');
 const expect = require('chai').expect;
 
 describe('Consul', function() {
-  it('instantiates a Consul Source with defaults', () => {
+  it('instantiates a Consul Source with defaults', function() {
     const consul = new Consul('test');
 
     // See https://github.com/silas/node-papi/blob/master/lib/client.js#L71
@@ -19,7 +19,7 @@ describe('Consul', function() {
     expect(consul.properties).to.be.empty;
   });
 
-  it('overrides defaults from constructor options', () => {
+  it('overrides defaults from constructor options', function() {
     const consul = new Consul('test', {
       host: '1.1.1.1',
       port: 1234,

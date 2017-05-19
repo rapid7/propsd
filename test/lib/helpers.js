@@ -15,5 +15,10 @@ Config.defaults({
     host: '127.0.0.1',
     port: 4500,
     interval: 10
+  },
+  consul: {
+    host: '127.0.0.1',
+    port: 8500,
+    secure: false
   }
 });

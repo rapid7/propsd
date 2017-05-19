@@ -21,7 +21,6 @@ const Logger = require('../lib/logger');
 
 const Properties = require('../lib/properties');
 const Sources = require('../lib/sources');
-const Consul = require('../lib/source/consul');
 const Metadata = require('../lib/source/metadata');
 const Tags = require('../lib/source/tags');
 const S3 = require('../lib/source/s3');
@@ -57,7 +56,6 @@ const properties = new Properties();
 const sources = new Sources(properties);
 
 // Add metadata and some statics
-properties.dynamic(new Consul('consul', Config.get('consul')), 'consul');
 properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
 properties.dynamic(new Tags(Config.get('metadata')), 'instance:tags');
 properties.static(Config.get('properties'));

@@ -7,7 +7,7 @@ const Consul = require('../lib/source/consul');
 
 const expect = require('chai').expect;
 
-describe('Consul', function _() {
+describe('Consul', function() {
   it('instantiates a Consul Source with defaults', () => {
     const consul = new Consul('test');
 
@@ -31,15 +31,15 @@ describe('Consul', function _() {
     expect(consul.client._opts.secure).to.equal(true);
   });
 
-  it('sets up properties on initialize', function __(done) {
+  it('sets up properties on initialize', function() {
     const consul = new Consul('test');
 
     consul.client = Stub;
 
-    consul.initialize()
-      .then(() => {
-        expect(consul.state).to.equal(Consul.RUNNING);
-        expect(consul.properties).to.eql({
+    return consul.initialize().then(() => {
+      expect(consul.state).to.equal(Consul.RUNNING);
+      expect(consul.properties).to.eql({
+        consul: {
           consul: {
             cluster: 'consul',
             addresses: ['10.0.0.1', '10.0.0.2', '10.0.0.3']
@@ -52,14 +52,12 @@ describe('Consul', function _() {
             cluster: 'postgresql',
             addresses: ['10.0.0.2']
           }
-        });
-
-        done();
-      })
-      .catch(done);
+        }
+      });
+    });
   });
 
-  it('handles errors safely', function ___(done) {
+  it('handles errors safely', function() {
     const consul = new Consul('test');
 
     consul.client = Stub;
@@ -67,12 +65,9 @@ describe('Consul', function _() {
       callback(new Error('This is a test error!'), null);
     };
 
-    consul.initialize()
-      .then(() => {
-        expect(consul.state).to.equal(Consul.ERROR);
-        expect(consul.properties).to.eql({});
-        done();
-      })
-      .catch(done);
+    return consul.initialize().then(() => {
+      expect(consul.state).to.equal(Consul.ERROR);
+      expect(consul.properties).to.eql({});
+    });
   });
 });

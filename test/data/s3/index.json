@@ -30,6 +30,13 @@
       }
     },
     {
+      "name": "name-tag",
+      "type": "s3",
+      "parameters": {
+        "path": "{{ tags:Name }}.json"
+      }
+    },
+    {
       "name": "consul",
       "type": "consul"
     }

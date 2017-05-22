@@ -34,10 +34,33 @@ describe('Tags source plugin', function() {
     expect(parser.properties['Another tag']).to.equal('some other value');
   });
 
-  it('handles errors from the AWS SDK gracefully by not exposing the property', function(done) {
+  it('handles errors from the AWS Metadata SDK gracefully by not exposing the property', function(done) {
     AWS.mock('MetadataService', 'request', (path, callback) => {
       callback(new Error('some error from the AWS SDK'), null);
     });
+    const source = new Tags({
+      interval: 100
+    });
+
+    source.once('update', () => {
+      expect(source.properties).to.be.a('object');
+      expect(source.properties).to.be.empty;
+
+      AWS.restore();
+      done();
+    });
+    source.initialize();
+  });
+
+  it('handles errors from the AWS EC2 SDK gracefully by not exposing the property', function(done) {
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+
+    AWS.mock('EC2', 'describeTags', (path, callback) => {
+      callback(new Error('some error from the AWS SDK'), null);
+    });
+
     const source = new Tags({
       interval: 100
     });

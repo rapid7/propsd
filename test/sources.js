@@ -12,9 +12,9 @@ const providers = {stub: Source.Stub};
 Sources.providers.stub = Source.Stub;
 Sources.UPDATE_HOLD_DOWN = 100;
 
-describe('Sources', function _() {
-  describe('Index', function __() {
-    it('stores configuration parameters passed to the constructor', function ___() {
+describe('Sources', function() {
+  describe('Index', function() {
+    it('stores configuration parameters passed to the constructor', function() {
       const index = new Sources.Index([{
         name: 'test-source',
         type: 'test'
@@ -29,7 +29,7 @@ describe('Sources', function _() {
       });
     });
 
-    it('rejects configuration objects with missing type parameters', function ___() {
+    it('rejects configuration objects with missing type parameters', function() {
       const index = new Sources.Index([{
         name: 'test-source'
       }]);
@@ -38,7 +38,7 @@ describe('Sources', function _() {
       expect(index.configurations).to.be.empty;
     });
 
-    it('generates a name for configuration objects with missing name parameters', function ___() {
+    it('generates a name for configuration objects with missing name parameters', function() {
       const index = new Sources.Index([{
         type: 'test'
       }]);
@@ -50,7 +50,7 @@ describe('Sources', function _() {
       expect(generatedName).to.match(/^test:/);
     });
 
-    it('interpolates template values in strings in configuration objects', function ___() {
+    it('interpolates template values in strings in configuration objects', function() {
       const index = new Sources.Index([{
         name: 'test-source',
         type: 'test',
@@ -84,7 +84,7 @@ describe('Sources', function _() {
       });
     });
 
-    it('ignores configuration objects with undefined interpolation parameters', function ___() {
+    it('ignores configuration objects with undefined interpolation parameters', function() {
       const index = new Sources.Index([{
         name: 'test-source',
         type: 'test',
@@ -107,7 +107,7 @@ describe('Sources', function _() {
       expect(index.configurations).to.be.empty;
     });
 
-    it('returns an ordered set of sources', function ___() {
+    it('returns an ordered set of sources', function() {
       const index = new Sources.Index([{
         name: 'first',
         type: 'test'
@@ -141,7 +141,7 @@ describe('Sources', function _() {
     });
   });
 
-  describe('Comparator', function __() {
+  describe('Comparator', function() {
     const one = new Sources.Index([]);
     const two = new Sources.Index([{
       name: 'source-one',
@@ -170,7 +170,7 @@ describe('Sources', function _() {
       parameters: {foo: 'baz'}
     }]);
 
-    it('detects new sources', function ___() {
+    it('detects new sources', function() {
       const diff = Sources.Comparator.compare(one, two);
 
       expect(diff.changes).to.equal(true);
@@ -179,7 +179,7 @@ describe('Sources', function _() {
       expect(diff.destroy).to.be.empty;
     });
 
-    it('detects unchanged and removed sources', function ___() {
+    it('detects unchanged and removed sources', function() {
       const diff = Sources.Comparator.compare(two, three);
 
       expect(diff.changes).to.equal(true);
@@ -188,7 +188,7 @@ describe('Sources', function _() {
       expect(diff.destroy).to.have.length.of(1);
     });
 
-    it('detects changed sources', function ___() {
+    it('detects changed sources', function() {
       const diff = Sources.Comparator.compare(three, four);
 
       expect(diff.changes).to.equal(true);
@@ -197,7 +197,7 @@ describe('Sources', function _() {
       expect(diff.destroy).to.have.length.of(1);
     });
 
-    it('detects when no changes have occurred', function ___() {
+    it('detects when no changes have occurred', function() {
       const diff = Sources.Comparator.compare(three, three);
 
       expect(diff.changes).to.equal(false);
@@ -206,7 +206,7 @@ describe('Sources', function _() {
       expect(diff.destroy).to.be.empty;
     });
 
-    it('creates sources for a new index', function ___() {
+    it('creates sources for a new index', function() {
       const diff = Sources.Comparator.compare(one, two);
       const index = diff.build(providers);
 
@@ -216,14 +216,14 @@ describe('Sources', function _() {
       );
     });
 
-    it('rejects source configurations with unsupported types', function ___() {
+    it('rejects source configurations with unsupported types', function() {
       const diff = Sources.Comparator.compare(one, new Sources.Index([{type: 'foobar'}]));
       const index = diff.build(providers);
 
       expect(index.sources).to.be.empty;
     });
 
-    it('shuts down removed sources from an old index', function ___(done) {
+    it('shuts down removed sources from an old index', function(done) {
       const diff = Sources.Comparator.compare(two, three);
 
       two.sources['source-one'].once('shutdown', (source) => {
@@ -234,7 +234,7 @@ describe('Sources', function _() {
       diff.cleanup();
     });
 
-    it('copies unchanged sources from the previous index', function ___() {
+    it('copies unchanged sources from the previous index', function() {
       const diff = Sources.Comparator.compare(two, three);
 
       diff.build(providers);
@@ -259,29 +259,29 @@ describe('Sources', function _() {
 
   properties.dynamic(layer);
 
-  describe('Configuration', function __() {
-    it('has the correct initial state', function ___() {
       expect(sources.properties).to.be.instanceOf(Properties);
       expect(sources.indices).to.be.instanceOf(Array);
       expect(sources.initialized).to.equal(false);
       expect(sources.current).to.be.instanceOf(Sources.Index);
       expect(sources.current.order).to.have.length.of(0);
+  describe('Configuration', function() {
+    it('has the correct initial state', function() {
     });
 
-    it('adds an index source', function ___() {
       sources.index(index);
+    it('adds an index source', function() {
 
       expect(sources.indices).to.deep.equal([index]);
     });
   });
 
-  describe('Initialization', function __() {
+  describe('Initialization', function() {
     this.timeout(5000);
 
-    it('initializes properties and indices', function ___(done) {
       sources.initialize();
 
       expect(sources.initializing).to.equal(true);
+    it('initializes properties and indices', function(done) {
 
       // Calling initialize multiple times returns valid promises
       sources.initialize()
@@ -297,23 +297,23 @@ describe('Sources', function _() {
         .catch(done);
     });
 
-    it('returns a resolved promise if called multiple times', function ___() {
       expect(sources.initialized).to.equal(true);
       expect(sources.initialize()).to.be.instanceOf(Promise);
+    it('returns a resolved promise if called multiple times', function() {
     });
 
-    it('updates the index when a Properties layer updates', function ___(done) {
       sources.once('update', () => {
         expect(sources.current.configurations.stub1.parameters.value).to.equal('quux');
+    it('updates the index when a Properties layer updates', function(done) {
         done();
       });
 
       layer.update({foo: 'quux'});
     });
 
-    it('updates the index when an Index layer updates', function ___(done) {
       sources.once('update', () => {
         expect(sources.current.configurations.stub2.parameters.changed).to.equal('parameter!');
+    it('updates the index when an Index layer updates', function(done) {
         done();
       });
 
@@ -332,22 +332,22 @@ describe('Sources', function _() {
       }]);
     });
 
-    it('does not update the properties view when the index isn\'t changed', function ___(done) {
       sources.once('noupdate', () => done());
       index.emit('update');
+    it('does not update the properties view when the index isn\'t changed', function(done) {
     });
   });
 
-  describe('Health', function __() {
-    it('sets a healthy code and status message', function ___() {
+  describe('Health', function() {
       const healthy = sources.health();
+    it('sets a healthy code and status message', function() {
 
       expect(healthy.code).to.equal(200);
       expect(healthy.status).to.equal('OK');
     });
 
-    it('sets an unhealthy code and status message when an index source is in an error state', function ___() {
       index.error();
+    it('sets an unhealthy code and status message when an index source is in an error state', function() {
 
       const healthy = sources.health();
 
@@ -355,9 +355,9 @@ describe('Sources', function _() {
       expect(healthy.status).to.equal('ERROR');
     });
 
-    it('sets an unhealthy code and status message when a layer source is in an error state', function ___() {
       index.recover();
       const h1 = sources.health();
+    it('sets an unhealthy code and status message when a layer source is in an error state', function() {
 
       expect(h1.code).to.equal(200);
       expect(h1.status).to.equal('OK');

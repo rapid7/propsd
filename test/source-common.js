@@ -5,8 +5,8 @@ require('./lib/helpers');
 const Source = require('./lib/stub/source');
 const expect = require('chai').expect;
 
-describe('Source/Common', function _() {
-  it('sets configurable parameters from constructor options', function __() {
+describe('Source/Common', function() {
+  it('sets configurable parameters from constructor options', function() {
     // Create some references to test against
     const testParser = {};
 
@@ -20,40 +20,37 @@ describe('Source/Common', function _() {
     expect(stub.parser).to.equal(testParser);
   });
 
-  it('initialize returns a promise', function __() {
+  it('initialize returns a promise', function() {
     const source = new Source.Stub();
 
     expect(source.initialize()).to.be.instanceOf(Promise);
   });
 
-  it('initialized promise resolves when a response is received', function __(done) {
+  it('initialized promise resolves when a response is received', function() {
     const source = new Source.Stub();
 
-    source.initialize().then(() => {
+    return source.initialize().then(() => {
       expect(source.state).to.equal(Source.RUNNING);
-      done();
     });
   });
 
-  it('initialized promise resolves when a NO_EXIST is received', function __(done) {
+  it('initialized promise resolves when a NO_EXIST is received', function() {
     const source = new Source.NoExistStub();
 
-    source.initialize().then(() => {
+    return source.initialize().then(() => {
       expect(source.state).to.equal(Source.WAITING);
-      done();
     });
   });
 
-  it('initialized promise resolves when an error is received', function __(done) {
+  it('initialized promise resolves when an error is received', function() {
     const source = new Source.ErrorStub();
 
-    source.initialize().then(() => {
+    return source.initialize().then(() => {
       expect(source.state).to.equal(Source.ERROR);
-      done();
     });
   });
 
-  it('shuts down cleanly', (done) => {
+  it('shuts down cleanly', function(done) {
     const source = new Source.Stub();
 
     source.once('shutdown', () => {
@@ -68,7 +65,7 @@ describe('Source/Common', function _() {
     });
   });
 
-  it('handles and emits errors from the underlying resource', function __(done) {
+  it('handles and emits errors from the underlying resource', function(done) {
     const source = new Source.ErrorStub();
 
     source.once('error', (err) => {
@@ -85,13 +82,13 @@ describe('Source/Common', function _() {
     source.initialize();
   });
 
-  it('fakes inheritance checks through the Source Factory methods', function __() {
+  it('fakes inheritance checks through the Source Factory methods', function() {
     expect(new Source.Stub()).to.be.instanceOf(Source.Common);
     expect(new Source.PollingStub()).to.be.instanceOf(Source.Common);
     expect(new Source.PollingStub()).to.be.instanceOf(Source.Common.Polling);
   });
 
-  it('clears properties and state on NO_EXIST when INITIALIZING', function __() {
+  it('clears properties and state on NO_EXIST when INITIALIZING', function() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.INITIALIZING;
@@ -104,7 +101,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXIST when RUNNING', function __() {
+  it('clears properties and state on NO_EXIST when RUNNING', function() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.RUNNING;
@@ -117,7 +114,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXIST when WARNING', function __() {
+  it('clears properties and state on NO_EXIST when WARNING', function() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.WARNING;
@@ -130,7 +127,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXIST when ERROR', function __() {
+  it('clears properties and state on NO_EXIST when ERROR', function() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.ERROR;
@@ -143,7 +140,7 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  it('clears properties and state on NO_EXIST when WAITING', function __() {
+  it('clears properties and state on NO_EXIST when WAITING', function() {
     const source = new Source.Stub({key: 'value'});
 
     source.state = Source.Common.WAITING;
@@ -156,8 +153,8 @@ describe('Source/Common', function _() {
     expect(source._state).to.eql(null);
   });
 
-  describe('Polling', function __() {
-    it('sets an interval', function ___() {
+  describe('Polling', function() {
+    it('sets an interval', function() {
       const stub = new Source.PollingStub({}, {
         interval: 42
       });
@@ -165,7 +162,7 @@ describe('Source/Common', function _() {
       expect(stub.interval).to.equal(42);
     });
 
-    it('starts a timer when initialized', function ___(done) {
+    it('starts a timer when initialized', function(done) {
       const stub = new Source.PollingStub();
 
       stub.initialize().then(() => {
@@ -176,33 +173,30 @@ describe('Source/Common', function _() {
       });
     });
 
-    it('only creates one timer if initialized multiple times', function ___(done) {
+    it('only creates one timer if initialized multiple times', function() {
       const stub = new Source.PollingStub();
 
-      stub.initialize().then(() => {
+      return stub.initialize().then(() => {
         expect(stub._timer).to.be.an('object');
 
         const firstTimer = stub._timer;
 
-        stub.initialize().then(() => {
+        return stub.initialize().then(() => {
           expect(stub._timer).to.equal(firstTimer);
 
           stub.shutdown();
-          done();
         });
       });
     });
 
-    it('clears its timer when shutdown', function ___(done) {
+    it('clears its timer when shutdown', function() {
       const stub = new Source.PollingStub();
 
-      stub.initialize().then(() => {
+      return stub.initialize().then(() => {
         expect(stub._timer).to.be.an('object');
 
         stub.shutdown();
         expect(stub._timer).to.equal(undefined);
-
-        done();
       });
     });
   });

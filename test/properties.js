@@ -10,10 +10,10 @@ Properties.BUILD_HOLD_DOWN = 100;
 
 const expect = require('chai').expect;
 
-describe('Properties', function _() {
+describe('Properties', function() {
   const properties = new Properties();
 
-  it('adds static properties and builds', function __(done) {
+  it('adds static properties and builds', function(done) {
     properties.static({
       hello: 'world'
     });
@@ -30,7 +30,7 @@ describe('Properties', function _() {
     properties.build();
   });
 
-  it('does not reorder source layers if build is called multiple times', function __(done) {
+  it('does not reorder source layers if build is called multiple times', function(done) {
     const localProps = new Properties();
     const correctOrder = ['first', 'second'];
 
@@ -59,7 +59,7 @@ describe('Properties', function _() {
     });
   });
 
-  it('does not reorder layers if the properties sources getter is called', function ___(done) {
+  it('does not reorder layers if the properties sources getter is called', function(done) {
     const props = new Properties();
     const sources = [
       new Source.Stub({path: 'foo'}),
@@ -79,7 +79,7 @@ describe('Properties', function _() {
     view.activate();
   });
 
-  it('adds layers with namespaces', function __(done) {
+  it('adds layers with namespaces', function(done) {
     properties.static({
       cruel: 'world'
     }, 'goodbye');
@@ -93,8 +93,8 @@ describe('Properties', function _() {
     properties.build();
   });
 
-  it('adds a dynamic layer and rebuilds on updates', function __(done) {
     const stub = new Source.Stub({
+  it('adds a dynamic layer and rebuilds on updates', function(done) {
       stubby: 'property!'
     });
 
@@ -112,7 +112,7 @@ describe('Properties', function _() {
     });
   });
 
-  it('creates and activates a new view', function __(done) {
+  it('creates and activates a new view', function(done) {
     const view = properties.view();
 
     expect(view).to.be.instanceOf(Properties.View);
@@ -127,11 +127,11 @@ describe('Properties', function _() {
     view.activate();
   });
 
-  it('does nothing when activate is called on the active view', function __() {
+  it('does nothing when activate is called on the active view', function() {
     expect(properties.active.activate()).to.be.instanceOf(Promise);
   });
 
-  it('rebuilds properties when a source in the active view updates', function __(done) {
+  it('rebuilds properties when a source in the active view updates', function(done) {
     const view = properties.view();
     const stub = new Source.Stub({
       foo: 'bar'
@@ -153,7 +153,7 @@ describe('Properties', function _() {
     });
   });
 
-  it('activates a view correctly when a source is NO_EXIST', function __(done) {
+  it('activates a view correctly when a source is NO_EXIST', function(done) {
     // Get current active view's sources
     const sources = properties.active.sources.concat([]);
     const stub = new Source.NoExistStub();

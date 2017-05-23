@@ -61,11 +61,15 @@ describe('Properties', function() {
 
   it('does not reorder layers if the properties sources getter is called', function(done) {
     const props = new Properties();
-    const sources = [
-      new Source.Stub({path: 'foo'}),
-      new Source.Stub({path: 'bar'}),
-      new Source.Stub({path: 'baz'})
-    ];
+
+    const sources = [{path: 'foo'}, {path: 'bar'}, {path: 'baz'}].map((prop) => {
+      const stub = new Source.Stub();
+
+      stub.properties = prop;
+
+      return stub;
+    });
+
     const view = props.view(sources);
     const expected = ['foo', 'bar', 'baz'];
     const reversed = ['baz', 'bar', 'foo'];
@@ -93,10 +97,12 @@ describe('Properties', function() {
     properties.build();
   });
 
-    const stub = new Source.Stub({
   it('adds a dynamic layer and rebuilds on updates', function(done) {
+    const stub = new Source.Stub();
+
+    stub.properties = {
       stubby: 'property!'
-    });
+    };
 
     properties.dynamic(stub);
 
@@ -133,9 +139,11 @@ describe('Properties', function() {
 
   it('rebuilds properties when a source in the active view updates', function(done) {
     const view = properties.view();
-    const stub = new Source.Stub({
+    const stub = new Source.Stub();
+
+    stub.properties = {
       foo: 'bar'
-    });
+    };
 
     view.register(stub);
 

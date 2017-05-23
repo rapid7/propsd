@@ -480,17 +480,19 @@ describe('Properties#build', function() {
         .reply(200, {
           plaintext: 'toor'
         });
+    const stub = new Source.Stub();
 
-    _properties = new Properties();
-
-    _properties.dynamic(new Source.Stub({
+    stub.properties = {
       password: {
         $tokend: {
           type: 'generic',
           resource: '/v1/secret/default/kali/root/password'
         }
       }
-    }));
+    };
+    _properties = new Properties();
+
+    _properties.dynamic(stub);
 
     _properties.once('build', (transformedProperties) => {
       expect(transformedProperties).to.eql({
@@ -510,10 +512,10 @@ describe('Properties#build', function() {
         .reply(200, {
           plaintext: 'toor'
         });
+    const stub = new Source.Stub();
+    const stub2 = new Source.Stub();
 
-    _properties = new Properties();
-
-    _properties.dynamic(new Source.Stub({
+    stub.properties = {
       password: {
         $tokend: {
           type: 'generic',
@@ -522,9 +524,8 @@ describe('Properties#build', function() {
           resource: '/v1/secret/default/kali/user/password'
         }
       }
-    }));
-
-    _properties.dynamic(new Source.Stub({
+    };
+    stub2.properties = {
       password: {
         $tokend: {
           type: 'generic',
@@ -533,7 +534,12 @@ describe('Properties#build', function() {
           resource: '/v1/secret/default/kali/root/password'
         }
       }
-    }));
+    };
+
+    _properties = new Properties();
+
+    _properties.dynamic(stub);
+    _properties.dynamic(stub2);
 
     _properties.once('build', (transformedProperties) => {
       expect(transformedProperties).to.eql({
@@ -564,10 +570,9 @@ describe('Properties#build', function() {
       .reply(200, {
         plaintext: 'myvoiceismypassword'
       });
+    const stub = new Source.Stub();
 
-    _properties = new Properties();
-
-    _properties.dynamic(new Source.Stub({
+    stub.properties = {
       password: {
         $tokend: {
           type: 'generic',
@@ -576,7 +581,10 @@ describe('Properties#build', function() {
           resource: '/v1/secret/default/kali/root/password'
         }
       }
-    }));
+    };
+    _properties = new Properties();
+
+    _properties.dynamic(stub);
 
     // "build" will have fired once from the initialization; watch for updates from polling
     _properties.on('build', (updatedProperties) => {

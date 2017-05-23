@@ -15,7 +15,7 @@ class Parser {
 }
 
 class Stub extends Common(Parser) {
-  constructor(properties, opts) {
+  constructor(name, opts) {
     // Inject defaults into options
     const options = Object.assign({
       type: 'stub',
@@ -24,7 +24,8 @@ class Stub extends Common(Parser) {
 
     super('stub', options);
     this.delay = options.delay;
-    this.properties = properties || {};
+    this.name = name;
+    this.properties = {};
   }
 
   initialize() {

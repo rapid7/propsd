@@ -10,7 +10,7 @@ describe('Source/Common', function() {
     // Create some references to test against
     const testParser = {};
 
-    const stub = new Source.Stub({}, {
+    const stub = new Source.Stub('stub', {
       parser: testParser
     });
 

@@ -33,7 +33,7 @@
       "name": "name-tag",
       "type": "s3",
       "parameters": {
-        "path": "{{ tags:Name }}.json"
+        "path": "{{ instance:tags:Name }}.json"
       }
     },
     {

@@ -36,6 +36,7 @@ version_dir = "#{ node['propsd']['paths']['directory'] }-#{ node['propsd']['vers
 package 'propsd' do
   source resources('remote_file[propsd]').path
   provider Chef::Provider::Package::Dpkg
+  version node['propsd']['version']
 end
 
 ## Symlink the version dir to the specified propsd directory

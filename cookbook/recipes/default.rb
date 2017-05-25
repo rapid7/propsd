@@ -37,12 +37,15 @@ package 'propsd' do
   source resources('remote_file[propsd]').path
   provider Chef::Provider::Package::Dpkg
   version node['propsd']['version']
+
+  notifies :create, "link[#{node['propsd']['paths']['directory']}]", :immediately
 end
 
 ## Symlink the version dir to the specified propsd directory
 link node['propsd']['paths']['directory'] do
   to version_dir
 
+  action :nothing
   notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 

@@ -10,10 +10,10 @@ Properties.BUILD_HOLD_DOWN = 100;
 
 const expect = require('chai').expect;
 
-describe('Properties', function _() {
+describe('Properties', function() {
   const properties = new Properties();
 
-  it('adds static properties and builds', function __(done) {
+  it('adds static properties and builds', function(done) {
     properties.static({
       hello: 'world'
     });
@@ -30,7 +30,7 @@ describe('Properties', function _() {
     properties.build();
   });
 
-  it('does not reorder source layers if build is called multiple times', function __(done) {
+  it('does not reorder source layers if build is called multiple times', function(done) {
     const localProps = new Properties();
     const correctOrder = ['first', 'second'];
 
@@ -59,13 +59,17 @@ describe('Properties', function _() {
     });
   });
 
-  it('does not reorder layers if the properties sources getter is called', function ___(done) {
+  it('does not reorder layers if the properties sources getter is called', function(done) {
     const props = new Properties();
-    const sources = [
-      new Source.Stub({path: 'foo'}),
-      new Source.Stub({path: 'bar'}),
-      new Source.Stub({path: 'baz'})
-    ];
+
+    const sources = [{path: 'foo'}, {path: 'bar'}, {path: 'baz'}].map((prop) => {
+      const stub = new Source.Stub();
+
+      stub.properties = prop;
+
+      return stub;
+    });
+
     const view = props.view(sources);
     const expected = ['foo', 'bar', 'baz'];
     const reversed = ['baz', 'bar', 'foo'];
@@ -79,7 +83,7 @@ describe('Properties', function _() {
     view.activate();
   });
 
-  it('adds layers with namespaces', function __(done) {
+  it('adds layers with namespaces', function(done) {
     properties.static({
       cruel: 'world'
     }, 'goodbye');
@@ -93,10 +97,12 @@ describe('Properties', function _() {
     properties.build();
   });
 
-  it('adds a dynamic layer and rebuilds on updates', function __(done) {
-    const stub = new Source.Stub({
+  it('adds a dynamic layer and rebuilds on updates', function(done) {
+    const stub = new Source.Stub();
+
+    stub.properties = {
       stubby: 'property!'
-    });
+    };
 
     properties.dynamic(stub);
 
@@ -112,7 +118,7 @@ describe('Properties', function _() {
     });
   });
 
-  it('creates and activates a new view', function __(done) {
+  it('creates and activates a new view', function(done) {
     const view = properties.view();
 
     expect(view).to.be.instanceOf(Properties.View);
@@ -127,15 +133,17 @@ describe('Properties', function _() {
     view.activate();
   });
 
-  it('does nothing when activate is called on the active view', function __() {
+  it('does nothing when activate is called on the active view', function() {
     expect(properties.active.activate()).to.be.instanceOf(Promise);
   });
 
-  it('rebuilds properties when a source in the active view updates', function __(done) {
+  it('rebuilds properties when a source in the active view updates', function(done) {
     const view = properties.view();
-    const stub = new Source.Stub({
+    const stub = new Source.Stub();
+
+    stub.properties = {
       foo: 'bar'
-    });
+    };
 
     view.register(stub);
 
@@ -153,7 +161,7 @@ describe('Properties', function _() {
     });
   });
 
-  it('activates a view correctly when a source is NO_EXIST', function __(done) {
+  it('activates a view correctly when a source is NO_EXIST', function(done) {
     // Get current active view's sources
     const sources = properties.active.sources.concat([]);
     const stub = new Source.NoExistStub();
@@ -247,134 +255,5 @@ describe('Properties', function _() {
         done();
       });
     }).catch(done);
-  });
-
-  describe('Merge', function __() {
-    it('merges one object into another', function ___() {
-      const a = {};
-      const b = {
-        a: 1, b: 2, c: {
-          a: [],
-          b: new Date(0)
-        }
-      };
-
-      const c = Properties.merge(a, b);
-
-      expect(a).to.equal(c);
-      expect(c).to.deep.equal(b);
-    });
-
-    it('merges objects recursively', function ___() {
-      const a = {
-        a: 2, c: {
-          d: 42
-        },
-        e: []
-      };
-      const b = {
-        a: 1, b: 2, c: {
-          a: [],
-          b: new Date(0)
-        }
-      };
-
-      const c = Properties.merge(a, b);
-
-      expect(a).to.equal(c);
-      expect(c).to.deep.equal({
-        a: 1, b: 2, c: {
-          a: [],
-          b: new Date(0),
-          d: 42
-        },
-        e: []
-      });
-    });
-
-    it('instantiates a new object for destination when null or undefined are passed', function ___() {
-      const a = null;
-      const b = {a: 1};
-
-      const c = Properties.merge(a, b);
-
-      expect(c).to.not.equal(a);
-      expect(c).to.not.equal(b);
-      expect(c).to.deep.equal({a: 1});
-    });
-
-    it('avoids merging source when null or undefined are passed', function ___() {
-      const a = {a: 1};
-      const b = null;
-
-      const c = Properties.merge(a, b);
-
-      expect(c).to.equal(a);
-      expect(c).to.deep.equal({a: 1});
-    });
-
-    it('avoids merging keys with null or undefined values', function ___() {
-      const a = {a: 0};
-      const b = {
-        z: 1,
-        n: null,
-        u: undefined
-      };
-
-      const c = Properties.merge(a, b);
-
-      expect(c).to.equal(a);
-      expect(c).to.deep.equal({
-        a: 0,
-        z: 1
-      });
-    });
-
-    it('always returns an Object', function ___() {
-      const a = [];
-      const b = null;
-
-      const c = Properties.merge(a, b);
-
-      expect(c).to.not.equal(a);
-      expect(c).to.not.equal(b);
-      expect(c).to.be.instanceOf(Object);
-      expect(c).to.deep.equal({});
-    });
-
-    it('does not attempt to merge values that aren\'t direct descendants of Object', function ___() {
-      const a = {
-        a: 2, c: {
-          a: [1, 2, 3],
-          b: {a: 'foo'},
-          d: 42,
-          e: new Date(1),
-          f: []
-        },
-        e: []
-      };
-      const b = {
-        a: 1, b: 2, c: {
-          a: [],
-          b: new Date(0),
-          e: 'bar',
-          f: {a: 123}
-        }
-      };
-
-      const c = Properties.merge(a, b);
-
-      expect(a).to.equal(c);
-      expect(c).to.deep.equal({
-        a: 1, b: 2, c: {
-          a: [],
-          b: new Date(0),
-          d: 42,
-          e: 'bar',
-          f: {a: 123}
-        },
-        e: []
-      });
-    });
   });
 });

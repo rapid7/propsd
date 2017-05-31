@@ -687,7 +687,7 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint-config-rapid7@^2.9.0:
+eslint-config-rapid7@~2.9.0:
   version "2.9.0"
   resolved "https://registry.yarnpkg.com/eslint-config-rapid7/-/eslint-config-rapid7-2.9.0.tgz#2341ed43cee9b0631b33f3cb9df0f2ba93528f65"
   dependencies:

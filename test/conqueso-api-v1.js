@@ -78,18 +78,18 @@ function makeServer(propsUnderTest) {
   return app.listen(testServerPort);
 }
 
-describe('Conqueso API v1', () => {
+describe('Conqueso API v1', function() {
   let server = null;
 
-  beforeEach(() => {
+  beforeEach(function() {
     server = makeServer(conquesoProperties);
   });
 
-  afterEach((done) => {
+  afterEach(function(done) {
     server.close(done);
   });
 
-  it('acknowledges GET requests', (done) => {
+  it('acknowledges GET requests', function(done) {
     request(server)
       .get('/v1/conqueso/api/roles')
       .set('Accept', 'text/plain')
@@ -97,42 +97,42 @@ describe('Conqueso API v1', () => {
       .expect(HTTP_OK, javaProperties, done);
   });
 
-  it('acknowledges POST requests', (done) => {
+  it('acknowledges POST requests', function(done) {
     request(server)
       .post('/v1/conqueso/api/roles/search/properties')
       .send(conquesoProperties)
       .expect(HTTP_OK, '', done);
   });
 
-  it('acknowledges PUT requests', (done) => {
+  it('acknowledges PUT requests', function(done) {
     request(server)
       .put('/v1/conqueso/api/roles/search/properties')
       .send(conquesoProperties)
       .expect(HTTP_OK, '', done);
   });
 
-  it('acknowledges OPTIONS requests', (done) => {
+  it('acknowledges OPTIONS requests', function(done) {
     request(server)
       .options('/v1/conqueso')
       .expect('Allow', 'GET,POST,PUT,OPTIONS')
       .expect(HTTP_OK, '', done);
   });
 
-  it('rejects DELETE requests', (done) => {
+  it('rejects DELETE requests', function(done) {
     request(server)
       .delete('/v1/conqueso')
       .expect('Allow', 'GET,POST,PUT,OPTIONS')
       .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
   });
 
-  it('rejects TRACE requests', (done) => {
+  it('rejects TRACE requests', function(done) {
     request(server)
       .trace('/v1/conqueso')
       .expect('Allow', 'GET,POST,PUT,OPTIONS')
       .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
   });
 
-  it('rejects HEAD requests', (done) => {
+  it('rejects HEAD requests', function(done) {
     request(server)
       .head('/v1/conqueso')
       .expect('Allow', 'GET,POST,PUT,OPTIONS')
@@ -141,13 +141,13 @@ describe('Conqueso API v1', () => {
 });
 
 // This is split out into a separate 'describe' group because of the way express binds ports
-describe('Conqueso API v1', () => {
+describe('Conqueso API v1', function() {
   let server;
 
-  before(() => {
+  before(function() {
     server = makeServer(nestedProperties);
   });
-  it('emits properly flattened data', (done) => {
+  it('emits properly flattened data', function(done) {
     request(server)
       .get('/v1/conqueso/api/roles')
       .set('Accept', 'text/plain')
@@ -155,7 +155,7 @@ describe('Conqueso API v1', () => {
       .expect(HTTP_OK, nestedJavaProperties, done);
   });
 
-  it('retrieves a specific property if it exists', (done) => {
+  it('retrieves a specific property if it exists', function(done) {
     request(server)
       .get('/v1/conqueso/api/roles/global/properties/food.name')
       .set('Accept', 'text/plain')
@@ -163,7 +163,7 @@ describe('Conqueso API v1', () => {
       .expect(HTTP_OK, 'tacos', done);
   });
 
-  it('returns no data if a specific property does not exist', (done) => {
+  it('returns no data if a specific property does not exist', function(done) {
     request(server)
       .get('/v1/conqueso/api/roles/global/properties/food.gluten')
       .set('Accept', 'text/plain')
@@ -171,36 +171,34 @@ describe('Conqueso API v1', () => {
       .expect(HTTP_OK, '', done);
   });
 
-  after((done) => {
+  after(function(done) {
     server.close(done);
   });
 });
 
-describe('Conqueso API v1', () => {
+describe('Conqueso API v1', function() {
   let consul = null,
       server = null;
 
-  beforeEach((done) => {
+  beforeEach(function(done) {
     consul = new Consul('consul');
     consul.client = ConsulStub;
 
-    consul.initialize().then(() => {
+    consul.initialize().then(function() {
       server = makeServer({
-        properties: {
-          consul: consul.properties
-        }
+        properties: consul.properties
       });
 
       done();
     });
   });
 
-  afterEach((done) => {
+  afterEach(function(done) {
     consul.shutdown();
     server.close(done);
   });
 
-  it('formats IP addresses for Consul services', (done) => {
+  it('formats IP addresses for Consul services', function(done) {
     const expected = [
       'conqueso.postgresql.ips=10.0.0.2',
       'conqueso.redis.ips=10.0.0.1',
@@ -217,7 +215,7 @@ describe('Conqueso API v1', () => {
       .expect(HTTP_OK, done);
   });
 
-  it('removes reserved "instance" keyword from properties', (done) => {
+  it('removes reserved "instance" keyword from properties', function(done) {
     server.close();
 
     server = makeServer({

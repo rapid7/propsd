@@ -97,6 +97,34 @@ describe('Properties', function() {
     properties.build();
   });
 
+  it('removes properties that have null values', function(done) {
+    const properties = new Properties();
+
+    properties.static({
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    }, 'goodbye');
+
+    const stub = new Source.Stub();
+
+    stub.properties = {
+      stubby: null
+    };
+
+    properties.dynamic(stub);
+
+    properties.once('build', (props) => {
+      expect(props.goodbye.cruel).to.equal('world');
+      expect(props.goodbye.leaving).to.be.an('undefined');
+      expect(props.goodbye.change).to.equal('my-mind');
+      expect(props.stubby).to.be.an('undefined');
+      done();
+    });
+
+    properties.build();
+  });
+
   it('adds a dynamic layer and rebuilds on updates', function(done) {
     const stub = new Source.Stub();
 

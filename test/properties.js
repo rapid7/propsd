@@ -97,6 +97,90 @@ describe('Properties', function() {
     properties.build();
   });
 
+  it('removes properties that have null values', function(done) {
+    const properties = new Properties();
+
+    properties.static({
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    }, 'goodbye');
+
+    const stub = new Source.Stub();
+
+    stub.properties = {
+      stubby: null
+    };
+
+    properties.dynamic(stub);
+
+    properties.once('build', (props) => {
+      expect(props.goodbye.cruel).to.equal('world');
+      expect(props.goodbye.leaving).to.be.an('undefined');
+      expect(props.goodbye.change).to.equal('my-mind');
+      expect(props.stubby).to.be.an('undefined');
+      done();
+    });
+
+    properties.build();
+  });
+
+  it('doesn\'t override values with properties that have null values', function(done) {
+    const properties = new Properties();
+    const stub = new Source.Stub();
+    const stub2 = new Source.Stub();
+
+    properties.static({
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    });
+
+    stub.properties = {
+      change: null
+    };
+
+    stub2.properties = {
+      cruel: null
+    };
+
+    properties.dynamic(stub);
+    properties.dynamic(stub2);
+
+    properties.once('build', (props) => {
+      expect(props.cruel).to.equal('world');
+      expect(props.leaving).to.be.an('undefined');
+      expect(props.change).to.equal('my-mind');
+      done();
+    });
+
+    properties.build();
+  });
+
+  it('merges namespaced layers correctly', function(done) {
+    const properties = new Properties();
+
+    properties.static({
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    }, 'goodbye');
+
+    properties.static({
+      foo: 'bar'
+    }, 'goodbye');
+
+    properties.once('build', (props) => {
+      expect(props.goodbye.cruel).to.equal('world');
+      expect(props.goodbye.leaving).to.be.an('undefined');
+      expect(props.goodbye.change).to.equal('my-mind');
+      expect(props.goodbye.foo).to.equal('bar');
+      done();
+    });
+
+    properties.build();
+  });
+
   it('adds a dynamic layer and rebuilds on updates', function(done) {
     const stub = new Source.Stub();
 
@@ -255,5 +339,135 @@ describe('Properties', function() {
         done();
       });
     }).catch(done);
+  });
+});
+
+
+describe('Merge', function() {
+  it('merges one object into another', function() {
+    const a = {};
+    const b = {
+      a: 1, b: 2, c: {
+        a: [],
+        b: new Date(0)
+      }
+    };
+
+    const c = Properties.merge(a, b);
+
+    expect(a).to.equal(c);
+    expect(c).to.deep.equal(b);
+  });
+
+  it('merges objects recursively', function() {
+    const a = {
+      a: 2, c: {
+        d: 42
+      },
+      e: []
+    };
+    const b = {
+      a: 1, b: 2, c: {
+        a: [],
+        b: new Date(0)
+      }
+    };
+
+    const c = Properties.merge(a, b);
+
+    expect(a).to.equal(c);
+    expect(c).to.deep.equal({
+      a: 1, b: 2, c: {
+        a: [],
+        b: new Date(0),
+        d: 42
+      },
+      e: []
+    });
+  });
+
+  it('instantiates a new object for destination when null or undefined are passed', function() {
+    const a = null;
+    const b = {a: 1};
+
+    const c = Properties.merge(a, b);
+
+    expect(c).to.not.equal(a);
+    expect(c).to.not.equal(b);
+    expect(c).to.deep.equal({a: 1});
+  });
+
+  it('avoids merging source when null or undefined are passed', function() {
+    const a = {a: 1};
+    const b = null;
+
+    const c = Properties.merge(a, b);
+
+    expect(c).to.equal(a);
+    expect(c).to.deep.equal({a: 1});
+  });
+
+  it('avoids merging keys with null or undefined values', function() {
+    const a = {a: 0};
+    const b = {
+      z: 1,
+      n: null,
+      u: undefined
+    };
+
+    const c = Properties.merge(a, b);
+
+    expect(c).to.equal(a);
+    expect(c).to.deep.equal({
+      a: 0,
+      z: 1
+    });
+  });
+
+  it('always returns an Object', function() {
+    const a = [];
+    const b = null;
+
+    const c = Properties.merge(a, b);
+
+    expect(c).to.not.equal(a);
+    expect(c).to.not.equal(b);
+    expect(c).to.be.instanceOf(Object);
+    expect(c).to.deep.equal({});
+  });
+
+  it('does not attempt to merge values that aren\'t direct descendants of Object', function() {
+    const a = {
+      a: 2, c: {
+        a: [1, 2, 3],
+        b: {a: 'foo'},
+        d: 42,
+        e: new Date(1),
+        f: []
+      },
+      e: []
+    };
+    const b = {
+      a: 1, b: 2, c: {
+        a: [],
+        b: new Date(0),
+        e: 'bar',
+        f: {a: 123}
+      }
+    };
+
+    const c = Properties.merge(a, b);
+
+    expect(a).to.equal(c);
+    expect(c).to.deep.equal({
+      a: 1, b: 2, c: {
+        a: [],
+        b: new Date(0),
+        d: 42,
+        e: 'bar',
+        f: {a: 123}
+      },
+      e: []
+    });
   });
 });

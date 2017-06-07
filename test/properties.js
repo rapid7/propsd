@@ -157,6 +157,30 @@ describe('Properties', function() {
     properties.build();
   });
 
+  it('merges namespaced layers correctly', function(done) {
+    const properties = new Properties();
+
+    properties.static({
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    }, 'goodbye');
+
+    properties.static({
+      foo: 'bar'
+    }, 'goodbye');
+
+    properties.once('build', (props) => {
+      expect(props.goodbye.cruel).to.equal('world');
+      expect(props.goodbye.leaving).to.be.an('undefined');
+      expect(props.goodbye.change).to.equal('my-mind');
+      expect(props.goodbye.foo).to.equal('bar');
+      done();
+    });
+
+    properties.build();
+  });
+
   it('adds a dynamic layer and rebuilds on updates', function(done) {
     const stub = new Source.Stub();
 

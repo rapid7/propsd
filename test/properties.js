@@ -125,6 +125,38 @@ describe('Properties', function() {
     properties.build();
   });
 
+  it('doesn\'t override values with properties that have null values', function(done) {
+    const properties = new Properties();
+    const stub = new Source.Stub();
+    const stub2 = new Source.Stub();
+
+    properties.static({
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    });
+
+    stub.properties = {
+      change: null
+    };
+
+    stub2.properties = {
+      cruel: null
+    };
+
+    properties.dynamic(stub);
+    properties.dynamic(stub2);
+
+    properties.once('build', (props) => {
+      expect(props.cruel).to.equal('world');
+      expect(props.leaving).to.be.an('undefined');
+      expect(props.change).to.equal('my-mind');
+      done();
+    });
+
+    properties.build();
+  });
+
   it('adds a dynamic layer and rebuilds on updates', function(done) {
     const stub = new Source.Stub();
 

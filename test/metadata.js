@@ -3,6 +3,7 @@
 require('./lib/helpers');
 
 const expect = require('chai').expect;
+const sinon = require('sinon');
 const AWS = require('aws-sdk-mock');
 
 const Metadata = require('../lib/source/metadata');
@@ -137,6 +138,36 @@ describe('Metadata source plugin', function _() {
       expect(source.properties['auto-scaling-group']).to.be.a('string');
       expect(source.properties['auto-scaling-group']).to.equal('my-cool-auto-scaling-group');
 
+      AWS.restore();
+      done();
+    });
+
+    source.initialize();
+  });
+
+  it('only retrieves ASG data once', function(done) {
+    const asgSpy = sinon.spy();
+
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
+      asgSpy();
+      callback(null, {AutoScalingInstances: [{
+        AutoScalingGroupName: 'my-cool-auto-scaling-group'
+      }]});
+    });
+
+    const source = new Metadata({
+      interval: 100
+    });
+
+    source.once('update', () => {
+      expect(asgSpy.calledOnce).to.be.true;
+    });
+
+    source.once('noupdate', () => {
+      expect(asgSpy.calledOnce).to.be.true;
       AWS.restore();
       done();
     });

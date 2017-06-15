@@ -57,7 +57,7 @@ const sources = new Sources(properties);
 
 // Add metadata and some statics
 properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
-properties.dynamic(new Tags(Config.get('metadata')), 'instance:tags');
+properties.dynamic(new Tags(Config.get('tags')), 'instance:tags');
 properties.static(Config.get('properties'));
 
 // Create the Index source

@@ -5,7 +5,7 @@
     "path": "index.json"
   },
   "metadata": {
-    "host": "127.0.0.1:8900"
+    "host": "127.0.0.1:8080"
   },
   "log": {
     "level": "info",

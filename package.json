@@ -1,6 +1,6 @@
 {
   "name": "propsd",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "A local daemon for loading static and dynamic properties",
   "main": "lib/index.js",
   "directories": {

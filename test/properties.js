@@ -181,6 +181,60 @@ describe('Properties', function() {
     properties.build();
   });
 
+  it('properly nests namespaces', function(done) {
+    const properties = new Properties();
+    const stub = new Source.Stub();
+
+    stub.properties = {
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    };
+
+    properties.dynamic(stub, 'goodbye:friends');
+
+
+    properties.once('build', (props) => {
+      expect(props.goodbye.friends).to.be.instanceOf(Object);
+      expect(props.goodbye.friends.change).to.equal('my-mind');
+      expect(props.goodbye.friends.cruel).to.equal('world');
+      done();
+    });
+
+    properties.build();
+  });
+
+  it('properly nests namespaces for multiple layers', function(done) {
+    const properties = new Properties();
+    const stub = new Source.Stub();
+    const stub2 = new Source.Stub();
+
+    stub.properties = {
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    };
+
+    stub2.properties = {
+      foo: 'bar',
+      baz: 3
+    };
+
+    properties.dynamic(stub, 'goodbye');
+    properties.dynamic(stub2, 'goodbye:friends');
+
+    properties.once('build', (props) => {
+      expect(props.goodbye.change).to.equal('my-mind');
+      expect(props.goodbye.cruel).to.equal('world');
+      expect(props.goodbye.friends).to.be.instanceOf(Object);
+      expect(props.goodbye.friends.baz).to.equal(3);
+      expect(props.goodbye.friends.foo).to.equal('bar');
+      done();
+    });
+
+    properties.build();
+  });
+
   it('adds a dynamic layer and rebuilds on updates', function(done) {
     const stub = new Source.Stub();
 

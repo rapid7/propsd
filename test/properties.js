@@ -181,7 +181,7 @@ describe('Properties', function() {
     properties.build();
   });
 
-  it.only('properly nests namespaces', function(done) {
+  it('properly nests namespaces', function(done) {
     const properties = new Properties();
     const stub = new Source.Stub();
     const stub2 = new Source.Stub();

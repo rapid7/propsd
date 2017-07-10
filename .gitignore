@@ -50,3 +50,4 @@ Berksfile.lock
 npm-shrinkwrap.json
 cookbook/.kitchen/
 cookbook/.kitchen.local.yml
+dist/

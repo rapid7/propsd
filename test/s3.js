@@ -11,7 +11,7 @@ const NON_DEFAULT_INTERVAL = 10000;
 const DEFAULT_INTERVAL = 60000;
 const DEFAULT_BUCKET = 'fake-bucket';
 
-const Source = require('../lib/source/common');
+const Source = require('../dist/lib/source/common');
 const s3Stub = require('./utils/s3-stub');
 
 describe('S3 source plugin', function() {
@@ -55,7 +55,7 @@ describe('S3 source plugin', function() {
 
   it('initializes a timer with the set interval', (done) => {
     this.s3.on('update', () => {
-      this.s3._timer.should.have.keys(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
+      this.s3._timer.should.have.properties(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
         '_onTimeout', '_repeat']);
       done();
     });
@@ -255,7 +255,7 @@ describe('S3 source plugin', function() {
     });
 
     const endpoint = 'www.somecoolendpoint.com';
-    const s3Source = require('../lib/source/s3');
+    const s3Source = require('../dist/lib/source/s3');
     const s3 = new s3Source('foo.json', {
       bucket: DEFAULT_BUCKET,
       path: 'foo.json',

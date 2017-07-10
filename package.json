@@ -2,16 +2,13 @@
   "name": "propsd",
   "version": "3.0.3",
   "description": "A local daemon for loading static and dynamic properties",
-  "main": "lib/index.js",
-  "directories": {
-    "doc": "docs",
-    "bin": "bin"
-  },
   "scripts": {
-    "start": "./bin/server.js",
-    "test": "mocha",
-    "lint": "eslint bin/** lib/** test/**",
-    "coverage": "istanbul cover _mocha -- -R spec",
+    "start": "./bin/server.js -r babel-require",
+    "clean": "rimraf dist",
+    "transpile": "npm run clean && babel src --out-dir dist --copy-files && cp package.json dist",
+    "test": "npm run transpile && mocha",
+    "lint": "eslint src/** test/**",
+    "coverage": "npm run transpile && istanbul cover _mocha -- -R spec",
     "report-coverage": "npm run coverage && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "metadata-server": "./test/bin/metadata-server",
     "s3-server": "./test/bin/s3-server.js",

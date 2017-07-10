@@ -190,6 +190,7 @@ CLEAN.include "#{name}-*.tgz"
 CLEAN.include 'pkg/'
 CLEAN.include '**/.DS_Store'
 CLEAN.include 'node_modules/'
+CLEAN.include 'dist/'
 
 task :default => [:clean, :package, :release]
 task :upload => [:clean, :package, :upload_packages]

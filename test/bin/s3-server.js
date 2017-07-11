@@ -15,8 +15,8 @@ global.Config = require('nconf')
   .argv()
   .env()
   .file(Path.resolve(__dirname, '../data/config.json'))
-  .defaults(require('../../config/defaults.json'));
-global.Log = require('../../lib/logger').attach(Config.get('log:level'));
+  .defaults(require('../../src/config/defaults.json'));
+global.Log = require('../../src/lib/logger').attach(Config.get('log:level'));
 
 const DEFAULT_HTTP_PORT = 4569;
 

@@ -3,7 +3,7 @@
   "version": "3.0.3",
   "description": "A local daemon for loading static and dynamic properties",
   "scripts": {
-    "start": "nodemon ./src/bin/server.js -r babel-require --",
+    "start": "nodemon ./src/bin/server.js --exec babel-node --",
     "clean": "rimraf dist",
     "version": "./test/bin/version.js",
     "transpile": "npm run version && babel src --out-dir dist --copy-files",

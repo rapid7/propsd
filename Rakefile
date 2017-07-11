@@ -90,7 +90,15 @@ task :install do
   end
 end
 
-task :shrinkwrap => [:install] do
+task :transpile do
+  if yarn_exists?
+    sh 'yarn run transpile'
+  else
+    sh 'npm run transpile'
+  end
+end
+
+task :shrinkwrap => [:install, :transpile] do
   sh 'npm shrinkwrap' unless yarn_exists?
 end
 
@@ -103,11 +111,11 @@ task :package_dirs do
   mkdir_p ::File.join(base_dir, config_dir)
 end
 
-task :source => [:install] do
-  ['bin/', 'lib/', 'node_modules/', 'LICENSE', 'package.json'].each do |src|
+task :source => [:install, :transpile] do
+  ['dist/bin/', 'dist/lib/', 'node_modules/', 'LICENSE', 'dist/version.json'].each do |src|
     cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
   end
-  cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
+  cp ::File.join(base_dir, 'dist', 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
 end
 
 task :chdir_pkg => [:package_dirs] do
@@ -183,7 +191,7 @@ task :release do
 end
 
 desc "Package #{name}"
-task :package => [:install, :shrinkwrap, :pack, :deb]
+task :package => [:install, :transpile, :shrinkwrap, :pack, :deb]
 
 CLEAN.include 'npm-shrinkwrap.json'
 CLEAN.include "#{name}-*.tgz"

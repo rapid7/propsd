@@ -8,7 +8,7 @@
     "version": "./test/bin/version.js",
     "transpile": "npm run version && babel src --out-dir dist --copy-files",
     "test": "npm run transpile && mocha",
-    "lint": "eslint src/** test/**",
+    "lint": "eslint src/**/*.js test/**/*.js",
     "coverage": "npm run transpile && istanbul cover _mocha -- -R spec",
     "report-coverage": "npm run coverage && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "metadata-server": "nodemon ./test/bin/metadata-server",

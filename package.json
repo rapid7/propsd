@@ -3,7 +3,7 @@
   "version": "3.0.3",
   "description": "A local daemon for loading static and dynamic properties",
   "scripts": {
-    "start": "nodemon ./src/bin/server.js -r babel-require",
+    "start": "nodemon ./src/bin/server.js -r babel-require --",
     "clean": "rimraf dist",
     "version": "./test/bin/version.js",
     "transpile": "npm run version && babel src --out-dir dist --copy-files",
@@ -11,9 +11,9 @@
     "lint": "eslint src/**/*.js test/**/*.js",
     "coverage": "npm run transpile && istanbul cover _mocha -- -R spec",
     "report-coverage": "npm run coverage && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
-    "metadata-server": "nodemon ./test/bin/metadata-server",
-    "s3-server": "nodemon ./test/bin/s3-server.js",
-    "dev-server": "npm run metadata-server & npm run s3-server -- -d test/data/s3 & npm start -- -c config/dev.json"
+    "metadata-server": "nodemon ./test/bin/metadata-server --",
+    "s3-server": "nodemon ./test/bin/s3-server.js --",
+    "dev-server": "npm run metadata-server & npm run s3-server -- -d test/data/s3 & npm start -- -c src/config/dev.json"
   },
   "repository": {
     "type": "git",

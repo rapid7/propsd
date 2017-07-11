@@ -78,16 +78,24 @@ def github_repo
   @repo = Octokit::Repository.from_url(repo)
 end
 
+def install_packages(production)
+  prod = production ? '--production' : ''
+  bin = yarn_exists? ? 'yarn' : 'npm'
+
+  sh "#{bin} install #{prod}".strip
+  sh "#{bin} check #{prod}".strip if yarn_exists?
+
+  # This is required because the conditional package bundles a devDependency
+  # that bundles conditional and causes shrinkwrap to complain
+  sh "#{bin} prune #{prod}".strip unless yarn_exists?
+end
+
 task :install do
-  if yarn_exists?
-    sh 'yarn install --production'
-    sh 'yarn check --production'
-  else
-    sh 'npm install --production'
-    # This is required because the conditional package bundles a devDependency
-    # that bundles conditional and causes shrinkwrap to complain
-    sh 'npm prune --production'
-  end
+  install_packages(true)
+end
+
+task :install_dev do
+  install_packages(false)
 end
 
 task :transpile do
@@ -98,7 +106,7 @@ task :transpile do
   end
 end
 
-task :shrinkwrap => [:install, :transpile] do
+task :shrinkwrap => [:install_dev, :transpile, :install] do
   sh 'npm shrinkwrap' unless yarn_exists?
 end
 
@@ -111,7 +119,7 @@ task :package_dirs do
   mkdir_p ::File.join(base_dir, config_dir)
 end
 
-task :source => [:install, :transpile] do
+task :source => [:install_dev, :transpile, :install] do
   ['dist/bin/', 'dist/lib/', 'node_modules/', 'LICENSE', 'dist/version.json'].each do |src|
     cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
   end
@@ -191,7 +199,7 @@ task :release do
 end
 
 desc "Package #{name}"
-task :package => [:install, :transpile, :shrinkwrap, :pack, :deb]
+task :package => [:install_dev, :transpile, :install, :shrinkwrap, :pack, :deb]
 
 CLEAN.include 'npm-shrinkwrap.json'
 CLEAN.include "#{name}-*.tgz"

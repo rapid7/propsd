@@ -2631,9 +2631,9 @@ nested-error-stacks@^1.0.0:
   dependencies:
     inherits "~2.0.1"
 
-"nock@git://github.com/martinkuba/nock.git#node8":
+"nock@git://github.com/node-nock/nock.git#35c76e39ee5a6fa0ef3e8d6fe389287e25975cd5":
   version "9.0.13"
-  resolved "git://github.com/martinkuba/nock.git#aac5c3450cb62cde2a8f5176e014858a885a0fae"
+  resolved "git://github.com/node-nock/nock.git#35c76e39ee5a6fa0ef3e8d6fe389287e25975cd5"
   dependencies:
     chai ">=1.9.2 <4.0.0"
     debug "^2.2.0"

@@ -1,7 +1,7 @@
 'use strict';
 
 const should = require('should');
-const util = require('../lib/util');
+const util = require('../dist/lib/util');
 
 describe('Util/getNestedProperty', function() {
   const getNestedProperty = util.getNestedProperty;

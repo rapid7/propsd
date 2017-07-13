@@ -78,19 +78,35 @@ def github_repo
   @repo = Octokit::Repository.from_url(repo)
 end
 
+def install_packages(production)
+  prod = production ? '--production' : ''
+  bin = yarn_exists? ? 'yarn' : 'npm'
+
+  sh "#{bin} install #{prod}".strip
+  sh "#{bin} check #{prod}".strip if yarn_exists?
+
+  # This is required because the conditional package bundles a devDependency
+  # that bundles conditional and causes shrinkwrap to complain
+  sh "#{bin} prune #{prod}".strip unless yarn_exists?
+end
+
 task :install do
+  install_packages(true)
+end
+
+task :install_dev do
+  install_packages(false)
+end
+
+task :transpile do
   if yarn_exists?
-    sh 'yarn install --production'
-    sh 'yarn check --production'
+    sh 'yarn run transpile'
   else
-    sh 'npm install --production'
-    # This is required because the conditional package bundles a devDependency
-    # that bundles conditional and causes shrinkwrap to complain
-    sh 'npm prune --production'
+    sh 'npm run transpile'
   end
 end
 
-task :shrinkwrap => [:install] do
+task :shrinkwrap => [:install_dev, :transpile, :install] do
   sh 'npm shrinkwrap' unless yarn_exists?
 end
 
@@ -103,11 +119,11 @@ task :package_dirs do
   mkdir_p ::File.join(base_dir, config_dir)
 end
 
-task :source => [:install] do
-  ['bin/', 'lib/', 'node_modules/', 'LICENSE', 'package.json'].each do |src|
+task :source => [:install_dev, :transpile, :install] do
+  ['dist/bin/', 'dist/lib/', 'node_modules/', 'LICENSE', 'dist/version.json'].each do |src|
     cp_r ::File.join(base_dir, src), ::File.join(base_dir, install_dir)
   end
-  cp ::File.join(base_dir, 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
+  cp ::File.join(base_dir, 'dist', 'config', 'defaults.json'), ::File.join(base_dir, config_dir)
 end
 
 task :chdir_pkg => [:package_dirs] do
@@ -183,13 +199,14 @@ task :release do
 end
 
 desc "Package #{name}"
-task :package => [:install, :shrinkwrap, :pack, :deb]
+task :package => [:install_dev, :transpile, :install, :shrinkwrap, :pack, :deb]
 
 CLEAN.include 'npm-shrinkwrap.json'
 CLEAN.include "#{name}-*.tgz"
 CLEAN.include 'pkg/'
 CLEAN.include '**/.DS_Store'
 CLEAN.include 'node_modules/'
+CLEAN.include 'dist/'
 
 task :default => [:clean, :package, :release]
 task :upload => [:clean, :package, :upload_packages]

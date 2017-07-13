@@ -3,7 +3,7 @@
 require('./lib/helpers');
 
 const Stub = require('./lib/stub/consul');
-const Consul = require('../lib/source/consul');
+const Consul = require('../dist/lib/source/consul');
 
 const expect = require('chai').expect;
 

@@ -2,7 +2,7 @@
 
 require('./lib/helpers');
 
-const Properties = require('../lib/properties');
+const Properties = require('../dist/lib/properties');
 const Source = require('./lib/stub/source');
 
 // Shorten build hold-down timeout for testing

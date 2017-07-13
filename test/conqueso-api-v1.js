@@ -3,7 +3,7 @@
 require('./lib/helpers');
 
 const ConsulStub = require('./lib/stub/consul');
-const Consul = require('../lib/source/consul');
+const Consul = require('../dist/lib/source/consul');
 
 const expect = require('chai').expect;
 const request = require('supertest');
@@ -73,7 +73,7 @@ const nestedJavaProperties = [
 function makeServer(propsUnderTest) {
   const app = require('express')();
 
-  require('../lib/control/v1/conqueso').attach(app, propsUnderTest);
+  require('../dist/lib/control/v1/conqueso').attach(app, propsUnderTest);
 
   return app.listen(testServerPort);
 }

@@ -1,6 +1,13 @@
 'use strict';
 
-const VERSION = require('../../../package').version;
+let VERSION;
+
+try {
+  VERSION = require('../../../version').version;
+} catch (ex) {
+  VERSION = '0.0.0';
+}
+
 const STATUS_CODES = require('../../util/status-codes');
 const Source = require('../../source/common');
 

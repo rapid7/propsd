@@ -4,8 +4,8 @@ require('./lib/helpers');
 
 const expect = require('chai').expect;
 const nock = require('nock');
-const TokendTransformer = require('../lib/transformers/tokend');
-const Properties = require('../lib/properties');
+const TokendTransformer = require('../dist/lib/transformers/tokend');
+const Properties = require('../dist/lib/properties');
 const Source = require('./lib/stub/source');
 
 // Speed up testing by shortening the time we wait for properties to build.

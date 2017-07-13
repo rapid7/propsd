@@ -5,8 +5,8 @@ require('./lib/helpers');
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
 
-const Tags = require('../lib/source/tags');
-const Parser = require('../lib/source/tags/parser');
+const Tags = require('../dist/lib/source/tags');
+const Parser = require('../dist/lib/source/tags/parser');
 
 const metadataPaths = require('./data/metadata-paths.json');
 const tagValues = {

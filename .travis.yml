@@ -1,6 +1,10 @@
 language: node_js
+node_js:
+  - "4"
 sudo: false
 script:
+  - npm run version
+  - npm run transpile
   - npm run lint
   - npm run test
 after_success:

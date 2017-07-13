@@ -1,7 +1,7 @@
 'use strict';
 
 const should = require('should');
-const StringTemplate = require('../lib/string-template');
+const StringTemplate = require('../dist/lib/string-template');
 
 describe('StringTemplate', () => {
   let string = 'The {{jumper:adjective}} {{ jumper:color }} {{jumper:animal}}';

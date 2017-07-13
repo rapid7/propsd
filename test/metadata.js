@@ -6,9 +6,9 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const AWS = require('aws-sdk-mock');
 
-const Metadata = require('../lib/source/metadata');
-const Parser = require('../lib/source/metadata/parser');
-const Util = require('../lib/source/metadata/util');
+const Metadata = require('../dist/lib/source/metadata');
+const Parser = require('../dist/lib/source/metadata/parser');
+const Util = require('../dist/lib/source/metadata/util');
 
 describe('Metadata source plugin', function _() {
   const metadataPaths = require('./data/metadata-paths.json');

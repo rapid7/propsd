@@ -43,7 +43,7 @@
     "istanbul": "~0.4.2",
     "mocha": "~3.3.0",
     "mocha-lcov-reporter": "~1.2.0",
-    "nock": "git://github.com/node-nock/nock.git#35c76e39ee5a6fa0ef3e8d6fe389287e25975cd5",
+    "nock": "^9.0.13",
     "nodemon": "^1.11.0",
     "proxyquire": "~1.7.4",
     "rimraf": "~2.5.2",

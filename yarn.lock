@@ -2631,9 +2631,9 @@ nested-error-stacks@^1.0.0:
   dependencies:
     inherits "~2.0.1"
 
-"nock@git://github.com/node-nock/nock.git#35c76e39ee5a6fa0ef3e8d6fe389287e25975cd5":
+nock@^9.0.13:
   version "9.0.13"
-  resolved "git://github.com/node-nock/nock.git#35c76e39ee5a6fa0ef3e8d6fe389287e25975cd5"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-9.0.13.tgz#d0bc39ef43d3179981e22b2e8ea069f916c5781a"
   dependencies:
     chai ">=1.9.2 <4.0.0"
     debug "^2.2.0"
@@ -2643,7 +2643,6 @@ nested-error-stacks@^1.0.0:
     mkdirp "^0.5.0"
     propagate "0.4.0"
     qs "^6.0.2"
-    semver "^5.3.0"
 
 node-pre-gyp@^0.6.29:
   version "0.6.34"

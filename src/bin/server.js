@@ -7,8 +7,14 @@ const args = require('yargs')
   .usage('Usage: $0 [args]')
   .option('c', {
     alias: 'config',
-    describe: 'Load configuration from file',
+    default: '/etc/propsd/config.json',
+    describe: 'Path to local propsd configuration',
     type: 'string'
+  })
+  .option('colorize', {
+    describe: 'Colorize log output',
+    type: 'boolean',
+    default: false
   })
   .help('help')
   .argv;
@@ -30,13 +36,7 @@ const server = HTTP.createServer(app);
 
 // Load nconf into the global namespace
 global.Config = require('nconf').env()
-  .argv({
-    config: {
-      alias: 'c',
-      default: '/etc/propsd/config.json',
-      describe: 'Path to local propsd configuration'
-    }
-  });
+  .argv();
 
 if (args.c) {
   Config.file(Path.resolve(process.cwd(), args.c));

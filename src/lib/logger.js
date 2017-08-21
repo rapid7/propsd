@@ -43,7 +43,7 @@ function Logger(level, filename) {
         timestamp: true,
         json: Config.get('log:json'),
         stringify: Config.get('log:json'),
-        colorize: !Config.get('log:json')
+        colorize: Config.get('colorize')
       })
     ]
   });

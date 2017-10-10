@@ -159,6 +159,32 @@ class TokendClient extends Source.Polling(TokendParser) {
   }
 
   /**
+   * Removes a request's Promise it from the specified pending request cache
+   * @param {string} type
+   * @param {string} id
+   */
+  clearCacheAtKey(type, id) {
+    let cache = null;
+
+    switch (type.toLowerCase()) {
+      case 'get':
+        cache = this._pendingGetRequests;
+        break;
+      case 'post':
+        cache = this._pendingPostRequests;
+        break;
+      default:
+        throw new Error(`A ${type} request does not map to an existing cache.`);
+    }
+
+    if (cache[id]) {
+      delete cache[id];
+    } else {
+      Log.log('DEBUG', `No data at ${id} in ${type} cache`);
+    }
+  }
+
+  /**
    * Implementation for getting a secret from Tokend
    *
    * @param {String} path - Path where the secret in Tokend can be found.

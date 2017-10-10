@@ -84,15 +84,18 @@ function Conqueso(app, storage) {
   // Conqueso compatible APIs are defined before the generic catch all route.
   app.get('/v1/conqueso/api/roles/:role/properties/:property', (req, res) => {
     const property = req.params.property;
-    const properties = makeConquesoProperties(storage.properties);
 
-    res.set('Content-Type', 'text/plain');
+    storage.properties.then((props) => {
+      const properties = makeConquesoProperties(props);
 
-    if (property && (properties.hasOwnProperty(property))) {
-      res.end(String(properties[property]));
-    } else {
-      res.end();
-    }
+      res.set('Content-Type', 'text/plain');
+
+      if (property && (properties.hasOwnProperty(property))) {
+        res.end(String(properties[property]));
+      } else {
+        res.end();
+      }
+    });
   });
 
   // Handle any other requests by returning all properites.
@@ -111,8 +114,10 @@ function Conqueso(app, storage) {
   }
 
   route.get((req, res) => {
-    res.set('Content-Type', 'text/plain');
-    res.end(makeJavaProperties(makeConquesoProperties(storage.properties)));
+    storage.properties.then((props) => {
+      res.set('Content-Type', 'text/plain');
+      res.end(makeJavaProperties(makeConquesoProperties(props)));
+    });
   });
 
   // Express defaults to using the GET route for HEAD requests.

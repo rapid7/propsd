@@ -135,4 +135,53 @@ describe('TokendClient', function() {
       done();
     }).catch(done);
   });
+
+  it('provides a method for clearing the request cache', function() {
+    const tokend = nock('http://127.0.0.1:4500')
+      .post('/v1/transit/default/decrypt', {
+        key: 'kali',
+        ciphertext: 'gbbe'
+      })
+      .reply(200, {
+        plaintext: 'toor'
+      });
+
+    _client = new TokendClient();
+
+    const keyId = '/v1/transit/default/decrypt.kali.gbbe';
+
+    return _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'}).then(() => {
+      const postRequestQueue = _client._pendingPostRequests;
+
+      expect(Object.keys(postRequestQueue).length).to.equal(1);
+      expect(postRequestQueue[keyId]).to.be.an.instanceof(Promise);
+
+      _client.clearCacheAtKey('POST', keyId);
+
+      expect(Object.keys(postRequestQueue).length).to.equal(0);
+
+      tokend.done();
+    });
+  });
+
+  it('throws an error if attempting to clear a non-existent cache', function() {
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/transit/default/decrypt', {
+          key: 'kali',
+          ciphertext: 'gbbe'
+        })
+        .reply(200, {
+          plaintext: 'toor'
+        });
+
+    _client = new TokendClient();
+
+    const keyId = '/v1/transit/default/decrypt.kali.gbbe';
+
+    return _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'}).then(() => {
+      expect(() => _client.clearCacheAtKey('HEAD', keyId)).to.throw(Error, 'A HEAD request does not map to an' +
+          ' existing cache.');
+      tokend.done();
+    });
+  });
 });

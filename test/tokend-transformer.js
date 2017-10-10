@@ -4,6 +4,7 @@ require('./lib/helpers');
 
 const expect = require('chai').expect;
 const nock = require('nock');
+const sinon = require('sinon');
 const TokendTransformer = require('../dist/lib/transformers/tokend');
 const Properties = require('../dist/lib/properties');
 const Source = require('./lib/stub/source');
@@ -425,6 +426,42 @@ describe('TokendTransformer', function() {
       tokend.done();
     });
   });
+
+  it('removes a resolved or rejected entry from the pending cache when it has been fulfilled', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        })
+        .reply(200, {
+          plaintext: 'toor',
+          keyid: 'arn:aws:kms:region:account-id:key/key-id'
+        });
+
+    _transformer = new TokendTransformer();
+    sinon.spy(_transformer._client, 'clearCacheAtKey');
+
+    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+      expect(_transformer._client.clearCacheAtKey.calledOnce).to.be.true;
+      const call = _transformer._client.clearCacheAtKey.firstCall;
+
+      // KMS type makes POST requests
+      expect(call.args[0]).to.equal('POST');
+      expect(call.args[1]).to.equal(`${untransformedProperties.password.$tokend.resource}.KMS.${untransformedProperties.password.$tokend.ciphertext}`);
+      tokend.done();
+    });
+  });
 });
 
 describe('Properties#build', function() {
@@ -463,12 +500,14 @@ describe('Properties#build', function() {
     });
 
     _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.eql({
-        password: 'toor'
-      });
+      transformedProperties.then((p) => {
+        expect(p).to.eql({
+          password: 'toor'
+        });
 
-      tokend.done();
-      done();
+        tokend.done();
+        done();
+      });
     });
 
     _properties.build();
@@ -494,13 +533,15 @@ describe('Properties#build', function() {
 
     _properties.dynamic(stub);
 
-    _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.eql({
-        password: 'toor'
-      });
+    _properties.once('build', (props) => {
+      props.then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: 'toor'
+        });
 
-      tokend.done();
-      done();
+        tokend.done();
+        done();
+      });
     });
 
     _properties.build();
@@ -541,13 +582,15 @@ describe('Properties#build', function() {
     _properties.dynamic(stub);
     _properties.dynamic(stub2);
 
-    _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.eql({
-        password: 'toor'
-      });
+    _properties.once('build', (props) => {
+      props.then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: 'toor'
+        });
 
-      tokend.done();
-      done();
+        tokend.done();
+        done();
+      });
     });
 
     _properties.build();

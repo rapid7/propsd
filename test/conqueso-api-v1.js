@@ -20,13 +20,13 @@ const conquesoProperties = {
     'meta.property.1': 'songs you have never heard of',
     'meta.property.2': 'artisanal cream cheese'
   },
-  properties: {
+  properties: Promise.resolve({
     date: fixedDate,
     regex: fixedRegex,
     name: 'hipster-mode-enabled',
     value: true,
     type: 'BOOLEAN'
-  },
+  }),
   on() {}
 };
 
@@ -35,7 +35,7 @@ const nestedProperties = {
     'meta.property.1': 'songs you have never heard of',
     'meta.property.2': 'artisanal cream cheese'
   },
-  properties: {
+  properties: Promise.resolve({
     name: 'hipster-mode-enabled',
     value: true,
     type: 'BOOLEAN',
@@ -44,7 +44,7 @@ const nestedProperties = {
       value: true,
       type: 'BOOLEAN'
     }
-  },
+  }),
   on() {}
 };
 
@@ -186,7 +186,7 @@ describe('Conqueso API v1', function() {
 
     consul.initialize().then(function() {
       server = makeServer({
-        properties: consul.properties
+        properties: Promise.resolve(consul.properties)
       });
 
       done();
@@ -219,12 +219,12 @@ describe('Conqueso API v1', function() {
     server.close();
 
     server = makeServer({
-      properties: {
+      properties: Promise.resolve({
         instance: {
           food: 'tacos'
         },
         gluten: 'free'
-      },
+      }),
       on() {}
     });
 

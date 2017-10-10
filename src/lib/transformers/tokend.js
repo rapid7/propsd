@@ -70,10 +70,12 @@ class TokendTransformer {
       const keyPath = info.get('keyPath');
       let resolver = null,
           payload = {},
+          method = '',
           source = 'Vault';
 
       switch (info.get('type')) {
         case 'generic':
+          method = 'GET';
           resolver = this._client.get(info.get('resource'));
           break;
 
@@ -82,6 +84,7 @@ class TokendTransformer {
             key: info.get('key'),
             ciphertext: info.get('ciphertext')
           };
+          method = 'POST';
 
           resolver = this._client.post(info.get('resource'), payload);
           break;
@@ -89,6 +92,7 @@ class TokendTransformer {
         case 'kms':
           source = 'KMS';
           payload = {
+            key: source,
             ciphertext: info.get('ciphertext')
           };
 
@@ -99,6 +103,7 @@ class TokendTransformer {
           if (info.get('datakey') && info.get('datakey') !== '') {
             payload.datakey = info.get('datakey');
           }
+          method = 'POST';
 
           resolver = this._client.post(info.get('resource'), payload);
           break;
@@ -109,7 +114,17 @@ class TokendTransformer {
           return Promise.resolve(Immutable.Map().setIn(keyPath, null));
       }
 
+      let requestId = `${info.get('resource')}.${payload.key}.${payload.ciphertext}`;
+
+      // We have to strip out any undefined values to make sure that we correctly map the requestId to
+      // the GET request cache key.
+      if (method === 'GET') {
+        requestId = requestId.split('.').filter((f) => f !== 'undefined').join('.');
+      }
+
       return resolver.then((data) => {
+        this._client.clearCacheAtKey(method, requestId);
+
         if (!data.hasOwnProperty('plaintext')) {
           Log.log('WARN', `No "plaintext" key found in ${source} for ${keyPath.join('.')}`);
 
@@ -119,6 +134,7 @@ class TokendTransformer {
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {
         Log.log('WARN', err);
+        this._client.clearCacheAtKey(method, requestId);
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, null));
       });

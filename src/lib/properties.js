@@ -81,7 +81,7 @@ class Properties extends EventEmitter {
     this.initialized = false;
 
     this.layers = [];
-    this.properties = Immutable.Map();
+    this._properties = Immutable.Map();
     this.active = new View(this);
     this.tokendTransformer = new TokendTransformer();
   }
@@ -101,6 +101,17 @@ class Properties extends EventEmitter {
       //  NOTE: This is a shallow copy and only copies object references to a new array.
       //  DO NOT USE THIS GETTER TO PERFORM ANY MUTATING ACTIVITIES.
       .concat(this.active.sources.slice().reverse());
+  }
+
+  /**
+   * Return a transformed set of properties
+   * @return {Promise<Object>}
+   */
+  get properties() {
+    return this.tokendTransformer
+      .transform(this._properties).then((transformedProperties) => { // eslint-disable-line arrow-body-style
+        return Immutable.Map(this._properties).mergeDeep(transformedProperties).toJS();
+      });
   }
 
   /**
@@ -190,18 +201,14 @@ class Properties extends EventEmitter {
         return properties;
       }, {});
 
-      const properties = merge(
+      this.persistent = persistent;
+      this._properties = merge(
         this.active.sources.reduce((properties, source) => merge(properties, source.properties), {}),
         persistent
       );
 
-      this.tokendTransformer.transform(properties).then((transformedProperties) => {
-        this.persistent = persistent;
-        this.properties = Immutable.Map(properties).mergeDeep(transformedProperties).toJS();
-
-        this.emit('build', this.properties);
-        delete this._building;
-      });
+      this.emit('build', this.properties);
+      delete this._building;
     }, Properties.BUILD_HOLD_DOWN);
 
     return built;

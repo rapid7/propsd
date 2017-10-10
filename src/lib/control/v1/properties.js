@@ -11,23 +11,26 @@ const STATUS_CODES = require('../../util/status-codes');
  */
 exports.attach = function attach(app, storage) {
   app.get('/v1/properties/:property*', function handler(req, res, next) {
-    const properties = storage.properties;
-    const prop = req.params.property;
+    storage.properties.then((properties) => {
+      const prop = req.params.property;
 
-    Log.log('INFO', 'Params: ', req.params);
+      Log.log('INFO', 'Params: ', req.params);
 
-    if (!properties[prop]) {
-      return next(new Error(`Property ${prop} not found`));
-    }
+      if (!properties[prop]) {
+        return next(new Error(`Property ${prop} not found`));
+      }
 
-    const value = properties[prop];
-    const extra = req.params[0].split('/').filter(Boolean);
+      const value = properties[prop];
+      const extra = req.params[0].split('/').filter(Boolean);
 
-    res.json(getNestedProperty(value, Array.from(extra)));
+      res.json(getNestedProperty(value, Array.from(extra)));
+    });
   });
 
   app.get('/v1/properties*', function handler(req, res) {
-    res.json(storage.properties);
+    storage.properties.then((properties) => {
+      res.json(properties);
+    });
   });
 
   app.use('/v1/properties/:property*', (err, req, res, next) => { // eslint-disable-line no-unused-vars

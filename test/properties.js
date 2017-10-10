@@ -21,10 +21,11 @@ describe('Properties', function() {
     expect(properties.layers.length).to.equal(1);
 
     properties.once('build', (props) => {
-      expect(props).to.be.instanceOf(Object);
-      expect(props.hello).to.equal('world');
-
-      done();
+      expect(props).to.be.instanceOf(Promise);
+      props.then((p) => {
+        expect(p.hello).to.equal('world');
+        done();
+      });
     });
 
     properties.build();
@@ -89,9 +90,11 @@ describe('Properties', function() {
     }, 'goodbye');
 
     properties.once('build', (props) => {
-      expect(props.hello).to.equal('world');
-      expect(props.goodbye.cruel).to.equal('world');
-      done();
+      props.then((p) => {
+        expect(p.hello).to.equal('world');
+        expect(p.goodbye.cruel).to.equal('world');
+        done();
+      });
     });
 
     properties.build();
@@ -115,11 +118,13 @@ describe('Properties', function() {
     properties.dynamic(stub);
 
     properties.once('build', (props) => {
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.goodbye.leaving).to.be.an('undefined');
-      expect(props.goodbye.change).to.equal('my-mind');
-      expect(props.stubby).to.be.an('undefined');
-      done();
+      props.then((p) => {
+        expect(p.goodbye.cruel).to.equal('world');
+        expect(p.goodbye.leaving).to.be.an('undefined');
+        expect(p.goodbye.change).to.equal('my-mind');
+        expect(p.stubby).to.be.an('undefined');
+        done();
+      });
     });
 
     properties.build();
@@ -148,10 +153,12 @@ describe('Properties', function() {
     properties.dynamic(stub2);
 
     properties.once('build', (props) => {
-      expect(props.cruel).to.equal('world');
-      expect(props.leaving).to.be.an('undefined');
-      expect(props.change).to.equal('my-mind');
-      done();
+      props.then((p) => {
+        expect(p.cruel).to.equal('world');
+        expect(p.leaving).to.be.an('undefined');
+        expect(p.change).to.equal('my-mind');
+        done();
+      });
     });
 
     properties.build();
@@ -171,11 +178,13 @@ describe('Properties', function() {
     }, 'goodbye');
 
     properties.once('build', (props) => {
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.goodbye.leaving).to.be.an('undefined');
-      expect(props.goodbye.change).to.equal('my-mind');
-      expect(props.goodbye.foo).to.equal('bar');
-      done();
+      props.then((p) => {
+        expect(p.goodbye.cruel).to.equal('world');
+        expect(p.goodbye.leaving).to.be.an('undefined');
+        expect(p.goodbye.change).to.equal('my-mind');
+        expect(p.goodbye.foo).to.equal('bar');
+        done();
+      });
     });
 
     properties.build();
@@ -202,15 +211,17 @@ describe('Properties', function() {
     properties.dynamic(stub2, 'this:is:really:deeply:nested');
 
     properties.once('build', (props) => {
-      expect(props.goodbye.friends).to.be.instanceOf(Object);
-      expect(props.goodbye.friends.change).to.equal('my-mind');
-      expect(props.goodbye.friends.cruel).to.equal('world');
+      props.then((p) => {
+        expect(p.goodbye.friends).to.be.instanceOf(Object);
+        expect(p.goodbye.friends.change).to.equal('my-mind');
+        expect(p.goodbye.friends.cruel).to.equal('world');
 
-      expect(props.this.is.really.deeply.nested).to.be.instanceOf(Object);
-      expect(props.this.is.really.deeply.nested.foo).to.equal('bar');
-      expect(props.this.is.really.deeply.nested.baz).to.equal(3);
-      expect(props.this.is.really.deeply.nested.quiz).to.be.true;
-      done();
+        expect(p.this.is.really.deeply.nested).to.be.instanceOf(Object);
+        expect(p.this.is.really.deeply.nested.foo).to.equal('bar');
+        expect(p.this.is.really.deeply.nested.baz).to.equal(3);
+        expect(p.this.is.really.deeply.nested.quiz).to.be.true;
+        done();
+      });
     });
 
     properties.build();
@@ -236,12 +247,14 @@ describe('Properties', function() {
     properties.dynamic(stub2, 'goodbye:friends');
 
     properties.once('build', (props) => {
-      expect(props.goodbye.change).to.equal('my-mind');
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.goodbye.friends).to.be.instanceOf(Object);
-      expect(props.goodbye.friends.baz).to.equal(3);
-      expect(props.goodbye.friends.foo).to.equal('bar');
-      done();
+      props.then((p) => {
+        expect(p.goodbye.change).to.equal('my-mind');
+        expect(p.goodbye.cruel).to.equal('world');
+        expect(p.goodbye.friends).to.be.instanceOf(Object);
+        expect(p.goodbye.friends.baz).to.equal(3);
+        expect(p.goodbye.friends.foo).to.equal('bar');
+        done();
+      });
     });
 
     properties.build();
@@ -258,10 +271,12 @@ describe('Properties', function() {
 
     properties.initialize().then(() => {
       properties.once('build', (props) => {
-        expect(props.hello).to.equal('world');
-        expect(props.goodbye.cruel).to.equal('world');
-        expect(props.stubby).to.equal('property!');
-        done();
+        props.then((p) => {
+          expect(p.hello).to.equal('world');
+          expect(p.goodbye.cruel).to.equal('world');
+          expect(p.stubby).to.equal('property!');
+          done();
+        });
       });
 
       stub.emit('update');
@@ -299,12 +314,14 @@ describe('Properties', function() {
 
     view.activate().then(() => {
       properties.once('build', (props) => {
-        expect(props.hello).to.equal('world');
-        expect(props.goodbye.cruel).to.equal('world');
-        expect(props.stubby).to.equal('property!');
-        expect(props.foo).to.equal('bar');
+        props.then((p) => {
+          expect(p.hello).to.equal('world');
+          expect(p.goodbye.cruel).to.equal('world');
+          expect(p.stubby).to.equal('property!');
+          expect(p.foo).to.equal('bar');
 
-        done();
+          done();
+        });
       });
 
       stub.emit('update');
@@ -321,14 +338,16 @@ describe('Properties', function() {
     const view = properties.view(sources);
 
     properties.once('build', (props) => {
-      expect(stub.state).to.equal(Source.WAITING);
+      props.then((p) => {
+        expect(stub.state).to.equal(Source.WAITING);
 
-      expect(props.hello).to.equal('world');
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.stubby).to.equal('property!');
-      expect(props.foo).to.equal('bar');
+        expect(p.hello).to.equal('world');
+        expect(p.goodbye.cruel).to.equal('world');
+        expect(p.stubby).to.equal('property!');
+        expect(p.foo).to.equal('bar');
 
-      done();
+        done();
+      });
     });
 
     view.activate();
@@ -351,15 +370,17 @@ describe('Properties', function() {
     };
 
     properties.once('build', (props) => {
-      expect(props.hello).to.equal('world');
-      expect(props.goodbye.cruel).to.equal('world');
-      expect(props.stubby).to.equal('property!');
+      props.then((p) => {
+        expect(p.hello).to.equal('world');
+        expect(p.goodbye.cruel).to.equal('world');
+        expect(p.stubby).to.equal('property!');
 
-      // This specifically tests the hold-down behavior. If it didn't work,
-      // the first sources indexNumber (0) will be set on the first 'build'
-      // event instead
-      expect(props.indexNumber).to.equal(1);
-      done();
+        // This specifically tests the hold-down behavior. If it didn't work,
+        // the first sources indexNumber (0) will be set on the first 'build'
+        // event instead
+        expect(p.indexNumber).to.equal(1);
+        done();
+      });
     });
 
     sources.forEach((source, i) => {

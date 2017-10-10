@@ -463,12 +463,14 @@ describe('Properties#build', function() {
     });
 
     _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.eql({
-        password: 'toor'
-      });
+      transformedProperties.then((p) => {
+        expect(p).to.eql({
+          password: 'toor'
+        });
 
-      tokend.done();
-      done();
+        tokend.done();
+        done();
+      });
     });
 
     _properties.build();
@@ -494,13 +496,15 @@ describe('Properties#build', function() {
 
     _properties.dynamic(stub);
 
-    _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.eql({
-        password: 'toor'
-      });
+    _properties.once('build', (props) => {
+      props.then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: 'toor'
+        });
 
-      tokend.done();
-      done();
+        tokend.done();
+        done();
+      });
     });
 
     _properties.build();
@@ -541,13 +545,15 @@ describe('Properties#build', function() {
     _properties.dynamic(stub);
     _properties.dynamic(stub2);
 
-    _properties.once('build', (transformedProperties) => {
-      expect(transformedProperties).to.eql({
-        password: 'toor'
-      });
+    _properties.once('build', (props) => {
+      props.then((transformedProperties) => {
+        expect(transformedProperties).to.eql({
+          password: 'toor'
+        });
 
-      tokend.done();
-      done();
+        tokend.done();
+        done();
+      });
     });
 
     _properties.build();

@@ -159,7 +159,7 @@ class TokendClient extends Source.Polling(TokendParser) {
   }
 
   /**
-   * Removes a request's Promise it from the specified pending request cache
+   * Removes a request's fulfilled Promise from the specified pending request cache
    * @param {string} type
    * @param {string} id
    */

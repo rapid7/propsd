@@ -452,7 +452,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
     sinon.spy(_transformer._client, 'clearCacheAtKey');
 
-    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+    return _transformer.transform(untransformedProperties).then(() => {
       expect(_transformer._client.clearCacheAtKey.calledOnce).to.be.true;
       const call = _transformer._client.clearCacheAtKey.firstCall;
 

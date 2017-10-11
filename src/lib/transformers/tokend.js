@@ -12,7 +12,7 @@ const DEFAULT_CACHE_TTL = 300000;
  *
  * @param {Object} properties  an object to search for transformable values
  * @param {Array} keyPath  accumulated path of keys where transformable value was found
- * @return {Array<Immutable.Map>} transformable data with injected key path
+ * @return {Array<Immutable.OrderedMap>} transformable data with injected key path
  */
 function collectTransformables(properties, keyPath) {
   let results = [];
@@ -26,7 +26,7 @@ function collectTransformables(properties, keyPath) {
   const keys = Object.keys(properties);
 
   if (keys.length === 1 && keys[0] === '$tokend') {
-    return results.concat(Immutable.Map(properties.$tokend).set('keyPath', keyPath));
+    return results.concat(Immutable.OrderedMap(properties.$tokend).set('keyPath', keyPath));
   }
 
   Object.keys(properties).forEach((key) => {

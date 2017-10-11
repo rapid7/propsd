@@ -3,6 +3,7 @@
 const TokendClient = require('./tokend-client');
 const Immutable = require('immutable');
 const isPlainObject = require('lodash.isplainobject');
+const crypto = require('crypto');
 
 /**
  * Walk a properties object looking for transformable values
@@ -48,6 +49,7 @@ class TokendTransformer {
    */
   constructor(options) {
     this._client = new TokendClient(options);
+    this._cache = {};
   }
 
   /**
@@ -68,6 +70,16 @@ class TokendTransformer {
   transform(properties) {
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
+
+      const signature = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(info.toJS()))
+        .digest('base64');
+
+      if (Object.keys(this._cache).indexOf(signature) !== -1) {
+        return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[signature].plaintext));
+      }
+
       let resolver = null,
           payload = {},
           method = '',
@@ -130,6 +142,8 @@ class TokendTransformer {
 
           return Promise.resolve(Immutable.Map().setIn(keyPath, null));
         }
+
+        this._cache[signature] = data;
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {

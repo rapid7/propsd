@@ -427,7 +427,7 @@ describe('TokendTransformer', function() {
     });
   });
 
-  it('removes a resolved or rejected entry from the pending cache when it has been fulfilled', function() {
+  it('removes a resolved or rejected entry from the client\'s pending cache when it has been fulfilled', function() {
     const untransformedProperties = {
       password: {
         $tokend: {

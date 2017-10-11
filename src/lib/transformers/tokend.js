@@ -5,6 +5,8 @@ const Immutable = require('immutable');
 const isPlainObject = require('lodash.isplainobject');
 const crypto = require('crypto');
 
+const DEFAULT_CACHE_TTL = 300000;
+
 /**
  * Walk a properties object looking for transformable values
  *
@@ -48,8 +50,14 @@ class TokendTransformer {
    * @param {Object} options  See TokendClient for options
    */
   constructor(options) {
-    this._client = new TokendClient(options);
+    const opts = options || {};
+
+    this._client = new TokendClient(opts);
     this._cache = {};
+
+    setInterval(() => {
+      this._cache = {};
+    }, opts.cacheTTL || DEFAULT_CACHE_TTL);
   }
 
   /**

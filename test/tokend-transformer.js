@@ -14,11 +14,13 @@ const Source = require('./lib/stub/source');
 Properties.BUILD_HOLD_DOWN = 10;
 
 describe('TokendTransformer', function() {
-  let _transformer = null;
+  let _transformer = null,
+      clock = null;
 
   beforeEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    clock = sinon.useFakeTimers();
 
     if (_transformer) {
       _transformer._client.shutdown();
@@ -26,6 +28,8 @@ describe('TokendTransformer', function() {
   });
 
   afterEach(function() {
+    clock.restore();
+
     if (_transformer) {
       _transformer._client.shutdown();
     }
@@ -540,6 +544,50 @@ describe('TokendTransformer', function() {
         password: null
       });
       expect(Object.keys(_transformer._cache).length).to.equal(0);
+    });
+  });
+
+  it('expires the cache after a period of time', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    let requestCount = 0;
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        })
+        .reply(200, () => {
+          requestCount++;
+
+          return {
+            plaintext: 'toor',
+            keyid: 'arn:aws:kms:region:account-id:key/key-id'
+          };
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(1);
+    }).then(() => {
+      clock.tick(300001);
+
+      return _transformer.transform(untransformedProperties);
+    }).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(0);
+
+      tokend.done();
     });
   });
 });

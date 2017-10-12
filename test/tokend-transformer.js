@@ -2,6 +2,7 @@
 
 require('./lib/helpers');
 
+const crypto = require('crypto');
 const expect = require('chai').expect;
 const nock = require('nock');
 const sinon = require('sinon');
@@ -13,10 +14,13 @@ const Source = require('./lib/stub/source');
 Properties.BUILD_HOLD_DOWN = 10;
 
 describe('TokendTransformer', function() {
-  let _transformer = null;
+  let _transformer = null,
+      clock = null;
 
   beforeEach(function() {
     nock.cleanAll();
+    nock.enableNetConnect();
+    clock = sinon.useFakeTimers();
 
     if (_transformer) {
       _transformer._client.shutdown();
@@ -24,6 +28,8 @@ describe('TokendTransformer', function() {
   });
 
   afterEach(function() {
+    clock.restore();
+
     if (_transformer) {
       _transformer._client.shutdown();
     }
@@ -427,7 +433,7 @@ describe('TokendTransformer', function() {
     });
   });
 
-  it('removes a resolved or rejected entry from the pending cache when it has been fulfilled', function() {
+  it('removes a resolved or rejected entry from the client\'s pending cache when it has been fulfilled', function() {
     const untransformedProperties = {
       password: {
         $tokend: {
@@ -452,7 +458,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
     sinon.spy(_transformer._client, 'clearCacheAtKey');
 
-    return _transformer.transform(untransformedProperties).then((transformedProperties) => {
+    return _transformer.transform(untransformedProperties).then(() => {
       expect(_transformer._client.clearCacheAtKey.calledOnce).to.be.true;
       const call = _transformer._client.clearCacheAtKey.firstCall;
 
@@ -462,6 +468,140 @@ describe('TokendTransformer', function() {
       tokend.done();
     });
   });
+
+  it('caches tokend requests so repeated calls for the same encrypted secret don\'t require another request', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const payload = Object.assign(untransformedProperties.password.$tokend, {keyPath: ['password']});
+    const signature = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(payload))
+        .digest('base64');
+    const response = {
+      plaintext: 'toor',
+      keyid: 'arn:aws:kms:region:account-id:key/key-id'
+    };
+
+    let requestCount = 0;
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        })
+        .reply(200, () => {
+          requestCount++;
+
+          return response;
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(1);
+      expect(_transformer._cache).to.have.property(signature);
+      expect(_transformer._cache[signature]).to.eql(response);
+
+      return _transformer.transform(untransformedProperties).then(() => {
+        expect(requestCount).to.equal(1);
+        expect(Object.keys(_transformer._cache).length).to.equal(1);
+        expect(_transformer._cache).to.have.property(signature);
+        expect(_transformer._cache[signature]).to.eql(response);
+
+        tokend.done();
+      });
+    });
+  });
+
+  it('doesn\'t cache failed calls', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    _transformer = new TokendTransformer();
+
+    // Disable connections so the request to Tokend fails instantly
+    nock.disableNetConnect();
+
+    return _transformer.transform(untransformedProperties).then((data) => {
+      expect(data).to.eql({
+        password: null
+      });
+      expect(Object.keys(_transformer._cache).length).to.equal(0);
+    });
+  });
+
+  it('expires the cache after a period of time', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    let requestCount = 0;
+    const tokend = nock('http://127.0.0.1:4500')
+        .post('/v1/kms/decrypt', {
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        })
+        .reply(200, () => {
+          requestCount++;
+
+          return {
+            plaintext: 'toor',
+            keyid: 'arn:aws:kms:region:account-id:key/key-id'
+          };
+        });
+
+    _transformer = new TokendTransformer();
+
+    return _transformer.transform(untransformedProperties).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(1);
+    }).then(() => {
+      clock.tick(360001);
+
+      return _transformer.transform(untransformedProperties);
+    }).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(0);
+
+      tokend.done();
+    });
+  });
+
+  it('varies the cache lifetime', function() {
+    const cacheTTL = 300000;
+
+    _transformer = new TokendTransformer({cacheTTL});
+    const spy = sinon.spy(_transformer, '_expireCache');
+
+    clock.tick(900000);
+    spy.returnValues.forEach((val) => {
+      expect(val).to.be.within(cacheTTL, cacheTTL + 60000);
+    });
+  });
 });
 
 describe('Properties#build', function() {
@@ -469,6 +609,7 @@ describe('Properties#build', function() {
 
   beforeEach(function() {
     nock.cleanAll();
+    nock.enableNetConnect();
 
     if (_properties) {
       _properties.tokendTransformer._client.shutdown();

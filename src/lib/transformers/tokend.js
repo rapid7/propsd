@@ -3,13 +3,16 @@
 const TokendClient = require('./tokend-client');
 const Immutable = require('immutable');
 const isPlainObject = require('lodash.isplainobject');
+const crypto = require('crypto');
+
+const DEFAULT_CACHE_TTL = 300000;
 
 /**
  * Walk a properties object looking for transformable values
  *
  * @param {Object} properties  an object to search for transformable values
  * @param {Array} keyPath  accumulated path of keys where transformable value was found
- * @return {Array<Immutable.Map>} transformable data with injected key path
+ * @return {Array<Immutable.OrderedMap>} transformable data with injected key path
  */
 function collectTransformables(properties, keyPath) {
   let results = [];
@@ -23,7 +26,7 @@ function collectTransformables(properties, keyPath) {
   const keys = Object.keys(properties);
 
   if (keys.length === 1 && keys[0] === '$tokend') {
-    return results.concat(Immutable.Map(properties.$tokend).set('keyPath', keyPath));
+    return results.concat(Immutable.OrderedMap(properties.$tokend).set('keyPath', keyPath));
   }
 
   Object.keys(properties).forEach((key) => {
@@ -47,7 +50,34 @@ class TokendTransformer {
    * @param {Object} options  See TokendClient for options
    */
   constructor(options) {
-    this._client = new TokendClient(options);
+    const opts = options || {};
+
+    this._client = new TokendClient(opts);
+    this._cache = {};
+
+    this._interval = opts.cacheTTL || DEFAULT_CACHE_TTL;
+
+    setImmediate(() => {
+      this._cache = {};
+
+      this._expireCache();
+    });
+  }
+
+  /**
+   * Expires the cache and calculates a new timeout for the next expiration time.
+   * @return {Number}
+   * @private
+   */
+  _expireCache() {
+    const i = Math.random() * ((this._interval + 60000) - this._interval) + this._interval;
+
+    setTimeout(() => {
+      this._cache = {};
+      this._expireCache();
+    }, i);
+
+    return i;
   }
 
   /**
@@ -68,6 +98,16 @@ class TokendTransformer {
   transform(properties) {
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
+
+      const signature = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(info.toJS()))
+        .digest('base64');
+
+      if (Object.keys(this._cache).indexOf(signature) !== -1) {
+        return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[signature].plaintext));
+      }
+
       let resolver = null,
           payload = {},
           method = '',
@@ -130,6 +170,8 @@ class TokendTransformer {
 
           return Promise.resolve(Immutable.Map().setIn(keyPath, null));
         }
+
+        this._cache[signature] = data;
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {

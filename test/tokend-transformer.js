@@ -580,7 +580,7 @@ describe('TokendTransformer', function() {
       expect(requestCount).to.equal(1);
       expect(Object.keys(_transformer._cache).length).to.equal(1);
     }).then(() => {
-      clock.tick(300001);
+      clock.tick(360001);
 
       return _transformer.transform(untransformedProperties);
     }).then(() => {
@@ -588,6 +588,18 @@ describe('TokendTransformer', function() {
       expect(Object.keys(_transformer._cache).length).to.equal(0);
 
       tokend.done();
+    });
+  });
+
+  it('varies the cache lifetime', function() {
+    const cacheTTL = 300000;
+
+    _transformer = new TokendTransformer({cacheTTL});
+    const spy = sinon.spy(_transformer, '_expireCache');
+
+    clock.tick(900000);
+    spy.args.forEach((call) => {
+      expect(call[0]).to.be.within(cacheTTL, cacheTTL + 60000);
     });
   });
 });

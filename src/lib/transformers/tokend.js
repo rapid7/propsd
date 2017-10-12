@@ -55,9 +55,27 @@ class TokendTransformer {
     this._client = new TokendClient(opts);
     this._cache = {};
 
-    setInterval(() => {
+    this._interval = opts.cacheTTL || DEFAULT_CACHE_TTL;
+
+    setImmediate(() => {
       this._cache = {};
-    }, opts.cacheTTL || DEFAULT_CACHE_TTL);
+
+      this._expireCache(Math.random() * ((this._interval + 60000) - this._interval) + this._interval);
+    });
+  }
+
+  /**
+   * Expires the cache and calculates a new timeout for the next expiration time.
+   * @param {Number} interval
+   * @private
+   */
+  _expireCache(interval) {
+    const i = Math.random() * ((this._interval + 60000) - this._interval) + this._interval;
+
+    setTimeout(() => {
+      this._cache = {};
+      this._expireCache(i);
+    }, interval);
   }
 
   /**

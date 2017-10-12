@@ -598,8 +598,8 @@ describe('TokendTransformer', function() {
     const spy = sinon.spy(_transformer, '_expireCache');
 
     clock.tick(900000);
-    spy.args.forEach((call) => {
-      expect(call[0]).to.be.within(cacheTTL, cacheTTL + 60000);
+    spy.returnValues.forEach((val) => {
+      expect(val).to.be.within(cacheTTL, cacheTTL + 60000);
     });
   });
 });

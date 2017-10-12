@@ -60,22 +60,24 @@ class TokendTransformer {
     setImmediate(() => {
       this._cache = {};
 
-      this._expireCache(Math.random() * ((this._interval + 60000) - this._interval) + this._interval);
+      this._expireCache();
     });
   }
 
   /**
    * Expires the cache and calculates a new timeout for the next expiration time.
-   * @param {Number} interval
+   * @return {Number}
    * @private
    */
-  _expireCache(interval) {
+  _expireCache() {
     const i = Math.random() * ((this._interval + 60000) - this._interval) + this._interval;
 
     setTimeout(() => {
       this._cache = {};
-      this._expireCache(i);
-    }, interval);
+      this._expireCache();
+    }, i);
+
+    return i;
   }
 
   /**

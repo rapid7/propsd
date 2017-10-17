@@ -1,17 +1,18 @@
-'use strict';
-
-const EventEmitter = require('events').EventEmitter;
-const Layer = require('./properties/layer');
-const View = require('./properties/view');
-const TokendTransformer = require('./transformers/tokend');
-const Immutable = require('immutable');
-const Util = require('./util');
+import {EventEmitter} from 'events';
+import Layer from './properties/layer';
+import View from './properties/view';
+import TokendTransformer from './transformers/tokend';
+import Immutable from 'immutable';
+import {merge, recusiveNamespaceMerge} from './util';
 
 /**
  * A Properties instance manages multiple statically configured layers,
  * and an active View instance.
  */
 class Properties extends EventEmitter {
+  // Build hold-down timeout
+  static BUILD_HOLD_DOWN = 1000;
+
   /**
    * Constructor
    */
@@ -33,10 +34,8 @@ class Properties extends EventEmitter {
    */
   get sources() {
     return []
-
       // Get Dynamic layers' source instances
       .concat(this.layers.map((layer) => layer.source).filter((source) => !!source))
-
       // Add the active View's sources.
       //  NOTE: This is a shallow copy and only copies object references to a new array.
       //  DO NOT USE THIS GETTER TO PERFORM ANY MUTATING ACTIVITIES.
@@ -126,24 +125,24 @@ class Properties extends EventEmitter {
       // template renderers.
       const persistent = this.layers.reduce((properties, layer) => {
         if (!layer.namespace) {
-          return Util.merge(properties, layer.properties);
+          return merge(properties, layer.properties);
         }
 
         let namespace = layer.namespace.split(':');
         const namespaceRoot = namespace.shift();
 
         if (namespace.length > 0) {
-          properties[namespaceRoot] = Util.recusiveNamespaceMerge(properties[namespaceRoot], namespace, layer.properties);
+          properties[namespaceRoot] = recusiveNamespaceMerge(properties[namespaceRoot], namespace, layer.properties);
         } else {
-          properties[namespaceRoot] = Util.merge(properties[namespaceRoot], layer.properties);
+          properties[namespaceRoot] = merge(properties[namespaceRoot], layer.properties);
         }
 
         return properties;
       }, {});
 
       this.persistent = persistent;
-      this._properties = Util.merge(
-        this.active.sources.reduce((properties, source) => Util.merge(properties, source.properties), {}),
+      this._properties = merge(
+        this.active.sources.reduce((properties, source) => merge(properties, source.properties), {}),
         persistent
       );
 
@@ -154,12 +153,5 @@ class Properties extends EventEmitter {
     return built;
   }
 }
-
-// Build hold-down timeout
-Properties.BUILD_HOLD_DOWN = 1000; // eslint-disable-line rapid7/static-magic-numbers
-
-Properties.Layer = Layer;
-Properties.View = View;
-Properties.merge = Util.merge;
 
 module.exports = Properties;

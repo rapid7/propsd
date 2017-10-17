@@ -3,8 +3,9 @@
 require('./lib/helpers');
 
 const Properties = require('../dist/lib/properties');
+const View = require('../dist/lib/properties/view');
 const Source = require('./lib/stub/source');
-const nock = require('nock');
+const merge = require('../dist/lib/util').merge;
 
 // Shorten build hold-down timeout for testing
 Properties.BUILD_HOLD_DOWN = 100;
@@ -305,7 +306,7 @@ describe('Properties', function() {
   it('creates and activates a new view', function(done) {
     const view = properties.view();
 
-    expect(view).to.be.instanceOf(Properties.View);
+    expect(view).to.be.instanceOf(View);
     expect(view.parent).to.equal(properties);
 
     expect(properties.active).to.not.equal(view);
@@ -459,7 +460,7 @@ describe('Merge', function() {
       }
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(a).to.equal(c);
     expect(c).to.deep.equal(b);
@@ -479,7 +480,7 @@ describe('Merge', function() {
       }
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(a).to.equal(c);
     expect(c).to.deep.equal({
@@ -496,7 +497,7 @@ describe('Merge', function() {
     const a = null;
     const b = {a: 1};
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(c).to.not.equal(a);
     expect(c).to.not.equal(b);
@@ -507,7 +508,7 @@ describe('Merge', function() {
     const a = {a: 1};
     const b = null;
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(c).to.equal(a);
     expect(c).to.deep.equal({a: 1});
@@ -521,7 +522,7 @@ describe('Merge', function() {
       u: undefined
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(c).to.equal(a);
     expect(c).to.deep.equal({
@@ -534,7 +535,7 @@ describe('Merge', function() {
     const a = [];
     const b = null;
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(c).to.not.equal(a);
     expect(c).to.not.equal(b);
@@ -562,7 +563,7 @@ describe('Merge', function() {
       }
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
     expect(a).to.equal(c);
     expect(c).to.deep.equal({

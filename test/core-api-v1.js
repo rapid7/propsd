@@ -162,12 +162,12 @@ const expectedIndexErrorStatusResponse = {
 
 const properties = new Properties();
 
-properties.dynamic(new S3('foo-bar-baz.json', {
+properties.addDynamicLayer(new S3('foo-bar-baz.json', {
   bucket: 'test-bucket',
   path: 'foo-bar-baz.json'
 }), 'test');
 
-properties.dynamic(new S3('foo-quiz-buzz.json', {
+properties.addDynamicLayer(new S3('foo-quiz-buzz.json', {
   bucket: 'test-bucket',
   path: 'foo-quiz-buzz.json'
 }), 'test');

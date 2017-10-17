@@ -810,7 +810,7 @@ describe('Properties#build', function() {
 
     _properties = new Properties();
 
-    _properties.static({
+    _properties.addStaticLayer({
       password: {
         $tokend: {
           type: 'generic',
@@ -851,7 +851,7 @@ describe('Properties#build', function() {
     };
     _properties = new Properties();
 
-    _properties.dynamic(stub);
+    _properties.addDynamicLayer(stub);
 
     _properties.once('build', (props) => {
       props.then((transformedProperties) => {
@@ -899,8 +899,8 @@ describe('Properties#build', function() {
 
     _properties = new Properties();
 
-    _properties.dynamic(stub);
-    _properties.dynamic(stub2);
+    _properties.addDynamicLayer(stub);
+    _properties.addDynamicLayer(stub2);
 
     _properties.once('build', (props) => {
       props.then((transformedProperties) => {

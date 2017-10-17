@@ -24,7 +24,7 @@ describe('Properties', function() {
   });
 
   it('adds static properties and builds', function(done) {
-    properties.static({
+    properties.addStaticLayer({
       hello: 'world'
     });
 
@@ -45,10 +45,10 @@ describe('Properties', function() {
     const localProps = new Properties();
     const correctOrder = ['first', 'second'];
 
-    localProps.static({
+    localProps.addStaticLayer({
       hello: 'world'
     }, 'first');
-    localProps.static({
+    localProps.addStaticLayer({
       world: 'hello'
     }, 'second');
 
@@ -93,8 +93,8 @@ describe('Properties', function() {
       });
   });
 
-  it('adds layers with namespaces', function() {
-    properties.static({
+  it('adds layers with namespaces', function(done) {
+    properties.addStaticLayer({
       cruel: 'world'
     }, 'goodbye');
 
@@ -115,7 +115,7 @@ describe('Properties', function() {
   it('removes properties that have null values', function(done) {
     const properties = new Properties();
 
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world',
       leaving: null,
       change: 'my-mind'
@@ -127,7 +127,7 @@ describe('Properties', function() {
       stubby: null
     };
 
-    properties.dynamic(stub);
+    properties.addDynamicLayer(stub);
 
     properties.once('build', (props) => {
       props.then((p) => {
@@ -147,7 +147,7 @@ describe('Properties', function() {
     const stub = new Source.Stub();
     const stub2 = new Source.Stub();
 
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world',
       leaving: null,
       change: 'my-mind'
@@ -161,8 +161,8 @@ describe('Properties', function() {
       cruel: null
     };
 
-    properties.dynamic(stub);
-    properties.dynamic(stub2);
+    properties.addDynamicLayer(stub);
+    properties.addDynamicLayer(stub2);
 
     const expectedLayerResult = {
       cruel: 'world',
@@ -186,13 +186,13 @@ describe('Properties', function() {
   it('merges namespaced layers correctly', function(done) {
     const properties = new Properties();
 
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world',
       leaving: null,
       change: 'my-mind'
     }, 'goodbye');
 
-    properties.static({
+    properties.addStaticLayer({
       foo: 'bar'
     }, 'goodbye');
 
@@ -226,8 +226,8 @@ describe('Properties', function() {
       quiz: true
     };
 
-    properties.dynamic(stub, 'goodbye:friends');
-    properties.dynamic(stub2, 'this:is:really:deeply:nested');
+    properties.addDynamicLayer(stub, 'goodbye:friends');
+    properties.addDynamicLayer(stub2, 'this:is:really:deeply:nested');
 
     properties.once('build', (props) => {
       props.then((p) => {
@@ -262,8 +262,8 @@ describe('Properties', function() {
       baz: 3
     };
 
-    properties.dynamic(stub, 'goodbye');
-    properties.dynamic(stub2, 'goodbye:friends');
+    properties.addDynamicLayer(stub, 'goodbye');
+    properties.addDynamicLayer(stub2, 'goodbye:friends');
 
     properties.once('build', (props) => {
       props.then((p) => {
@@ -286,7 +286,7 @@ describe('Properties', function() {
       stubby: 'property!'
     };
 
-    properties.dynamic(stub);
+    properties.addDynamicLayer(stub);
 
     const expectedPropsResult = {
       goodbye: {

@@ -259,7 +259,7 @@ describe('Sources', function() {
     }]);
 
     layer.properties = {foo: 'bar'};
-    properties.dynamic(layer);
+    properties.addDynamicLayer(layer);
 
     return {properties, layer, sources, index};
   };

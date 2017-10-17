@@ -59,7 +59,7 @@ class Properties extends EventEmitter {
    * @param {Source}  source
    * @param {String}  namespace
    */
-  dynamic(source, namespace) {
+  addDynamicLayer(source, namespace) {
     this.layers.push(new Layer.Dynamic(source, namespace));
   }
 
@@ -69,7 +69,7 @@ class Properties extends EventEmitter {
    * @param {Object}  properties
    * @param {String}  namespace
    */
-  static(properties, namespace) {
+  addStaticLayer(properties, namespace) {
     this.layers.push(new Layer.Static(properties, namespace));
   }
 

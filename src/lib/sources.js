@@ -1,4 +1,5 @@
 'use strict';
+
 const EventEmitter = require('events').EventEmitter;
 const STATUS_CODES = require('./util/status-codes');
 

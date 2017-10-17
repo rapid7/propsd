@@ -1,5 +1,5 @@
-/* global Log */
 'use strict';
+
 const DeepEqual = require('deep-equal');
 
 /**

@@ -1,4 +1,3 @@
-/* global Log, Config */
 'use strict';
 
 const Crypto = require('crypto');

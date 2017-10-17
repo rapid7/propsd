@@ -62,7 +62,7 @@ class StringTemplate {
       // Traverse the scope object
       for (let i = 0; i < path.length; i++) {
         if (!node.hasOwnProperty(path[i])) {
-          throw new ReferenceError('Undefined parameter ' + capture);
+          throw new ReferenceError(`Undefined parameter ${capture}`);
         }
         node = node[path[i]];
       }

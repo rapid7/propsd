@@ -7,7 +7,7 @@
 
 const FS = require('fs');
 const Path = require('path');
-const Util = require('../../lib/source/metadata/util');
+const Util = require('../../src/lib/source/metadata/util');
 
 const metadata = require('../data/metadata-paths.json');
 
@@ -20,7 +20,9 @@ Util.traverse(
 
   // Handle results of metadata tree traversal
   (err, data) => {
-    if (err) { throw err; }
+    if (err) {
+      throw err;
+    }
     FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-values.json'), JSON.stringify(data, null, 2));
   }
 );

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 'use strict';
 
 /**
@@ -9,6 +10,7 @@ const ONE_MINUTE = 60000;
 
 function requestProperties(uri) {
   console.log(`Polling ${uri}`);
+
   return new Promise((resolve, reject) => {
     const req = HTTP.get(uri, (res) => {
       res.setEncoding('utf8');
@@ -22,7 +24,9 @@ function requestProperties(uri) {
       res.on('error', reject);
 
       res.on('end', (d) => {
-        if (d) data += d;
+        if (d) {
+          data += d;
+        }
         resolve(data.split(/\n/g));
       });
     });
@@ -51,6 +55,7 @@ function apply(arr, comparator, operation) {
     }
     ret[i] = `${prop}=${val}`;
   });
+
   return ret;
 }
 
@@ -108,8 +113,7 @@ const PROPSD = 'http://localhost:9100/v1/conqueso';
   Promise.all([
     requestProperties(CONQUESO),
     requestProperties(PROPSD)
-  ])
-  .then((data) => {
+  ]).then((data) => {
     const conqueso = data[0];
     const propsd = data[1];
 
@@ -127,7 +131,9 @@ const PROPSD = 'http://localhost:9100/v1/conqueso';
     diff.removed.forEach((p) => {
       console.log(`  - ${p}`);
     });
-  }, (err) => { console.error(err); });
+  }, (err) => {
+    console.error(err);
+  });
 
   setTimeout(poll, ONE_MINUTE);
 }());

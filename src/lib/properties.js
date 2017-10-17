@@ -1,4 +1,5 @@
 'use strict';
+
 const EventEmitter = require('events').EventEmitter;
 const Layer = require('./properties/layer');
 const View = require('./properties/view');

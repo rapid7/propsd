@@ -16,7 +16,7 @@ function makeJavaProperties(data) {
 
   for (const key in data) {
     if (data.hasOwnProperty(key)) {
-      results.push(key + '=' + data[key]);
+      results.push(`${key}=${data[key]}`);
     }
   }
 

@@ -1,4 +1,3 @@
-/* global Log, Config */
 'use strict';
 
 const Aws = require('aws-sdk');

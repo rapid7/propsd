@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-/* global Config, Log */
-'use strict';
-
 const args = require('yargs')
   .usage('Usage: $0 [args]')
   .option('c', {

@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 /* global Config, Log */
+
 'use strict';
+
 const fs = require('fs');
 const S3rver = require('s3rver');
 const os = require('os');

@@ -33,7 +33,9 @@ Util.traverse(
 
   // Call `Metadata.request` for each path
   (path, cb) => metadata.request(path, (err, data) => {
-    if (err) { return cb(err); }
+    if (err) {
+      return cb(err);
+    }
 
     // Store unparsed data from each path
     paths[path] = data;
@@ -43,7 +45,9 @@ Util.traverse(
 
   // Handle results of metadata tree traversal
   (err) => {
-    if (err) { throw err; }
+    if (err) {
+      throw err;
+    }
     FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-paths.json'), JSON.stringify(paths, null, 2));
   }
 );

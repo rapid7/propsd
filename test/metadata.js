@@ -15,17 +15,14 @@ describe('Metadata source plugin', function _() {
   const metadataValues = require('./data/metadata-values.json');
 
   it('traverses metadata paths', function __(done) {
-    Util.traverse('latest', Parser.paths,
-      (path, cb) => cb(null, metadataPaths[path]),
-      (err, data) => {
-        if (err) {
-          return done(err);
-        }
+    const data = Util.traverse('latest', Parser.paths, (path, cb) => cb(null, metadataPaths[path]));
 
-        expect(data).to.eql(metadataValues);
-        done();
-      }
-    );
+    if (data.error) {
+      return done(data.error);
+    }
+
+    expect(data.values).to.eql(metadataValues);
+    done();
   });
 
   it('parses traversed values into a useful object', function __() {

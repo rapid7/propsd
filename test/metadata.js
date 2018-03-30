@@ -10,11 +10,11 @@ const Metadata = require('../dist/lib/source/metadata');
 const Parser = require('../dist/lib/source/metadata/parser');
 const Util = require('../dist/lib/source/metadata/util');
 
-describe('Metadata source plugin', function _() {
+describe('Metadata source plugin', function() {
   const metadataPaths = require('./data/metadata-paths.json');
   const metadataValues = require('./data/metadata-values.json');
 
-  it('traverses metadata paths', function __(done) {
+  it('traverses metadata paths', function(done) {
     const data = Util.traverse('latest', Parser.paths, (path, cb) => cb(null, metadataPaths[path]));
 
     if (data.error) {
@@ -25,7 +25,7 @@ describe('Metadata source plugin', function _() {
     done();
   });
 
-  it('parses traversed values into a useful object', function __() {
+  it('parses traversed values into a useful object', function() {
     const parser = new Parser();
 
     parser.update(metadataValues);
@@ -75,7 +75,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
+  it('periodically fetches metadata from the EC2 metadata API', function(done) {
     this.timeout(2500);
 
     // Stub the AWS.MetadataService request method

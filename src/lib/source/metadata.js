@@ -81,8 +81,12 @@ class Metadata extends Source.Polling(Parser) { // eslint-disable-line new-cap
     if (instanceId && az) {
       const region = az.slice(0, -1);
 
+      // Check whether we've cached the ASG name so we don't continue
+      // to try to grab it. We assume an instance isn't going to change
+      // ASG.
       if (!this.parser.properties['auto-scaling-group']) {
         Log.log('DEBUG', 'Retrieving auto-scaling-group data');
+
         p = this._getAsgName(region, instanceId).then((asg) => {
           if (asg) {
             values['auto-scaling-group'] = asg;
@@ -92,6 +96,7 @@ class Metadata extends Source.Polling(Parser) { // eslint-disable-line new-cap
         }).catch(() => values);
       } else {
         Log.log('DEBUG', 'Using cached auto-scaling-group data.');
+
         values['auto-scaling-group'] = this.properties['auto-scaling-group'];
         p = Promise.resolve(values);
       }

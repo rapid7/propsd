@@ -19,7 +19,7 @@
 const AWS = require('aws-sdk');
 const FS = require('fs');
 const Path = require('path');
-const Util = require('../../lib/source/metadata/util');
+const Util = require('../../dist/lib/source/metadata/util');
 
 const metadata = new AWS.MetadataService({
   host: 'localhost:8080'
@@ -27,23 +27,20 @@ const metadata = new AWS.MetadataService({
 
 const paths = {};
 
-Util.traverse(
+const results = Util.traverse(
   'latest',
   ['/meta-data/', '/dynamic/'],
-
-  // Call `Metadata.request` for each path
   (path, cb) => metadata.request(path, (err, data) => {
-    if (err) { return cb(err); }
+    if (err) {
+      return cb(err);
+    }
 
-    // Store unparsed data from each path
     paths[path] = data;
-
     cb(null, data);
-  }),
+  }));
 
-  // Handle results of metadata tree traversal
-  (err) => {
-    if (err) { throw err; }
-    FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-paths.json'), JSON.stringify(paths, null, 2));
-  }
-);
+if (results.error) {
+  throw results.error;
+}
+
+FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-paths.json'), JSON.stringify(paths, null, 2));

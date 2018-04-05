@@ -85,34 +85,41 @@ exports.each = each;
  * @param  {String}   version              The Metadata API version to traverse
  * @param  {Array}    paths                An initial array of paths to traverse
  * @param  {Function} request(path, cb)    Request handler. Called for each Metadata path
- * @param  {Function} callback(err, paths) Return an error or a hash of paths and their values
+ * @return {Object}                        The results of the traversal
  */
-exports.traverse = function traverse(version, paths, request, callback) {
+exports.traverse = function traverse(version, paths, request) {
   const values = {};
 
-  each(paths, (path, next) => {
-    request(Path.join('/', version, path), (err, data) => {
+  let error;
+
+  while (paths.length > 0) {
+    const path = paths.shift();
+    const joinedPath = Path.join('/', version, path);
+
+    request(joinedPath, (err, data) => {
       if (err) {
-        return next(err);
+        error = err;
+
+        return;
       }
 
       if (typeof data === 'undefined') {
-        // If there's no data it means we should ignore that path
-        return next();
+        return;
       }
 
       // This is a tree! Split new-line delimited strings into an array and add to paths
       if (path.slice(-1) === '/') {
+        // Remove leading `/`
         const items = data.trim().split('\n');
 
         items.forEach((node) => paths.push(Path.join(path, node)));
 
-        return next();
+        return;
       }
 
-      // Remove leading `/`
       values[path] = data;
-      next();
     });
-  }, (err) => callback(err, values), null);
+  }
+
+  return {error, values};
 };

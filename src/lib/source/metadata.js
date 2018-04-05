@@ -58,84 +58,108 @@ class Metadata extends Source.Polling(Parser) { // eslint-disable-line new-cap
   /**
    * Fetch implementation for EC2 Metadata
    * @param {Function} callback
+   * @returns {void}
    * @private
    */
   _fetch(callback) {
-    Util.traverse(this.version, Parser.paths,
-
-      // Call `Metadata.request` for each path
-      (path, cb) => this.service.request(path, cb),
-
-      // Handle results of metadata tree traversal
-      (err, data) => {
-        if (err) {
-          return callback(err);
-        }
-
-        let p = Promise.resolve(data);
-
-        // Grab the ASG from the instance-id
-        const instanceId = data['meta-data/instance-id'];
-        const az = data['meta-data/placement/availability-zone'];
-
-        if (instanceId && az) {
-          const region = az.slice(0, -1);
-
-          if (!this.parser.properties['auto-scaling-group']) {
-            Log.log('DEBUG', 'Retrieving auto-scaling-group data');
-            p = new Promise((resolve, reject) => {
-              (new Aws.AutoScaling({region})).describeAutoScalingInstances({InstanceIds: [instanceId]}, (err, d) => {
-                if (err) {
-                  Log.log('ERROR', err);
-
-                  return reject(err);
-                }
-                resolve(d);
-              });
-            }).then((d) => {
-              const asg = d.AutoScalingInstances.map((instance) => instance.AutoScalingGroupName);
-
-              // No reason it should be longer than 1 but worth a check
-              if (asg.length > 1) {
-                Log.log('WARN', `Instance id ${instanceId} is in multiple auto-scaling groups`, asg);
-              }
-
-              // Check to see if an instance is actually part of an ASG
-              if (asg.length !== 0) {
-                data['auto-scaling-group'] = asg[0];
-              }
-
-              return data;
-            }).catch(() => data);
-          } else {
-            Log.log('DEBUG', 'Using cached auto-scaling-group data.');
-            data['auto-scaling-group'] = this.properties['auto-scaling-group'];
-            p = Promise.resolve(data);
-          }
-        }
-
-        p.then((data) => {
-          // Detect change by hashing the fetched data
-          const hash = Crypto.createHash('sha1');
-          const paths = Object.keys(data);
-
-          Log.log('DEBUG', `Source/Metadata: Fetched ${paths.length} paths from the ec2-metadata service`, this.status());
-
-          paths.sort().forEach((key) => {
-            hash.update(`${key}:${data[key]}`);
-          });
-
-          const signature = hash.digest('base64');
-
-          if (this._state === signature) {
-            return callback(null, Source.NO_UPDATE);
-          }
-
-          this._state = signature;
-          callback(null, data);
-        });
-      }
+    const {error, values} = Util.traverse(
+      this.version,
+      Parser.paths,
+      (path, cb) => this.service.request(path, cb)
     );
+
+    if (error) {
+      return callback(error);
+    }
+
+    let p = Promise.resolve(values);
+
+    // Grab the ASG from the instance-id
+    const instanceId = values['meta-data/instance-id'];
+    const az = values['meta-data/placement/availability-zone'];
+
+    if (instanceId && az) {
+      const region = az.slice(0, -1);
+
+      // Check whether we've cached the ASG name so we don't continue
+      // to try to grab it. We assume an instance isn't going to change
+      // ASG.
+      if (!this.parser.properties['auto-scaling-group']) {
+        Log.log('DEBUG', 'Retrieving auto-scaling-group data');
+
+        p = this._getAsgName(region, instanceId).then((asg) => {
+          if (asg) {
+            values['auto-scaling-group'] = asg;
+          }
+
+          return values;
+        }).catch(() => values);
+      } else {
+        Log.log('DEBUG', 'Using cached auto-scaling-group data.');
+
+        values['auto-scaling-group'] = this.properties['auto-scaling-group'];
+        p = Promise.resolve(values);
+      }
+    }
+
+    p.then((data) => {
+      Log.log('DEBUG', `Source/Metadata: Fetched ${Object.keys(data).length} paths` +
+        `from the ec2-metadata service`, this.status());
+      const signature = this._hashMetaData(data);
+
+      if (this._state === signature) {
+        return callback(null, Source.NO_UPDATE);
+      }
+
+      this._state = signature;
+      callback(null, data);
+    });
+  }
+
+  /**
+   * Get the ASG name
+   *
+   * @param {String} region The region the instance is in
+   * @param {String} instanceId The instance Id
+   * @returns {Promise}
+   */
+  _getAsgName(region, instanceId) {
+    return (new Aws.AutoScaling({region})).describeAutoScalingInstances({InstanceIds: [instanceId]})
+      .promise()
+      .then((d) => {
+        const asg = d.AutoScalingInstances.map((instance) => instance.AutoScalingGroupName);
+
+        // No reason it should be longer than 1 but worth a check
+        if (asg.length > 1) {
+          Log.log('WARN', `Instance id ${instanceId} is in multiple auto-scaling groups`, asg);
+        }
+
+        // Check to see if an instance is actually part of an ASG
+        if (asg.length !== 0) {
+          return asg[0];
+        }
+
+        Log.log('INFO', `Instance ${instanceId} is not part of an autoscaling group.`);
+
+        return null;
+      });
+  }
+
+  /**
+   * Hash data from the ec2metadata endpoint
+   *
+   * @param {Object} data Data retrieved from the ec2metadata endpoint
+   * @returns {String}
+   */
+  _hashMetaData(data) {
+    const hash = Crypto.createHash('sha1');
+    const paths = Object.keys(data);
+
+    paths.sort().forEach((key) => {
+      hash.update(`${key}:${data[key]}`);
+    });
+
+    return hash.digest('base64');
   }
 }
 

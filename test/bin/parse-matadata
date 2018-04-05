@@ -7,20 +7,19 @@
 
 const FS = require('fs');
 const Path = require('path');
-const Util = require('../../lib/source/metadata/util');
+const Util = require('../../dist/lib/source/metadata/util');
 
 const metadata = require('../data/metadata-paths.json');
 
-Util.traverse(
+const results = Util.traverse(
   'latest',
   ['/meta-data/', '/dynamic/'],
 
   // Call `Metadata.request` for each path
-  (path, cb) => cb(null, metadata[path]),
+  (path, cb) => cb(null, metadata[path]));
 
-  // Handle results of metadata tree traversal
-  (err, data) => {
-    if (err) { throw err; }
-    FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-values.json'), JSON.stringify(data, null, 2));
-  }
-);
+if (results.error) {
+  throw results.error;
+}
+
+FS.writeFileSync(Path.resolve(__dirname, '../data/metadata-values.json'), JSON.stringify(results.values, null, 2));

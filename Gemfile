@@ -7,8 +7,8 @@ gem 'octokit', '~> 4.0'
 gem 'mime-types', '~> 3.1'
 
 group :cookbook do
-  gem 'builderator', '~> 1.0'
+  gem 'builderator', :git => 'git@github.com:rapid7/builderator.git', :branch => 'upgrade-to-latest-chef-14'
   gem 'test-kitchen'
   gem 'kitchen-vagrant'
-  gem 'berkshelf', '~> 4.3'
+  gem 'berkshelf', '~> 6.2'
 end

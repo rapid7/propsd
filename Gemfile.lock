@@ -324,10 +324,13 @@ DEPENDENCIES
   aws-sdk (~> 2.2)
   berkshelf (~> 6.2)
   builderator!
+  ffi (>= 1.9.24)
   fpm (~> 1.6)
   kitchen-vagrant
   mime-types (~> 3.1)
+  minitar (>= 0.6)
   octokit (~> 4.0)
+  rack (>= 1.6.11)
   rake (~> 10.5)
   test-kitchen
 

@@ -249,6 +249,10 @@ class TokendClient extends Source.Polling(TokendParser) {
         'Content-Length': Buffer.byteLength(content)
       }
     }, (res) => {
+      if (res.statusCode !== 200) {
+        callback(new Error("ERROR: Unable to decrypt secret"), null)
+      }
+
       res.setEncoding('utf8');
       res.on('data', (chunk) => {
         secret += chunk;

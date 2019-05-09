@@ -5,8 +5,6 @@ const Immutable = require('immutable');
 const isPlainObject = require('lodash.isplainobject');
 const crypto = require('crypto');
 
-const DEFAULT_CACHE_TTL = 300000;
-
 /**
  * Walk a properties object looking for transformable values
  *
@@ -55,29 +53,9 @@ class TokendTransformer {
     this._client = new TokendClient(opts);
     this._cache = {};
 
-    this._interval = opts.cacheTTL || DEFAULT_CACHE_TTL;
-
     setImmediate(() => {
       this._cache = {};
-
-      this._expireCache();
     });
-  }
-
-  /**
-   * Expires the cache and calculates a new timeout for the next expiration time.
-   * @return {Number}
-   * @private
-   */
-  _expireCache() {
-    const i = Math.random() * ((this._interval + 60000) - this._interval) + this._interval;
-
-    setTimeout(() => {
-      this._cache = {};
-      this._expireCache();
-    }, i);
-
-    return i;
   }
 
   /**
@@ -101,17 +79,13 @@ class TokendTransformer {
 
       const signature = crypto
         .createHash('sha1')
-        .update(JSON.stringify(info.toJS()))
+        .update(keyPath[0])
         .digest('base64');
 
-      if (Object.keys(this._cache).indexOf(signature) !== -1) {
-        return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[signature].plaintext));
-      }
-
       let resolver = null,
-          payload = {},
-          method = '',
-          source = 'Vault';
+        payload = {},
+        method = '',
+        source = 'Vault';
 
       switch (info.get('type')) {
         case 'generic':
@@ -175,6 +149,10 @@ class TokendTransformer {
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {
+        if (this._cache.hasOwnProperty(signature)) {
+          return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[signature].plaintext));
+        }
+
         Log.log('WARN', err);
         this._client.clearCacheAtKey(method, requestId);
 

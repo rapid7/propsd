@@ -53,11 +53,13 @@ class TokendTransformer {
     const opts = options || {};
 
     this._client = new TokendClient(opts);
+    this._previousProperties = {};
     this._cache = {};
 
     this._interval = opts.cacheTTL || DEFAULT_CACHE_TTL;
 
     setImmediate(() => {
+      this._previousProperties = {};
       this._cache = {};
 
       this._expireCache();
@@ -73,6 +75,10 @@ class TokendTransformer {
     const i = Math.random() * ((this._interval + 60000) - this._interval) + this._interval;
 
     setTimeout(() => {
+      if (Object.keys(this._cache).length !== 0) {
+        this._previousProperties = this._cache;
+      }
+
       this._cache = {};
       this._expireCache();
     }, i);
@@ -109,9 +115,9 @@ class TokendTransformer {
       }
 
       let resolver = null,
-          payload = {},
-          method = '',
-          source = 'Vault';
+        payload = {},
+        method = '',
+        source = 'Vault';
 
       switch (info.get('type')) {
         case 'generic':
@@ -175,9 +181,13 @@ class TokendTransformer {
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {
-        Log.log('WARN', err);
         this._client.clearCacheAtKey(method, requestId);
 
+        if (this._previousProperties.hasOwnProperty(signature)) {
+          return Promise.resolve(Immutable.Map().setIn(keyPath, this._previousProperties[signature].plaintext));
+        }
+
+        Log.log('WARN', err);
         return Promise.resolve(Immutable.Map().setIn(keyPath, null));
       });
     });

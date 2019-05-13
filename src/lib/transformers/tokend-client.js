@@ -259,6 +259,11 @@ class TokendClient extends Source.Polling(TokendParser) {
         } catch (e) {
           return callback(e, null);
         }
+
+        if (res.statusCode !== 200) {
+          callback(new Error("ERROR: Received a non 200 status code from tokend"), secret.error.message);
+        }
+
         callback(null, secret);
       });
     });

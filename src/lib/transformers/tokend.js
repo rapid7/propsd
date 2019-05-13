@@ -83,7 +83,6 @@ class TokendTransformer {
 
 
       if (this._cache.hasOwnProperty(propertyName) && this._cache[propertyName].signature === signature) {
-        seenProperties.push(propertyName);
         return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[propertyName].plaintext));
       }
 

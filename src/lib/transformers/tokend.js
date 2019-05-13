@@ -5,8 +5,6 @@ const Immutable = require('immutable');
 const isPlainObject = require('lodash.isplainobject');
 const crypto = require('crypto');
 
-const DEFAULT_CACHE_TTL = 300000;
-
 /**
  * Walk a properties object looking for transformable values
  *
@@ -54,30 +52,6 @@ class TokendTransformer {
 
     this._client = new TokendClient(opts);
     this._cache = {};
-
-    this._interval = opts.cacheTTL || DEFAULT_CACHE_TTL;
-
-    setImmediate(() => {
-      this._cache = {};
-
-      this._expireCache();
-    });
-  }
-
-  /**
-   * Expires the cache and calculates a new timeout for the next expiration time.
-   * @return {Number}
-   * @private
-   */
-  _expireCache() {
-    const i = Math.random() * ((this._interval + 60000) - this._interval) + this._interval;
-
-    setTimeout(() => {
-      this._cache = {};
-      this._expireCache();
-    }, i);
-
-    return i;
   }
 
   /**
@@ -96,22 +70,26 @@ class TokendTransformer {
    * @return {Promise<Properties>} properties that had $tokend values transformed
    */
   transform(properties) {
+    const seenProperties = [];
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
+      const propertyName = keyPath[0];
 
       const signature = crypto
         .createHash('sha1')
         .update(JSON.stringify(info.toJS()))
         .digest('base64');
 
-      if (Object.keys(this._cache).indexOf(signature) !== -1) {
-        return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[signature].plaintext));
+
+      if (this._cache.hasOwnProperty(propertyName) && this._cache[propertyName].signature === signature) {
+        seenProperties.push(propertyName);
+        return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[propertyName].plaintext));
       }
 
       let resolver = null,
-          payload = {},
-          method = '',
-          source = 'Vault';
+        payload = {},
+        method = '',
+        source = 'Vault';
 
       switch (info.get('type')) {
         case 'generic':
@@ -171,12 +149,20 @@ class TokendTransformer {
           return Promise.resolve(Immutable.Map().setIn(keyPath, null));
         }
 
-        this._cache[signature] = data;
+        this._cache[propertyName] = {
+          signature,
+          plaintext: data.plaintext
+        };
+
+        seenProperties.push(propertyName);
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {
         Log.log('WARN', err);
         this._client.clearCacheAtKey(method, requestId);
+        if (this._cache.hasOwnProperty(propertyName) && this._cache[propertyName].signature === signature) {
+          return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[propertyName].plaintext));
+        }
 
         return Promise.resolve(Immutable.Map().setIn(keyPath, null));
       });
@@ -188,6 +174,12 @@ class TokendTransformer {
       values.forEach((value) => {
         transformedProperties = transformedProperties.mergeDeep(value);
       });
+
+      Object.keys(this._cache)
+        .filter((propertyName) => seenProperties.indexOf(propertyName) === -1)
+        .forEach((entry) => {
+          delete this._cache[entry]
+        });
 
       return transformedProperties.toJS();
     });

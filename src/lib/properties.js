@@ -83,9 +83,7 @@ class Properties extends EventEmitter {
     this.layers = [];
     this._properties = Immutable.Map();
     this.active = new View(this);
-    this.tokendTransformer = new TokendTransformer({
-      cacheTTL: Config.get('cacheTTL')
-    });
+    this.tokendTransformer = new TokendTransformer();
   }
 
   /**

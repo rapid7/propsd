@@ -74,6 +74,7 @@ class TokendTransformer {
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
       const propertyName = keyPath[0];
+      seenProperties.push(propertyName);
 
       const signature = crypto
         .createHash('sha1')
@@ -154,13 +155,11 @@ class TokendTransformer {
           plaintext: data.plaintext
         };
 
-        seenProperties.push(propertyName);
-
         return Promise.resolve(Immutable.Map().setIn(keyPath, data.plaintext));
       }).catch((err) => {
         Log.log('WARN', err);
         this._client.clearCacheAtKey(method, requestId);
-        if (this._cache.hasOwnProperty(propertyName) && this._cache[propertyName].signature === signature) {
+        if (this._cache.hasOwnProperty(propertyName)) {
           return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[propertyName].plaintext));
         }
 

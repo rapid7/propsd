@@ -73,6 +73,10 @@ class TokendTransformer {
     const seenProperties = [];
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
+      if (keyPath.length !== 1) {
+        Log.log('WARN', 'keyPath does not have a length of 1, this could cause errors in the property set')
+      }
+
       const propertyName = keyPath[0];
       seenProperties.push(propertyName);
 
@@ -162,6 +166,7 @@ class TokendTransformer {
           return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[propertyName].plaintext));
         }
 
+        Log.log('WARN', `'${propertyName}' not found in cache, '${propertyName}' will be set to null`)
         return Promise.resolve(Immutable.Map().setIn(keyPath, null));
       });
     });
@@ -173,11 +178,16 @@ class TokendTransformer {
         transformedProperties = transformedProperties.mergeDeep(value);
       });
 
+      /*
+      * Remove entries from the cache if it has not been iterated on above
+      * from collectTransformables
+      */
       Object.keys(this._cache)
-        .filter((propertyName) => seenProperties.indexOf(propertyName) === -1)
-        .forEach((entry) => {
-          delete this._cache[entry]
-        });
+        .forEach((propertyName) => {
+          if (seenProperties.indexOf(propertyName) === -1) {
+            delete this._cache[propertyName]
+          }
+        })
 
       return transformedProperties.toJS();
     });

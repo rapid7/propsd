@@ -261,7 +261,7 @@ class TokendClient extends Source.Polling(TokendParser) {
         }
 
         if (res.statusCode !== 200) {
-          callback(new Error("ERROR: Received a non 200 status code from tokend"), secret.error.message);
+          callback(new Error(`ERROR: Received '${secret.error.message}' from tokend while trying to decrypt a secret`), null);
         }
 
         callback(null, secret);

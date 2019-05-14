@@ -531,6 +531,222 @@ describe('TokendTransformer', function() {
     });
   });
 
+  it('should use existing value in cache if property has received new ciphertext/datakey but tokend failed to decrypt successfully', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const untransformedProperties2 = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe2',
+          datakey: 'foobar2'
+        }
+      }
+    }
+
+    const keyPathObject = {
+      keyPath: ['password']
+    };
+
+    const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
+    const signature = crypto
+      .createHash('sha1')
+      .update(JSON.stringify(payload))
+      .digest('base64');
+
+    const response = {
+      plaintext: 'toor',
+      keyid: 'arn:aws:kms:region:account-id:key/key-id'
+    };
+
+    let requestCount = 0;
+    const tokend = nock('http://127.0.0.1:4500')
+      .post('/v1/kms/decrypt', {
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, () => {
+        requestCount++;
+
+        return response;
+      })
+      .post('/v1/kms/decrypt', {
+        ciphertext: 'gbbe2',
+        datakey: 'foobar2'
+      })
+      .reply(500, () => {
+        requestCount++;
+
+        return {
+          error: {
+            message: 'error'
+          }
+        }
+      });
+
+    _transformer = new TokendTransformer();
+
+    const propertyName = keyPathObject.keyPath[0];
+
+    return _transformer.transform(untransformedProperties).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(1);
+      expect(_transformer._cache).to.have.property(propertyName);
+      expect(_transformer._cache[propertyName].signature).to.eql(signature);
+      expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+
+      return _transformer.transform(untransformedProperties2).then(() => {
+        expect(requestCount).to.equal(2);
+        expect(Object.keys(_transformer._cache).length).to.equal(1);
+        expect(_transformer._cache).to.have.property(propertyName);
+        expect(_transformer._cache[propertyName].signature).to.eql(signature);
+        expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+
+        tokend.done();
+      });
+    });
+  });
+
+  it('should not have property in the cache if the property will be set to null and the property does not exist in the cache already', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const keyPathObject = {
+      keyPath: ['password']
+    };
+
+    const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
+    let requestCount = 0;
+    const tokend = nock('http://127.0.0.1:4500')
+      .post('/v1/kms/decrypt', {
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(500, () => {
+        requestCount++;
+
+        return {
+          error: {
+            message: 'error'
+          }
+        };
+      });
+
+    _transformer = new TokendTransformer();
+
+    const propertyName = keyPathObject.keyPath[0];
+
+    return _transformer.transform(untransformedProperties).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(0);
+      expect(_transformer._cache).to.not.have.property(propertyName);
+      tokend.done();
+    });
+  });
+
+  it('should remove old properties from the cache', function() {
+    const untransformedProperties = {
+      password: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe',
+          datakey: 'foobar'
+        }
+      }
+    };
+
+    const untransformedProperties2 = {
+      password2: {
+        $tokend: {
+          type: 'kms',
+          resource: '/v1/kms/decrypt',
+          ciphertext: 'gbbe2',
+          datakey: 'foobar2'
+        }
+      }
+    };
+
+    const keyPathObject = {
+      keyPath: ['password']
+    };
+
+    const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
+    const signature = crypto
+      .createHash('sha1')
+      .update(JSON.stringify(payload))
+      .digest('base64');
+
+    const response = {
+      plaintext: 'toor',
+      keyid: 'arn:aws:kms:region:account-id:key/key-id'
+    };
+
+    const response2 = {
+      plaintext: 'toor2',
+      keyid: 'arn:aws:kms:region:account-id:key/key-id'
+    }
+
+    let requestCount = 0;
+    const tokend = nock('http://127.0.0.1:4500')
+      .post('/v1/kms/decrypt', {
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, () => {
+        requestCount++;
+
+        return response;
+      })
+      .post('/v1/kms/decrypt', {
+        ciphertext: 'gbbe2',
+        datakey: 'foobar2'
+      })
+      .reply(200, () => {
+        requestCount++;
+
+        return response2;
+      });
+
+    _transformer = new TokendTransformer();
+
+    const propertyName = keyPathObject.keyPath[0];
+
+    return _transformer.transform(untransformedProperties).then(() => {
+      expect(requestCount).to.equal(1);
+      expect(Object.keys(_transformer._cache).length).to.equal(1);
+      expect(_transformer._cache).to.have.property(propertyName);
+      expect(_transformer._cache[propertyName].signature).to.eql(signature);
+      expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+
+      return _transformer.transform(untransformedProperties2).then(() => {
+        expect(requestCount).to.equal(2);
+        expect(Object.keys(_transformer._cache).length).to.equal(1);
+        expect(_transformer._cache).to.not.have.property('password')
+        expect(_transformer._cache).to.have.property('password2');
+        tokend.done();
+      });
+    });
+  });
+
   it('doesn\'t cache failed calls', function() {
     const untransformedProperties = {
       password: {

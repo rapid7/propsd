@@ -481,11 +481,16 @@ describe('TokendTransformer', function() {
       }
     };
 
-    const payload = Object.assign(untransformedProperties.password.$tokend, {keyPath: ['password']});
+    const keyPathObject = {
+      keyPath: ['password']
+    };
+
+    const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
     const signature = crypto
         .createHash('sha1')
         .update(JSON.stringify(payload))
         .digest('base64');
+
     const response = {
       plaintext: 'toor',
       keyid: 'arn:aws:kms:region:account-id:key/key-id'
@@ -505,17 +510,21 @@ describe('TokendTransformer', function() {
 
     _transformer = new TokendTransformer();
 
+    const propertyName = keyPathObject.keyPath[0];
+
     return _transformer.transform(untransformedProperties).then(() => {
       expect(requestCount).to.equal(1);
       expect(Object.keys(_transformer._cache).length).to.equal(1);
-      expect(_transformer._cache).to.have.property(signature);
-      expect(_transformer._cache[signature]).to.eql(response);
+      expect(_transformer._cache).to.have.property(propertyName);
+      expect(_transformer._cache[propertyName].signature).to.eql(signature);
+      expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
 
       return _transformer.transform(untransformedProperties).then(() => {
         expect(requestCount).to.equal(1);
         expect(Object.keys(_transformer._cache).length).to.equal(1);
-        expect(_transformer._cache).to.have.property(signature);
-        expect(_transformer._cache[signature]).to.eql(response);
+        expect(_transformer._cache).to.have.property(propertyName);
+        expect(_transformer._cache[propertyName].signature).to.eql(signature);
+        expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
 
         tokend.done();
       });
@@ -544,62 +553,6 @@ describe('TokendTransformer', function() {
         password: null
       });
       expect(Object.keys(_transformer._cache).length).to.equal(0);
-    });
-  });
-
-  it('expires the cache after a period of time', function() {
-    const untransformedProperties = {
-      password: {
-        $tokend: {
-          type: 'kms',
-          resource: '/v1/kms/decrypt',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        }
-      }
-    };
-
-    let requestCount = 0;
-    const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, () => {
-          requestCount++;
-
-          return {
-            plaintext: 'toor',
-            keyid: 'arn:aws:kms:region:account-id:key/key-id'
-          };
-        });
-
-    _transformer = new TokendTransformer();
-
-    return _transformer.transform(untransformedProperties).then(() => {
-      expect(requestCount).to.equal(1);
-      expect(Object.keys(_transformer._cache).length).to.equal(1);
-    }).then(() => {
-      clock.tick(360001);
-
-      return _transformer.transform(untransformedProperties);
-    }).then(() => {
-      expect(requestCount).to.equal(1);
-      expect(Object.keys(_transformer._cache).length).to.equal(0);
-
-      tokend.done();
-    });
-  });
-
-  it('varies the cache lifetime', function() {
-    const cacheTTL = 300000;
-
-    _transformer = new TokendTransformer({cacheTTL});
-    const spy = sinon.spy(_transformer, '_expireCache');
-
-    clock.tick(900000);
-    spy.returnValues.forEach((val) => {
-      expect(val).to.be.within(cacheTTL, cacheTTL + 60000);
     });
   });
 });

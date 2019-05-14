@@ -146,6 +146,7 @@ describe('Metadata source plugin', function _() {
   });
 
   it('only retrieves ASG data once', function(done) {
+    this.timeout(5000);
     const asgSpy = sinon.spy();
 
     AWS.mock('MetadataService', 'request', (path, callback) => {
@@ -176,7 +177,7 @@ describe('Metadata source plugin', function _() {
   });
 
   it('handles ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function(done) {
-    this.timeout(2500);
+    this.timeout(5000);
 
     AWS.mock('MetadataService', 'request', (path, callback) => {
       callback(null, metadataPaths[path]);

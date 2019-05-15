@@ -145,7 +145,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it('only retrieves ASG data once', function(done) {
+  it.only('only retrieves ASG data once', function(done) {
     const asgSpy = sinon.spy();
 
     AWS.mock('MetadataService', 'request', (path, callback) => {

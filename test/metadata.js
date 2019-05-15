@@ -90,7 +90,7 @@ describe('Metadata source plugin', function _() {
     });
 
     const source = new Metadata({
-      interval: 100
+      interval: 1000
     });
 
     source.once('update', () => {

@@ -95,7 +95,7 @@ describe('Metadata source plugin', function _() {
 
     source.once('update', () => {
       // Currently used in our Index object.
-      console.log('first');
+      // console.log('first');
       expect(source.properties.account).to.be.a('string');
       expect(source.properties.region).to.be.a('string');
       expect(source.properties['vpc-id']).to.be.a('string');
@@ -114,17 +114,17 @@ describe('Metadata source plugin', function _() {
       //   AWS.restore();
       //   done();
       // });
-      done();
+      // done();
     });
 
-    // source.once('noupdate', () => {
-    //   console.log('in here?');
-    //   // expect(source.state).to.equal(Metadata.RUNNING);
-    //   // source.shutdown();
+    source.once('noupdate', () => {
+      // console.log('in here?');
+      expect(source.state).to.equal(Metadata.RUNNING);
+      source.shutdown();
 
-    //   AWS.restore();
-    //   done();
-    // });
+      AWS.restore();
+      done();
+    });
 
     source.initialize();
   });
@@ -184,6 +184,7 @@ describe('Metadata source plugin', function _() {
 
     source.once('noupdate', () => {
       expect(asgSpy.calledOnce).to.be.true;
+      source.shutdown();
       AWS.restore();
       done();
     });

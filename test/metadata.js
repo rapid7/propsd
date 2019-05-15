@@ -78,7 +78,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('periodically fetches metadata from the EC2 metadata API', function __(done) {
+  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
     // Stub the AWS.MetadataService request method
@@ -95,6 +95,7 @@ describe('Metadata source plugin', function _() {
 
     source.once('update', () => {
       // Currently used in our Index object.
+      console.log('first');
       expect(source.properties.account).to.be.a('string');
       expect(source.properties.region).to.be.a('string');
       expect(source.properties['vpc-id']).to.be.a('string');
@@ -113,7 +114,7 @@ describe('Metadata source plugin', function _() {
       //   AWS.restore();
       //   done();
       // });
-      done();
+      // done();
     });
 
     source.once('noupdate', () => {

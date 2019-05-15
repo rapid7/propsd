@@ -107,7 +107,7 @@ describe('Metadata source plugin', function _() {
 
       source.once('noupdate', () => {
         expect(source.state).to.equal(Metadata.RUNNING);
-        source.shutdown();
+        // source.shutdown();
 
         AWS.restore();
         done();

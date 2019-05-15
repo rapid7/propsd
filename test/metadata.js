@@ -179,7 +179,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it('handles ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function (done) {
+  it.only('handles ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function (done) {
     this.timeout(2500);
 
     AWS.mock('MetadataService', 'request', (path, callback) => {

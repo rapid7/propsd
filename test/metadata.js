@@ -14,7 +14,7 @@ describe('Metadata source plugin', function _() {
   const metadataPaths = require('./data/metadata-paths.json');
   const metadataValues = require('./data/metadata-values.json');
 
-  it('traverses metadata paths', function __(done) {
+  it.only('traverses metadata paths', function __(done) {
     Util.traverse('latest', Parser.paths,
       (path, cb) => cb(null, metadataPaths[path]),
       (err, data) => {
@@ -28,7 +28,7 @@ describe('Metadata source plugin', function _() {
     );
   });
 
-  it('parses traversed values into a useful object', function __() {
+  it.only('parses traversed values into a useful object', function __() {
     const parser = new Parser();
 
     parser.update(metadataValues);
@@ -45,7 +45,7 @@ describe('Metadata source plugin', function _() {
     expect(parser.properties.interface).to.be.an('object');
   });
 
-  it('doesn\'t display values that are undefined', function () {
+  it.only('doesn\'t display values that are undefined', function () {
     const parser = new Parser();
     const deletedMetadataValues = Object.assign({}, metadataValues);
 
@@ -59,7 +59,7 @@ describe('Metadata source plugin', function _() {
     expect(parser.properties).to.not.have.property('region');
   });
 
-  it('handles errors from the AWS SDK gracefully by not exposing the property', function (done) {
+  it.only('handles errors from the AWS SDK gracefully by not exposing the property', function (done) {
     AWS.mock('MetadataService', 'request', (path, callback) => {
       callback(new Error('some error from the AWS SDK'), null);
     });
@@ -78,7 +78,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
+  it.only('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
     // Stub the AWS.MetadataService request method

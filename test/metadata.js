@@ -132,6 +132,39 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
+  it.only('only retrieves ASG data once', function (done) {
+    const asgSpy = sinon.spy();
+
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
+      asgSpy();
+      callback(null, {
+        AutoScalingInstances: [{
+          AutoScalingGroupName: 'my-cool-auto-scaling-group'
+        }]
+      });
+    });
+
+    const source = new Metadata({
+      interval: 100
+    });
+
+    source.once('update', () => {
+      expect(asgSpy.calledOnce).to.be.true;
+    });
+
+    source.once('noupdate', () => {
+      expect(asgSpy.calledOnce).to.be.true;
+      source.shutdown();
+      AWS.restore();
+      done();
+    });
+
+    source.initialize();
+  });
+
   it.only('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
@@ -176,39 +209,6 @@ describe('Metadata source plugin', function _() {
       expect(source.state).to.equal(Metadata.RUNNING);
       source.shutdown();
 
-      AWS.restore();
-      done();
-    });
-
-    source.initialize();
-  });
-
-  it.only('only retrieves ASG data once', function (done) {
-    const asgSpy = sinon.spy();
-
-    AWS.mock('MetadataService', 'request', (path, callback) => {
-      callback(null, metadataPaths[path]);
-    });
-    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
-      asgSpy();
-      callback(null, {
-        AutoScalingInstances: [{
-          AutoScalingGroupName: 'my-cool-auto-scaling-group'
-        }]
-      });
-    });
-
-    const source = new Metadata({
-      interval: 100
-    });
-
-    source.once('update', () => {
-      expect(asgSpy.calledOnce).to.be.true;
-    });
-
-    source.once('noupdate', () => {
-      expect(asgSpy.calledOnce).to.be.true;
-      source.shutdown();
       AWS.restore();
       done();
     });

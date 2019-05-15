@@ -90,7 +90,7 @@ describe('Metadata source plugin', function _() {
     });
 
     const source = new Metadata({
-      interval: 1000
+      interval: 100
     });
 
     source.once('update', () => {
@@ -106,15 +106,15 @@ describe('Metadata source plugin', function _() {
       expect(source.properties.credentials).to.be.an('object');
       expect(source.properties.interface).to.be.an('object');
 
-      // source.once('noupdate', () => {
-      //   console.log('in here?');
-      //   expect(source.state).to.equal(Metadata.RUNNING);
-      //   source.shutdown();
+      source.once('noupdate', () => {
+        expect(source.state).to.equal(Metadata.RUNNING);
+        source.shutdown();
 
-      //   AWS.restore();
-      //   done();
-      // });
-      done();
+        AWS.restore();
+        done();
+      });
+      // source.shutdown();
+      // done();
     });
 
     // source.once('noupdate', () => {
@@ -151,7 +151,7 @@ describe('Metadata source plugin', function _() {
       // Currently used in our Index object.
       expect(source.properties['auto-scaling-group']).to.be.a('string');
       expect(source.properties['auto-scaling-group']).to.equal('my-cool-auto-scaling-group');
-
+      source.shutdown();
       AWS.restore();
       done();
     });

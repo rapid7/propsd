@@ -113,6 +113,7 @@ describe('Metadata source plugin', function _() {
       //   AWS.restore();
       //   done();
       // });
+      done();
     });
 
     source.once('noupdate', () => {

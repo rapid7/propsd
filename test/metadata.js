@@ -78,7 +78,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('periodically fetches metadata from the EC2 metadata API', function (done) {
+  it.only('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
     // Stub the AWS.MetadataService request method
@@ -105,13 +105,23 @@ describe('Metadata source plugin', function _() {
       expect(source.properties.credentials).to.be.an('object');
       expect(source.properties.interface).to.be.an('object');
 
-      source.once('noupdate', () => {
-        expect(source.state).to.equal(Metadata.RUNNING);
-        // source.shutdown();
+      // source.once('noupdate', () => {
+      //   console.log('in here?');
+      //   expect(source.state).to.equal(Metadata.RUNNING);
+      //   source.shutdown();
 
-        AWS.restore();
-        done();
-      });
+      //   AWS.restore();
+      //   done();
+      // });
+    });
+
+    source.once('noupdate', () => {
+      console.log('in here?');
+      expect(source.state).to.equal(Metadata.RUNNING);
+      source.shutdown();
+
+      AWS.restore();
+      done();
     });
 
     source.initialize();

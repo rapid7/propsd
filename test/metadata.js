@@ -78,7 +78,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('periodically fetches metadata from the EC2 metadata API', function __(done) {
+  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
     // Stub the AWS.MetadataService request method

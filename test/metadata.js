@@ -114,17 +114,17 @@ describe('Metadata source plugin', function _() {
       //   AWS.restore();
       //   done();
       // });
-      // done();
-    });
-
-    source.once('noupdate', () => {
-      // console.log('in here?');
-      expect(source.state).to.equal(Metadata.RUNNING);
-      source.shutdown();
-
-      AWS.restore();
       done();
     });
+
+    // source.once('noupdate', () => {
+    //   // console.log('in here?');
+    //   expect(source.state).to.equal(Metadata.RUNNING);
+    //   source.shutdown();
+
+    //   AWS.restore();
+    //   done();
+    // });
 
     source.initialize();
   });

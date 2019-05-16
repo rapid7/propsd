@@ -218,6 +218,9 @@ describe('Metadata source plugin', function _() {
 });
 
 describe("testing", function() {
+  const metadataPaths = require('./data/metadata-paths.json');
+  const metadataValues = require('./data/metadata-values.json');
+
   it('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 

@@ -14,7 +14,7 @@ describe('Metadata source plugin', function _() {
   const metadataPaths = require('./data/metadata-paths.json');
   const metadataValues = require('./data/metadata-values.json');
 
-  it.only('traverses metadata paths', function __(done) {
+  it('traverses metadata paths', function __(done) {
     Util.traverse('latest', Parser.paths,
       (path, cb) => cb(null, metadataPaths[path]),
       (err, data) => {
@@ -28,7 +28,7 @@ describe('Metadata source plugin', function _() {
     );
   });
 
-  it.only('parses traversed values into a useful object', function __() {
+  it('parses traversed values into a useful object', function __() {
     const parser = new Parser();
 
     parser.update(metadataValues);
@@ -45,7 +45,7 @@ describe('Metadata source plugin', function _() {
     expect(parser.properties.interface).to.be.an('object');
   });
 
-  it.only('doesn\'t display values that are undefined', function () {
+  it('doesn\'t display values that are undefined', function () {
     const parser = new Parser();
     const deletedMetadataValues = Object.assign({}, metadataValues);
 
@@ -59,7 +59,7 @@ describe('Metadata source plugin', function _() {
     expect(parser.properties).to.not.have.property('region');
   });
 
-  it.only('handles errors from the AWS SDK gracefully by not exposing the property', function (done) {
+  it('handles errors from the AWS SDK gracefully by not exposing the property', function (done) {
     AWS.mock('MetadataService', 'request', (path, callback) => {
       callback(new Error('some error from the AWS SDK'), null);
     });
@@ -78,7 +78,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('periodically fetches metadata from the EC2 metadata API', function __(done) {
+  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
     this.timeout(2500);
 
     // Stub the AWS.MetadataService request method
@@ -129,7 +129,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('retrieves ASG info for the instance', function (done) {
+  it('retrieves ASG info for the instance', function (done) {
     this.timeout(2500);
 
     AWS.mock('MetadataService', 'request', (path, callback) => {
@@ -159,7 +159,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('only retrieves ASG data once', function (done) {
+  it('only retrieves ASG data once', function (done) {
     const asgSpy = sinon.spy();
 
     AWS.mock('MetadataService', 'request', (path, callback) => {
@@ -192,7 +192,7 @@ describe('Metadata source plugin', function _() {
     source.initialize();
   });
 
-  it.only('handles ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function (done) {
+  it('handles ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function (done) {
     this.timeout(2500);
 
     AWS.mock('MetadataService', 'request', (path, callback) => {
@@ -215,4 +215,59 @@ describe('Metadata source plugin', function _() {
 
     source.initialize();
   });
+});
+
+describe("testing", function() {
+  it('periodically fetches metadata from the EC2 metadata API', function __(done) {
+    this.timeout(2500);
+
+    // Stub the AWS.MetadataService request method
+    AWS.mock('MetadataService', 'request', (path, callback) => {
+      callback(null, metadataPaths[path]);
+    });
+    AWS.mock('AutoScaling', 'describeAutoScalingInstances', (params, callback) => {
+      callback(null, { AutoScalingInstances: [] });
+    });
+
+    const source = new Metadata({
+      interval: 100
+    });
+
+    source.once('update', () => {
+      // Currently used in our Index object.
+      // console.log('first');
+      expect(source.properties.account).to.be.a('string');
+      expect(source.properties.region).to.be.a('string');
+      expect(source.properties['vpc-id']).to.be.a('string');
+      expect(source.properties['iam-role']).to.eq('fake-fake');
+      expect(source.properties['instance-id']).to.be.a('string');
+
+      expect(source.properties.identity).to.be.an('object');
+      expect(source.properties.credentials).to.be.an('object');
+      expect(source.properties.interface).to.be.an('object');
+
+      source.once('noupdate', () => {
+        expect(source.state).to.equal(Metadata.RUNNING);
+        source.shutdown();
+
+        AWS.restore();
+        done();
+      });
+      // source.shutdown();
+      // done();
+    });
+
+    // source.once('noupdate', () => {
+    //   // console.log('in here?');
+    //   expect(source.state).to.equal(Metadata.RUNNING);
+    //   source.shutdown();
+
+    //   AWS.restore();
+    //   done();
+    // });
+
+    source.initialize();
+  });
+
+
 });

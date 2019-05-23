@@ -29,7 +29,7 @@ describe('TokendTransformer', function() {
 
   afterEach(function() {
     clock.restore();
-
+    nock.disableNetConnect();
     if (_transformer) {
       _transformer._client.shutdown();
     }
@@ -624,6 +624,7 @@ describe('Properties#build', function() {
   });
 
   afterEach(function() {
+    nock.disableNetConnect();
     if (_properties) {
       _properties.tokendTransformer._client.shutdown();
     }

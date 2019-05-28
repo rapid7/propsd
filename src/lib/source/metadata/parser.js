@@ -130,7 +130,7 @@ Parser.mappings = {
     properties.credentials.expires = credentials.Expiration;
   },
 
-  'meta-data/mac': () => {},
+  'meta-data/mac': () => { },
   'meta-data/network/interfaces/macs/': (path, metadata, properties) => {
     const mac = metadata['meta-data/mac'];
 

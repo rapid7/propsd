@@ -29,7 +29,7 @@ describe('TokendTransformer', function() {
 
   afterEach(function() {
     clock.restore();
-
+    nock.disableNetConnect();
     if (_transformer) {
       _transformer._client.shutdown();
     }
@@ -138,6 +138,7 @@ describe('TokendTransformer', function() {
 
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe',
           region: 'eu-central-1'
         })
@@ -170,6 +171,7 @@ describe('TokendTransformer', function() {
 
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe'
         })
         .reply(200, {
@@ -202,6 +204,7 @@ describe('TokendTransformer', function() {
 
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe',
           datakey: 'foobar'
         })
@@ -234,6 +237,7 @@ describe('TokendTransformer', function() {
 
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe'
         })
         .reply(200, {
@@ -447,6 +451,7 @@ describe('TokendTransformer', function() {
 
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe',
           datakey: 'foobar'
         })
@@ -494,6 +499,7 @@ describe('TokendTransformer', function() {
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe',
           datakey: 'foobar'
         })
@@ -562,6 +568,7 @@ describe('TokendTransformer', function() {
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
         .post('/v1/kms/decrypt', {
+          key: 'KMS',
           ciphertext: 'gbbe',
           datakey: 'foobar'
         })
@@ -617,6 +624,7 @@ describe('Properties#build', function() {
   });
 
   afterEach(function() {
+    nock.disableNetConnect();
     if (_properties) {
       _properties.tokendTransformer._client.shutdown();
     }

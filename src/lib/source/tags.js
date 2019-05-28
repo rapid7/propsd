@@ -52,7 +52,16 @@ class Tags extends Source.Polling(Parser) { // eslint-disable-line new-cap
         return callback(null, {});
       });
     }).then((data) => {
-      const document = JSON.parse(data);
+      let document;
+
+      try {
+        document = JSON.parse(data);
+      } catch (e) {
+        document = {
+          instanceId: '',
+          region: ''
+        };
+      }
 
       return {
         instance: document.instanceId,

@@ -13,6 +13,7 @@ lib-cov
 
 # Directory for generated packages
 pkg
+vendor
 
 # Coverage directory used by tools like istanbul
 coverage

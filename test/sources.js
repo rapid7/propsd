@@ -5,7 +5,7 @@ require('./lib/helpers');
 const Properties = require('../dist/lib/properties');
 const Sources = require('../dist/lib/sources');
 const Source = require('./lib/stub/source');
-
+const nock = require('nock');
 const expect = require('chai').expect;
 const providers = {stub: Source.Stub};
 
@@ -285,6 +285,15 @@ describe('Sources', function() {
   describe('Initialization', function() {
     this.timeout(5000);
     const stubs = setUp();
+
+    before(function () {
+      nock.disableNetConnect();
+    });
+
+    after(function() {
+      nock.enableNetConnect();
+    })
+
 
     stubs.sources.index(stubs.index);
 

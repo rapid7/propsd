@@ -4,6 +4,7 @@ require('./lib/helpers');
 
 const Properties = require('../dist/lib/properties');
 const Source = require('./lib/stub/source');
+const nock = require('nock');
 
 // Shorten build hold-down timeout for testing
 Properties.BUILD_HOLD_DOWN = 100;
@@ -12,6 +13,14 @@ const expect = require('chai').expect;
 
 describe('Properties', function() {
   const properties = new Properties();
+
+  before(function () {
+    nock.disableNetConnect();
+  });
+
+  after(function () {
+    nock.enableNetConnect();
+  });
 
   it('adds static properties and builds', function(done) {
     properties.static({
@@ -60,7 +69,7 @@ describe('Properties', function() {
     });
   });
 
-  it('does not reorder layers if the properties sources getter is called', function(done) {
+  it('does not reorder layers if the properties sources getter is called', function() {
     const props = new Properties();
 
     const sources = [{path: 'foo'}, {path: 'bar'}, {path: 'baz'}].map((prop) => {
@@ -75,29 +84,31 @@ describe('Properties', function() {
     const expected = ['foo', 'bar', 'baz'];
     const reversed = ['baz', 'bar', 'foo'];
 
-    props.once('build', () => {
-      expect(props.sources.map((s) => s.properties.path)).to.eql(reversed);
-      expect(props.active.sources.map((s) => s.properties.path)).to.eql(expected);
-      done();
-    });
-
-    view.activate();
+    return view.activate()
+      .then(function (props) {
+        expect(props.sources[0].properties.path).to.eql('foo');
+        expect(props.sources[1].properties.path).to.eql('bar');
+        expect(props.sources[2].properties.path).to.eql('baz');
+      });
   });
 
-  it('adds layers with namespaces', function(done) {
+  it('adds layers with namespaces', function() {
     properties.static({
       cruel: 'world'
     }, 'goodbye');
 
-    properties.once('build', (props) => {
-      props.then((p) => {
-        expect(p.hello).to.equal('world');
-        expect(p.goodbye.cruel).to.equal('world');
-        done();
-      });
-    });
+    const expectedPropsResult = {
+      goodbye: {
+        cruel: 'world'
+      },
+      hello: 'world'
+    };
 
-    properties.build();
+    return properties.build()
+      .then(function (props) {
+        expect(props.layers).to.have.length(2);
+        expect(props._properties).to.eql(expectedPropsResult);
+      });
   });
 
   it('removes properties that have null values', function(done) {
@@ -130,7 +141,7 @@ describe('Properties', function() {
     properties.build();
   });
 
-  it('doesn\'t override values with properties that have null values', function(done) {
+  it('doesn\'t override values with properties that have null values', function() {
     const properties = new Properties();
     const stub = new Source.Stub();
     const stub2 = new Source.Stub();
@@ -152,16 +163,23 @@ describe('Properties', function() {
     properties.dynamic(stub);
     properties.dynamic(stub2);
 
-    properties.once('build', (props) => {
-      props.then((p) => {
-        expect(p.cruel).to.equal('world');
-        expect(p.leaving).to.be.an('undefined');
-        expect(p.change).to.equal('my-mind');
-        done();
-      });
-    });
+    const expectedLayerResult = {
+      cruel: 'world',
+      leaving: null,
+      change: 'my-mind'
+    };
 
-    properties.build();
+    const expectedPropsResult = {
+      cruel: 'world',
+      change: 'my-mind'
+    };
+
+    return properties.build()
+      .then(function (props) {
+        expect(props.layers).to.have.length(3);
+        expect(props.layers[0].properties).to.eql(expectedLayerResult);
+        expect(props._properties).to.eql(expectedPropsResult);
+      });
   });
 
   it('merges namespaced layers correctly', function(done) {
@@ -260,7 +278,7 @@ describe('Properties', function() {
     properties.build();
   });
 
-  it('adds a dynamic layer and rebuilds on updates', function(done) {
+  it('adds a dynamic layer and rebuilds on updates', function() {
     const stub = new Source.Stub();
 
     stub.properties = {
@@ -269,18 +287,19 @@ describe('Properties', function() {
 
     properties.dynamic(stub);
 
-    properties.initialize().then(() => {
-      properties.once('build', (props) => {
-        props.then((p) => {
-          expect(p.hello).to.equal('world');
-          expect(p.goodbye.cruel).to.equal('world');
-          expect(p.stubby).to.equal('property!');
-          done();
-        });
-      });
+    const expectedPropsResult = {
+      goodbye: {
+        cruel: 'world'
+      },
+      hello: 'world',
+      stubby: 'property!'
+    };
 
-      stub.emit('update');
-    });
+    return properties.initialize()
+      .then(function (props) {
+        expect(props.layers).to.be.length(3);
+        expect(props._properties).to.eql(expectedPropsResult);
+      });
   });
 
   it('creates and activates a new view', function(done) {

@@ -73,8 +73,9 @@ class TokendTransformer {
     const seenProperties = [];
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
-      if (keyPath.length !== 1) {
-        Log.log('WARN', 'keyPath does not have a length of 1, this could cause errors in the property set')
+      if (!Array.isArray(keyPath) || keyPath.length !== 1) {
+        Log.log('WARN', 'keyPath is not an array or  does not have a length of 1, this could cause errors in the property set')
+        return Promise.reject('keyPath is not an array or  does not have a length of 1')
       }
 
       const propertyName = keyPath[0];
@@ -126,7 +127,6 @@ class TokendTransformer {
             payload.datakey = info.get('datakey');
           }
           method = 'POST';
-
           resolver = this._client.post(info.get('resource'), payload);
           break;
 
@@ -143,7 +143,6 @@ class TokendTransformer {
       if (method === 'GET') {
         requestId = requestId.split('.').filter((f) => f !== 'undefined').join('.');
       }
-
       return resolver.then((data) => {
         this._client.clearCacheAtKey(method, requestId);
 

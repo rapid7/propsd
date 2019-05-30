@@ -73,12 +73,7 @@ class TokendTransformer {
     const seenProperties = [];
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
-      if (!Array.isArray(keyPath) || keyPath.length !== 1) {
-        Log.log('WARN', 'keyPath is not an array or  does not have a length of 1, this could cause errors in the property set')
-        return Promise.reject('keyPath is not an array or  does not have a length of 1')
-      }
-
-      const propertyName = keyPath[0];
+      const propertyName = keyPath.join(".");
       seenProperties.push(propertyName);
 
       const signature = crypto

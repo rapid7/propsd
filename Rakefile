@@ -83,7 +83,7 @@ def install_packages(production)
   bin = yarn_exists? ? 'yarn' : 'npm'
 
   sh "#{bin} install #{prod}".strip
-  sh "#{bin} check #{prod}".strip if yarn_exists?
+  sh "#{bin} check #{prod}".strip if yarn_exists? && production
 
   # This is required because the conditional package bundles a devDependency
   # that bundles conditional and causes shrinkwrap to complain

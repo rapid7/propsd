@@ -259,6 +259,11 @@ class TokendClient extends Source.Polling(TokendParser) {
         } catch (e) {
           return callback(e, null);
         }
+
+        if (res.statusCode !== 200) {
+          callback(new Error(`ERROR: Received '${secret.error.message}' from tokend while trying to decrypt a secret`), null);
+        }
+
         callback(null, secret);
       });
     });

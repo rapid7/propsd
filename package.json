@@ -36,7 +36,7 @@
     "chai-as-promised": "~5.2.0",
     "chokidar": "~3.0.0",
     "coveralls": "~2.11.8",
-    "eslint": "~3.17.1",
+    "eslint": "~4.18.2",
     "eslint-config-rapid7": "~2.9.0",
     "eslint-plugin-import": "~2.2.0",
     "eslint-plugin-react": "~6.10.0",

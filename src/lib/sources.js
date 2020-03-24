@@ -158,6 +158,11 @@ class Sources extends EventEmitter {
       status: 'OK'
     };
 
+    const source_state = {
+      source: [],
+      count: 0
+    }
+
     object.indices = this.indices.map((source) => {
       // TODO This logic is fairly ham-fisted right now. It'll work because nothing
       // is setting `state` to WARNING at the moment. When we do start supporting a
@@ -171,13 +176,23 @@ class Sources extends EventEmitter {
     });
 
     object.sources = this.properties.sources.map((source) => {
-      if (!source.ok) {
-        object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
+      if (!source.ready) {
+        object.code = STATUS_CODES.SERVICE_UNAVAILABLE;
         object.status = source.state;
+      }
+
+      if (!source.ok) {
+        source_state.index.push(source.state)
+        source_state.count = source_state.count + 1
       }
 
       return source.status();
     });
+
+    if (object.sources.length == source_state.count) {
+      object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
+      object.status = source_state.index;
+    }
 
     return object;
   }

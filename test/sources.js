@@ -286,13 +286,13 @@ describe('Sources', function() {
     this.timeout(5000);
     const stubs = setUp();
 
-    before(function () {
+    before(function() {
       nock.disableNetConnect();
     });
 
     after(function() {
       nock.enableNetConnect();
-    })
+    });
 
 
     stubs.sources.addIndex(stubs.index);

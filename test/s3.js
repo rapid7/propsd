@@ -19,7 +19,7 @@ describe('S3 source plugin', function() {
 
   const fakeResponse = {
     ETag: 'ThisIsACoolEtag',
-    Body: new Buffer(JSON.stringify({properties: {a: 1, b: 'foo', c: {d: 0}}}))
+    Body: Buffer.from(JSON.stringify({properties: {a: 1, b: 'foo', c: {d: 0}}}))
   };
 
   const S3 = s3Stub({
@@ -55,7 +55,7 @@ describe('S3 source plugin', function() {
 
   it('initializes a timer with the set interval', (done) => {
     this.s3.on('update', () => {
-      this.s3._timer.should.have.properties(['_called', '_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
+      this.s3._timer.should.have.properties(['_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
         '_onTimeout', '_repeat']);
       done();
     });
@@ -220,7 +220,7 @@ describe('S3 source plugin', function() {
   it('correctly parses a sample document', (done) => {
     const Stub = s3Stub({getObject: sinon.stub().callsArgWith(1, null, {
       ETag: 'ThisIsACoolEtag',
-      Body: new Buffer(JSON.stringify(require('./data/s3/global')))
+      Body: Buffer.from(JSON.stringify(require('./data/s3/global')))
     })});
 
     const s3SampleData = new Stub('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});

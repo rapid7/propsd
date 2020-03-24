@@ -13,40 +13,38 @@ const nock = require('nock');
 const metadataPaths = require('./data/metadata-paths.json');
 const tagValues = {
   Tags: [
-    { Key: 'Name', Value: 'service-name', ResourceType: 'instance', ResourceId: 'i-instanceid' },
-    { Key: 'Service', Value: 'service-type', ResourceType: 'instance', ResourceId: 'i-instanceid' },
-    { Key: 'This tag', Value: 'a value', ResourceType: 'instance', ResourceId: 'i-instanceid' },
-    { Key: 'Another tag', Value: 'some other value', ResourceType: 'instance', ResourceId: 'i-instanceid' }
+    {Key: 'Name', Value: 'service-name', ResourceType: 'instance', ResourceId: 'i-instanceid'},
+    {Key: 'Service', Value: 'service-type', ResourceType: 'instance', ResourceId: 'i-instanceid'},
+    {Key: 'This tag', Value: 'a value', ResourceType: 'instance', ResourceId: 'i-instanceid'},
+    {Key: 'Another tag', Value: 'some other value', ResourceType: 'instance', ResourceId: 'i-instanceid'}
   ]
 };
 
-describe('Tags source plugin', function () {
-
+describe('Tags source plugin', function() {
   let metadataServiceSpy = sinon.spy();
+
   let ec2Spy = sinon.spy();
 
-  before(function () {
+  before(function() {
     nock.disableNetConnect();
   });
 
-  after(function () {
+  after(function() {
     nock.cleanAll();
     nock.enableNetConnect();
   });
 
-  beforeEach(function () {
+  beforeEach(function() {
     AWS.setSDKInstance(AWS_SDK);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     AWS.restore();
     metadataServiceSpy.reset();
     ec2Spy.reset();
   });
 
-
-
-  it('should parses tags into a useful object', function () {
+  it('should parses tags into a useful object', function() {
     const parser = new Parser();
 
     parser.update(tagValues);
@@ -61,7 +59,7 @@ describe('Tags source plugin', function () {
     expect(parser.properties['Another tag']).to.equal('some other value');
   });
 
-  it('handles errors from the AWS Metadata SDK gracefully by not exposing the property', function () {
+  it('handles errors from the AWS Metadata SDK gracefully by not exposing the property', function() {
     AWS.mock('MetadataService', 'request', (path, callback) => {
       metadataServiceSpy();
       callback(new Error('some error from the AWS SDK'), null);
@@ -71,14 +69,14 @@ describe('Tags source plugin', function () {
     });
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         expect(metadataServiceSpy.called).to.be.true;
         expect(source.properties).to.be.a('object');
         expect(source.properties).to.be.empty;
       });
   });
 
-  it('should handle errors from the AWS EC2 SDK gracefully by not exposing the property', function () {
+  it('should handle errors from the AWS EC2 SDK gracefully by not exposing the property', function() {
     AWS.mock('MetadataService', 'request', (path, callback) => {
       metadataServiceSpy();
       callback(null, metadataPaths[path]);
@@ -94,7 +92,7 @@ describe('Tags source plugin', function () {
     });
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         expect(metadataServiceSpy.called).to.be.true;
         expect(ec2Spy.called).to.be.true;
         expect(source.properties).to.be.a('object');
@@ -102,7 +100,7 @@ describe('Tags source plugin', function () {
       });
   });
 
-  it('should periodically fetches tag data', function () {
+  it('should periodically fetches tag data', function() {
     // this.timeout(2500);
 
     // Stub the AWS.MetadataService request method
@@ -123,8 +121,8 @@ describe('Tags source plugin', function () {
     let ec2InitialCount;
 
     return source.initialize()
-      .then(function () {
-        ec2InitialCount = ec2Spy.callCount
+      .then(() => {
+        ec2InitialCount = ec2Spy.callCount;
         expect(source.properties.Name).to.be.a('string');
         expect(source.properties.Service).to.be.a('string');
         expect(source.properties['This tag']).to.be.a('string');
@@ -135,10 +133,10 @@ describe('Tags source plugin', function () {
         expect(source.properties['This tag']).to.equal('a value');
         expect(source.properties['Another tag']).to.equal('some other value');
       })
-      .then(function () {
-        return new Promise((resolve) => { setTimeout(resolve, 1000) })
-      })
-      .then(function () {
+      .then(() => new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      }))
+      .then(() => {
         expect(ec2Spy.callCount).to.be.above(ec2InitialCount);
       });
   });

@@ -12,16 +12,16 @@ const Metadata = require('../src/lib/source/metadata');
 const Parser = require('../src/lib/source/metadata/parser');
 const Util = require('../src/lib/source/metadata/util');
 
-describe('Metadata traversals / parsing', function () {
+describe('Metadata traversals / parsing', function() {
   const metadataPaths = require('./data/metadata-paths.json');
   const metadataValues = require('./data/metadata-values.json');
 
-  it('should travarse metadata paths successfully', function (done) {
+  it('should travarse metadata paths successfully', function(done) {
     Util.traverse('latest', Parser.paths,
-      function (path, callback) {
-        callback(null, metadataPaths[path])
+      function(path, callback) {
+        callback(null, metadataPaths[path]);
       },
-      function (err, data) {
+      function(err, data) {
         if (err) {
           return done(err);
         }
@@ -31,7 +31,7 @@ describe('Metadata traversals / parsing', function () {
       });
   });
 
-  it('should parse traversed values into a useful object', function () {
+  it('should parse traversed values into a useful object', function() {
     const parser = new Parser();
 
     parser.update(metadataValues);
@@ -48,7 +48,7 @@ describe('Metadata traversals / parsing', function () {
     expect(parser.properties.interface).to.be.an('object');
   });
 
-  it('should not display values that are undefined', function () {
+  it('should not display values that are undefined', function() {
     const parser = new Parser();
     const deletedMetadataValues = Object.assign({}, metadataValues);
 
@@ -63,32 +63,34 @@ describe('Metadata traversals / parsing', function () {
   });
 });
 
-describe('Metadata / ASG API calls', function () {
+describe('Metadata / ASG API calls', function() {
   const metadataPaths = require('./data/metadata-paths.json');
+
   let metadataServiceSpy = sinon.spy();
+
   let asgSpy = sinon.spy();
 
-  before(function () {
+  before(function() {
     nock.disableNetConnect();
   });
 
-  beforeEach(function () {
+  beforeEach(function() {
     AWS_MOCK.setSDKInstance(AWS_SDK);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     AWS_MOCK.restore();
     metadataServiceSpy.reset();
     asgSpy.reset();
   });
 
-  after(function () {
+  after(function() {
     nock.cleanAll();
     nock.enableNetConnect();
   });
 
-  it('should handle AWS MetaDataService error from the AWS SDK gracefully by not exposing the property', function () {
-    AWS_MOCK.mock('MetadataService', 'request', function (path, callback) {
+  it('should handle AWS MetaDataService error from the AWS SDK gracefully by not exposing the property', function() {
+    AWS_MOCK.mock('MetadataService', 'request', function(path, callback) {
       metadataServiceSpy();
       callback(new Error('some error from the AWS SDK'), null);
     });
@@ -98,20 +100,20 @@ describe('Metadata / ASG API calls', function () {
     });
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         expect(metadataServiceSpy.called).to.be.true;
         expect(source.properties).to.be.a('object');
         expect(source.properties).to.be.empty;
       });
   });
 
-  it('should handle ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function () {
-    AWS_MOCK.mock('MetadataService', 'request', function (path, callback) {
+  it('should handle ASG errors from the AWS SDK by not surfacing the auto-scaling-group property', function() {
+    AWS_MOCK.mock('MetadataService', 'request', function(path, callback) {
       metadataServiceSpy();
       callback(null, metadataPaths[path]);
     });
 
-    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function (params, callback) {
+    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function(params, callback) {
       asgSpy();
       callback(new Error('some error from the AWS SDK'), null);
     });
@@ -121,20 +123,20 @@ describe('Metadata / ASG API calls', function () {
     });
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         expect(metadataServiceSpy.called).to.be.true;
         expect(asgSpy.calledOnce).to.be.true;
         expect(source.properties['auto-scaling-group']).to.be.undefined;
       });
   });
 
-  it('should retrieve ASG info for the instance', function () {
-    AWS_MOCK.mock('MetadataService', 'request', function (path, callback) {
+  it('should retrieve ASG info for the instance', function() {
+    AWS_MOCK.mock('MetadataService', 'request', function(path, callback) {
       metadataServiceSpy();
       callback(null, metadataPaths[path]);
     });
 
-    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function (params, callback) {
+    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function(params, callback) {
       asgSpy();
       callback(null, {
         AutoScalingInstances: [{
@@ -148,7 +150,7 @@ describe('Metadata / ASG API calls', function () {
     });
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         expect(metadataServiceSpy.called).to.be.true;
         expect(asgSpy.calledOnce).to.be.true;
         expect(source.properties.account).to.be.a('string');
@@ -164,15 +166,15 @@ describe('Metadata / ASG API calls', function () {
       });
   });
 
-  it('periodically fetches metadata / ASG info from the EC2 metadata / ASG API', function () {
-    AWS_MOCK.mock('MetadataService', 'request', function (path, callback) {
+  it('periodically fetches metadata / ASG info from the EC2 metadata / ASG API', function() {
+    AWS_MOCK.mock('MetadataService', 'request', function(path, callback) {
       metadataServiceSpy();
       callback(null, metadataPaths[path]);
     });
 
-    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function (params, callback) {
+    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function(params, callback) {
       asgSpy();
-      callback(null, { AutoScalingInstances: [] });
+      callback(null, {AutoScalingInstances: []});
     });
 
     const source = new Metadata({
@@ -182,26 +184,26 @@ describe('Metadata / ASG API calls', function () {
     let metadataInitialCallCount;
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         metadataInitialCallCount = metadataServiceSpy.callCount;
         expect(metadataServiceSpy.called).to.be.true;
         expect(asgSpy.calledOnce).to.be.true;
       })
-      .then(function () {
-        return new Promise((resolve) => { setTimeout(resolve, 1000) })
-      })
-      .then(function () {
+      .then(() => new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      }))
+      .then(() => {
         expect(metadataServiceSpy.callCount).to.be.above(metadataInitialCallCount);
         expect(asgSpy.calledOnce).to.be.false;
       });
   });
 
-  it('should only retrieve ASG data once', function () {
-    AWS_MOCK.mock('MetadataService', 'request', function (path, callback) {
+  it('should only retrieve ASG data once', function() {
+    AWS_MOCK.mock('MetadataService', 'request', function(path, callback) {
       callback(null, metadataPaths[path]);
     });
 
-    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function (params, callback) {
+    AWS_MOCK.mock('AutoScaling', 'describeAutoScalingInstances', function(params, callback) {
       asgSpy();
       callback(null, {
         AutoScalingInstances: [{
@@ -215,13 +217,13 @@ describe('Metadata / ASG API calls', function () {
     });
 
     return source.initialize()
-      .then(function () {
+      .then(() => {
         expect(asgSpy.calledOnce).to.be.true;
       })
-      .then(function () {
-        return new Promise(function (resolve) { setTimeout(resolve, 1000) })
-      })
-      .then(function () {
+      .then(() => new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      }))
+      .then(() => {
         expect(asgSpy.calledOnce).to.be.true;
       });
   });

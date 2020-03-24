@@ -138,15 +138,15 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          region: 'eu-central-1'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        region: 'eu-central-1'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
@@ -171,14 +171,14 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
@@ -204,15 +204,15 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
@@ -237,14 +237,14 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
@@ -307,14 +307,14 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        })
-        .get('/v1/secret/default/kali/user/password')
-        .reply(200, {
-          plaintext: 'resu'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      })
+      .get('/v1/secret/default/kali/user/password')
+      .reply(200, {
+        plaintext: 'resu'
+      });
 
     _transformer = new TokendTransformer();
 
@@ -424,8 +424,8 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, 'toor');
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, 'toor');
 
     _transformer = new TokendTransformer();
 
@@ -451,15 +451,15 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
     sinon.spy(_transformer._client, 'clearCacheAtKey');
@@ -493,9 +493,9 @@ describe('TokendTransformer', function() {
 
     const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
     const signature = crypto
-        .createHash('sha1')
-        .update(JSON.stringify(payload))
-        .digest('base64');
+      .createHash('sha1')
+      .update(JSON.stringify(payload))
+      .digest('base64');
 
     const response = {
       plaintext: 'toor',
@@ -504,16 +504,16 @@ describe('TokendTransformer', function() {
 
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, () => {
-          requestCount++;
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, () => {
+        requestCount++;
 
-          return response;
-        });
+        return response;
+      });
 
     _transformer = new TokendTransformer();
 
@@ -559,7 +559,7 @@ describe('TokendTransformer', function() {
           datakey: 'foobar2'
         }
       }
-    }
+    };
 
     const keyPathObject = {
       keyPath: ['password']
@@ -600,7 +600,7 @@ describe('TokendTransformer', function() {
           error: {
             message: 'error'
           }
-        }
+        };
       });
 
     _transformer = new TokendTransformer();
@@ -642,23 +642,22 @@ describe('TokendTransformer', function() {
       keyPath: ['password']
     };
 
-    const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(500, () => {
-          requestCount++;
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(500, () => {
+        requestCount++;
 
-          return {
-            error: {
-              message: 'error'
-            }
-          };
-        });
+        return {
+          error: {
+            message: 'error'
+          }
+        };
+      });
 
     _transformer = new TokendTransformer();
 
@@ -713,7 +712,7 @@ describe('TokendTransformer', function() {
     const response2 = {
       plaintext: 'toor2',
       keyid: 'arn:aws:kms:region:account-id:key/key-id'
-    }
+    };
 
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
@@ -741,18 +740,19 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     const propertyName = keyPathObject.keyPath[0];
+
     return _transformer.transform(untransformedProperties)
-      .then(function () {
+      .then(() => {
         expect(requestCount).to.equal(1);
         expect(Object.keys(_transformer._cache).length).to.equal(1);
         expect(_transformer._cache).to.have.property(propertyName);
         expect(_transformer._cache[propertyName].signature).to.eql(signature);
         expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
 
-        return _transformer.transform(untransformedProperties2).then(function () {
+        return _transformer.transform(untransformedProperties2).then(() => {
           expect(requestCount).to.equal(2);
           expect(Object.keys(_transformer._cache).length).to.equal(1);
-          expect(_transformer._cache).to.not.have.property('password')
+          expect(_transformer._cache).to.not.have.property('password');
           expect(_transformer._cache).to.have.property('password2');
           tokend.done();
         });
@@ -803,10 +803,10 @@ describe('Properties#build', function() {
 
   it('transforms $tokend objects in static properties', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      });
 
     _properties = new Properties();
 
@@ -835,10 +835,10 @@ describe('Properties#build', function() {
 
   it('transforms $tokend objects in dynamic properties', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      });
     const stub = new Source.Stub();
 
     stub.properties = {
@@ -869,10 +869,10 @@ describe('Properties#build', function() {
 
   it('transforms $tokend objects after they are merged', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      });
     const stub = new Source.Stub();
     const stub2 = new Source.Stub();
 

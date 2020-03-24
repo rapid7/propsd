@@ -78,7 +78,6 @@ class ErrorStub extends Stub {
 
     return initialized;
   }
-
 }
 
 class PollingStub extends Common.Polling(Parser) {

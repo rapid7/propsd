@@ -2,6 +2,8 @@
 
 require('./lib/helpers');
 
+const nock = require('nock');
+
 const Properties = require('../src/lib/properties');
 const View = require('../src/lib/properties/view');
 const Source = require('./lib/stub/source');
@@ -15,11 +17,11 @@ const expect = require('chai').expect;
 describe('Properties', function() {
   const properties = new Properties();
 
-  before(function () {
+  before(function() {
     nock.disableNetConnect();
   });
 
-  after(function () {
+  after(function() {
     nock.enableNetConnect();
   });
 
@@ -81,19 +83,17 @@ describe('Properties', function() {
       return stub;
     });
 
-    const view = props.view(sources);
-    const expected = ['foo', 'bar', 'baz'];
-    const reversed = ['baz', 'bar', 'foo'];
-
-    return view.activate()
-      .then(function (props) {
+    return props
+      .view(sources)
+      .activate()
+      .then((props) => {
         expect(props.sources[0].properties.path).to.eql('foo');
         expect(props.sources[1].properties.path).to.eql('bar');
         expect(props.sources[2].properties.path).to.eql('baz');
       });
   });
 
-  it('adds layers with namespaces', function(done) {
+  it('adds layers with namespaces', function() {
     properties.addStaticLayer({
       cruel: 'world'
     }, 'goodbye');
@@ -106,7 +106,7 @@ describe('Properties', function() {
     };
 
     return properties.build()
-      .then(function (props) {
+      .then((props) => {
         expect(props.layers).to.have.length(2);
         expect(props._properties).to.eql(expectedPropsResult);
       });
@@ -176,7 +176,7 @@ describe('Properties', function() {
     };
 
     return properties.build()
-      .then(function (props) {
+      .then((props) => {
         expect(props.layers).to.have.length(3);
         expect(props.layers[0].properties).to.eql(expectedLayerResult);
         expect(props._properties).to.eql(expectedPropsResult);
@@ -297,7 +297,7 @@ describe('Properties', function() {
     };
 
     return properties.initialize()
-      .then(function (props) {
+      .then((props) => {
         expect(props.layers).to.be.length(3);
         expect(props._properties).to.eql(expectedPropsResult);
       });

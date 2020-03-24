@@ -57,6 +57,7 @@ class StringTemplate {
   toString() {
     return this.template.replace(this.constructor.CAPTURE, (match, capture) => {
       const path = capture.split(this.constructor.DELIMITER);
+
       let node = this.scope;
 
       // Traverse the scope object

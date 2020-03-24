@@ -76,7 +76,7 @@ class S3 extends Source.Polling(S3Parser) { // eslint-disable-line new-cap
       config.region = Config.get('index:region');
     }
 
-    config.credentialProvider = new Aws.CredentialProviderChain()
+    config.credentialProvider = new Aws.CredentialProviderChain();
 
     this.service = new Aws.S3(config);
   }

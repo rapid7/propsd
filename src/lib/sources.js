@@ -211,8 +211,8 @@ Sources.providers = {
 };
 
 // Update hold-down timeout
-Sources.UPDATE_HOLD_DOWN = 1000; // eslint-disable-line rapid7/static-magic-numbers
-Sources.MAX_LISTENERS = 100; // eslint-disable-line rapid7/static-magic-numbers
+Sources.UPDATE_HOLD_DOWN = 1000;
+Sources.MAX_LISTENERS = 100;
 
 Sources.Comparator = Comparator;
 Sources.Index = Index;

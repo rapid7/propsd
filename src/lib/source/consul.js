@@ -1,6 +1,5 @@
 'use strict';
 
-/* global Log, Config */
 const Client = require('consul');
 const Source = require('./common');
 const Parser = require('./consul/parser');

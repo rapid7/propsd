@@ -13,8 +13,6 @@ const expressWinston = require('express-winston');
  */
 function Logger(level, filename) {
   const logLevel = level.toUpperCase() || 'INFO';
-
-  /* eslint-disable rapid7/static-magic-numbers */
   const javaLogLevels = {
     levels: {
       ERROR: 0,
@@ -31,8 +29,6 @@ function Logger(level, filename) {
       DEBUG: 'blue'
     }
   };
-
-  /* eslint-enable rapid7/static-magic-numbers */
 
   const logger = new Winston.Logger({
     level: logLevel,

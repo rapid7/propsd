@@ -51,7 +51,7 @@ class MetadataClient {
 }
 
 MetadataClient.version = 'latest';
-MetadataClient.DEFAULT_TIMEOUT = 500; // eslint-disable-line rapid7/static-magic-numbers
+MetadataClient.DEFAULT_TIMEOUT = 500;
 MetadataClient.DEFAULT_HOST = '169.254.169.254:80';
 
 /* Export */

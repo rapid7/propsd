@@ -73,7 +73,8 @@ class TokendTransformer {
     const seenProperties = [];
     const promises = collectTransformables(properties, []).map((info) => {
       const keyPath = info.get('keyPath');
-      const propertyName = keyPath.join(".");
+      const propertyName = keyPath.join('.');
+
       seenProperties.push(propertyName);
 
       const signature = crypto
@@ -87,9 +88,9 @@ class TokendTransformer {
       }
 
       let resolver = null,
-        payload = {},
-        method = '',
-        source = 'Vault';
+          payload = {},
+          method = '',
+          source = 'Vault';
 
       switch (info.get('type')) {
         case 'generic':
@@ -138,6 +139,7 @@ class TokendTransformer {
       if (method === 'GET') {
         requestId = requestId.split('.').filter((f) => f !== 'undefined').join('.');
       }
+
       return resolver.then((data) => {
         this._client.clearCacheAtKey(method, requestId);
 
@@ -160,7 +162,8 @@ class TokendTransformer {
           return Promise.resolve(Immutable.Map().setIn(keyPath, this._cache[propertyName].plaintext));
         }
 
-        Log.log('WARN', `'${propertyName}' not found in cache, '${propertyName}' will be set to null`)
+        Log.log('WARN', `'${propertyName}' not found in cache, '${propertyName}' will be set to null`);
+
         return Promise.resolve(Immutable.Map().setIn(keyPath, null));
       });
     });
@@ -179,9 +182,9 @@ class TokendTransformer {
       Object.keys(this._cache)
         .forEach((propertyName) => {
           if (seenProperties.indexOf(propertyName) === -1) {
-            delete this._cache[propertyName]
+            delete this._cache[propertyName];
           }
-        })
+        });
 
       return transformedProperties.toJS();
     });

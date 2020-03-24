@@ -126,7 +126,7 @@ class Source extends EventEmitter {
    * Ready States are anything but INITIALIZED or CREATED
    */
   get ready() {
-    return this.state !== Source.INITIALIZING && this.state !== Source.CREATED
+    return this.state !== Source.INITIALIZING && this.state !== Source.CREATED;
   }
 
   /* eslint-disable max-statements */
@@ -388,7 +388,7 @@ class Polling extends Source {
   }
 }
 
-Polling.DEFAULT_INTERVAL = 60000; // eslint-disable-line rapid7/static-magic-numbers
+Polling.DEFAULT_INTERVAL = 60000;
 
 /**
  * Build a Mixin class to inject a Parser class into a Polling Source

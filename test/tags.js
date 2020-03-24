@@ -5,8 +5,8 @@ require('./lib/helpers');
 const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
 const AWS_SDK = require('aws-sdk');
-const Tags = require('../dist/lib/source/tags');
-const Parser = require('../dist/lib/source/tags/parser');
+const Tags = require('../src/lib/source/tags');
+const Parser = require('../src/lib/source/tags/parser');
 const sinon = require('sinon');
 const nock = require('nock');
 

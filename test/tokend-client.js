@@ -4,7 +4,7 @@ require('./lib/helpers');
 
 const expect = require('chai').expect;
 const nock = require('nock');
-const TokendClient = require('../dist/lib/transformers/tokend-client');
+const TokendClient = require('../src/lib/transformers/tokend-client');
 
 describe('TokendClient', function () {
   let _client = null;

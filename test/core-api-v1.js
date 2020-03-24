@@ -1,9 +1,9 @@
 'use strict';
 
 const request = require('supertest');
-const Properties = require('../dist/lib/properties');
-const Sources = require('../dist/lib/sources');
-const S3 = require('../dist/lib/source/s3');
+const Properties = require('../src/lib/properties');
+const Sources = require('../src/lib/sources');
+const S3 = require('../src/lib/source/s3');
 
 require('./lib/helpers');
 require('should');
@@ -187,7 +187,7 @@ sources.addIndex(new S3('index.json', {
 const makeServer = () => {
   const app = require('express')();
 
-  require('../dist/lib/control/v1/core').attach(app, sources);
+  require('../src/lib/control/v1/core').attach(app, sources);
 
   return app.listen(testServerPort);
 };

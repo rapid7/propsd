@@ -2,8 +2,8 @@
 
 require('./lib/helpers');
 
-const Properties = require('../dist/lib/properties');
-const Sources = require('../dist/lib/sources');
+const Properties = require('../src/lib/properties');
+const Sources = require('../src/lib/sources');
 const Source = require('./lib/stub/source');
 const nock = require('nock');
 const expect = require('chai').expect;

@@ -18,7 +18,7 @@ describe('Logging', () => {
     'log:level': 'info',
     'log:access:level': 'verbose'
   });
-  const log = require('../dist/lib/logger').attach(config.get('log:level'));
+  const log = require('../src/lib/logger').attach(config.get('log:level'));
 
   it('returns a WINSTON object', () => {
     log.should.be.an.instanceOf(Winston.Logger);
@@ -29,7 +29,7 @@ describe('Logging', () => {
   });
 
   describe('File logging', () => {
-    const fileLog = require('../dist/lib/logger').attach('INFO', 'tmp.log');
+    const fileLog = require('../src/lib/logger').attach('INFO', 'tmp.log');
 
     fileLog.remove(Winston.transports.Console);
 
@@ -45,7 +45,7 @@ describe('Logging', () => {
     });
 
     it('optionally logs to a file', () => {
-      const logger = require('../dist/lib/logger').attach('info');
+      const logger = require('../src/lib/logger').attach('info');
 
       Object.keys(logger.transports).should.eql(['console']);
     });
@@ -58,7 +58,7 @@ describe('Logging', () => {
         done();
       });
 
-      require('../dist/lib/logger').attach('info', 'tmp.log');
+      require('../src/lib/logger').attach('info', 'tmp.log');
     });
   });
 });

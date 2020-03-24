@@ -11,7 +11,7 @@ const NON_DEFAULT_INTERVAL = 10000;
 const DEFAULT_INTERVAL = 60000;
 const DEFAULT_BUCKET = 'fake-bucket';
 
-const Source = require('../dist/lib/source/common');
+const Source = require('../src/lib/source/common');
 const s3Stub = require('./utils/s3-stub');
 
 describe('S3 source plugin', function() {
@@ -255,7 +255,7 @@ describe('S3 source plugin', function() {
     });
 
     const endpoint = 'www.somecoolendpoint.com';
-    const s3Source = require('../dist/lib/source/s3');
+    const s3Source = require('../src/lib/source/s3');
     const s3 = new s3Source('foo.json', {
       bucket: DEFAULT_BUCKET,
       path: 'foo.json',

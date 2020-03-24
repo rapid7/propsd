@@ -1,6 +1,6 @@
 'use strict';
 
-const Common = require('../../../dist/lib/source/common');
+const Common = require('../../../src/lib/source/common');
 
 class Parser {
   constructor() {

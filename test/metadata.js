@@ -8,9 +8,9 @@ const nock = require('nock');
 const AWS_MOCK = require('aws-sdk-mock');
 const AWS_SDK = require('aws-sdk');
 
-const Metadata = require('../dist/lib/source/metadata');
-const Parser = require('../dist/lib/source/metadata/parser');
-const Util = require('../dist/lib/source/metadata/util');
+const Metadata = require('../src/lib/source/metadata');
+const Parser = require('../src/lib/source/metadata/parser');
+const Util = require('../src/lib/source/metadata/util');
 
 describe('Metadata traversals / parsing', function () {
   const metadataPaths = require('./data/metadata-paths.json');

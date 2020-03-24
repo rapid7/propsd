@@ -6,8 +6,8 @@ const crypto = require('crypto');
 const expect = require('chai').expect;
 const nock = require('nock');
 const sinon = require('sinon');
-const TokendTransformer = require('../dist/lib/transformers/tokend');
-const Properties = require('../dist/lib/properties');
+const TokendTransformer = require('../src/lib/transformers/tokend');
+const Properties = require('../src/lib/properties');
 const Source = require('./lib/stub/source');
 
 // Speed up testing by shortening the time we wait for properties to build.

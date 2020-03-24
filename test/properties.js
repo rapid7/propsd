@@ -2,10 +2,10 @@
 
 require('./lib/helpers');
 
-const Properties = require('../dist/lib/properties');
-const View = require('../dist/lib/properties/view');
+const Properties = require('../src/lib/properties');
+const View = require('../src/lib/properties/view');
 const Source = require('./lib/stub/source');
-const merge = require('../dist/lib/util').merge;
+const merge = require('../src/lib/util').merge;
 
 // Shorten build hold-down timeout for testing
 Properties.BUILD_HOLD_DOWN = 100;

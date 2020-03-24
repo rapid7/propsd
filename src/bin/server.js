@@ -58,7 +58,7 @@ properties.addDynamicLayer(new Tags(Config.get('tags')), 'instance:tags');
 properties.addStaticLayer(Config.get('properties'));
 
 // Create the Index source
-sources.index(new S3('index', Config.get('index')));
+sources.addIndex(new S3('index', Config.get('index')));
 
 // Go!
 sources.initialize();

@@ -174,7 +174,7 @@ properties.addDynamicLayer(new S3('foo-quiz-buzz.json', {
 
 const sources = new Sources(properties);
 
-sources.index(new S3('index.json', {
+sources.addIndex(new S3('index.json', {
   bucket: 'test-bucket',
   path: 'index.json'
 }));

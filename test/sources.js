@@ -276,7 +276,7 @@ describe('Sources', function() {
     });
 
     it('adds an index source', function() {
-      stubs.sources.index(stubs.index);
+      stubs.sources.addIndex(stubs.index);
 
       expect(stubs.sources.indices).to.deep.equal([stubs.index]);
     });
@@ -295,7 +295,7 @@ describe('Sources', function() {
     })
 
 
-    stubs.sources.index(stubs.index);
+    stubs.sources.addIndex(stubs.index);
 
     it('initializes properties and indices', function() {
       stubs.sources.initialize();
@@ -358,31 +358,7 @@ describe('Sources', function() {
     this.timeout(3000);
     let stubs = null;
 
-    beforeEach(function() {
-      stubs = setUp();
-      stubs.sources.index(stubs.index);
-    });
-
-    it('sets a healthy code and status message when index and sources are in ready state', function() {
-      return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
-
-        stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING);
-        });
-
-        const healthy = stubs.sources.health();
-
-        expect(healthy.code).to.equal(200);
-        expect(healthy.status).to.equal('OK');
-      });
-    });
-
-    // test for any initialising
-    it('sets an uninitialized code (503) and status message when all index and sources are uninitialized', function() {
-      stubs.sources.initialize();
-
-      expect(stubs.sources.initializing).to.equal(true);
+    stubs.sources.addIndex(stubs.index);
 
       const healthy = stubs.sources.health();
 

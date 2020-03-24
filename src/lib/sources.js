@@ -36,7 +36,7 @@ class Sources extends EventEmitter {
    *
    * @param  {Source} source
    */
-  index(source) {
+  addIndex(source) {
     this.indices.push(source);
   }
 

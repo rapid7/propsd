@@ -182,7 +182,7 @@ class Sources extends EventEmitter {
       }
 
       if (!source.ok) {
-        source_state.index.push(source.state)
+        source_state.source.push(source.state)
         source_state.count = source_state.count + 1
       }
 
@@ -191,7 +191,7 @@ class Sources extends EventEmitter {
 
     if (object.sources.length == source_state.count) {
       object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-      object.status = source_state.index;
+      object.status = source_state.source;
     }
 
     return object;

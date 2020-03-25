@@ -236,35 +236,117 @@ describe('Core API v1', function() {
     });
   }
 
-  it('responds correctly to a request to the /status endpoint', (done) => {
-    request(server)
-      .get(endpoints.status)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(HTTP_OK)
-      .end((err, res) => {
-        res.body.should.have.properties(expectedStatusResponse);
-        res.body.should.have.property('uptime');
-        res.body.should.have.property('version');
-        done();
-      });
+  describe('When sources are uninitialized', function() {
+    it('responds correctly to a request to the /status endpoint', (done) => {
+      request(server)
+        .get(endpoints.status)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_SERVICE_UNAVAILABLE)
+        .end((err, res) => {
+          res.body.should.have.properties(expectedInitialStatusResponse);
+          res.body.should.have.property('uptime');
+          res.body.should.have.property('version');
+          done();
+        });
+    });
+
+    it('responds correctly to a request to the /health endpoint', (done) => {
+      request(server)
+        .get(endpoints.health)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_SERVICE_UNAVAILABLE)
+        .end((err, res) => {
+          res.body.should.have.properties({status: HTTP_SERVICE_UNAVAILABLE, plugins: {s3: expectedInitialStatusResponse.sources.length}});
+          res.body.should.have.property('uptime');
+          res.body.should.have.property('version');
+          done();
+        });
+    });
+
+    it('returns a 500 if any source plugins fail');
+
+    it('returns a 429 if any source plugins have a warning');
   });
 
-  it('responds correctly to a request to the /health endpoint', (done) => {
-    request(server)
-      .get(endpoints.health)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(HTTP_OK)
-      .end((err, res) => {
-        res.body.should.have.properties({status: HTTP_OK, plugins: {s3: expectedStatusResponse.sources.length}});
-        res.body.should.have.property('uptime');
-        res.body.should.have.property('version');
-        done();
+  describe('When sources are running', function() {
+    before(() => {
+      sources.properties.sources.forEach((source) => {
+        source.state = 'RUNNING'
       });
+
+      sources.indices.forEach((index) => {
+        index.state = 'RUNNING'
+      });
+    });
+
+    it('responds correctly to a request to the /status endpoint', (done) => {
+      request(server)
+        .get(endpoints.status)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_OK)
+        .end((err, res) => {
+          res.body.should.have.properties(expectedRunningStatusResponse);
+          res.body.should.have.property('uptime');
+          res.body.should.have.property('version');
+          done();
+        });
+    });
+
+    it('responds correctly to a request to the /health endpoint', (done) => {
+      request(server)
+        .get(endpoints.health)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_OK)
+        .end((err, res) => {
+          res.body.should.have.properties({status: HTTP_OK, plugins: {s3: expectedRunningStatusResponse.sources.length}});
+          res.body.should.have.property('uptime');
+          res.body.should.have.property('version');
+          done();
+        });
+    });
   });
 
-  it('returns a 500 if any source plugins fail');
+  describe('When the Index is in an error state', (done) => {
+    before(() => {
+      sources.properties.sources.forEach((source) => {
+        source.state = 'RUNNING'
+      });
 
-  it('returns a 429 if any source plugins have a warning');
+      sources.indices.forEach((index) => {
+        index.state = 'ERROR'
+      });
+    });
+
+    it('responds correctly to a request to the /status endpoint', (done) => {
+      request(server)
+        .get(endpoints.status)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_INTERNAL_SERVER_ERROR)
+        .end((err, res) => {
+          res.body.should.have.properties(expectedIndexErrorStatusResponse);
+          res.body.should.have.property('uptime');
+          res.body.should.have.property('version');
+          done();
+        });
+    });
+
+    it('responds correctly to a request to the /health endpoint', (done) => {
+      request(server)
+        .get(endpoints.health)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(HTTP_INTERNAL_SERVER_ERROR)
+        .end((err, res) => {
+          res.body.should.have.properties({status: 500, plugins: {s3: expectedIndexErrorStatusResponse.sources.length}});
+          res.body.should.have.property('uptime');
+          res.body.should.have.property('version');
+          done();
+        });
+    });
+  });
 });

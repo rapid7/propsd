@@ -167,6 +167,11 @@ class Sources extends EventEmitter {
       // TODO This logic is fairly ham-fisted right now. It'll work because nothing
       // is setting `state` to WARNING at the moment. When we do start supporting a
       // WARNING state, this will have to become aware that OK < WARING < ERROR.
+      if (!source.ready) {
+        object.code = STATUS_CODES.SERVICE_UNAVAILABLE;
+        object.status = source.state;
+      }
+
       if (!source.ok) {
         object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
         object.status = source.state;

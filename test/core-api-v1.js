@@ -4,8 +4,8 @@ const request = require('supertest');
 const Properties = require('../dist/lib/properties');
 const Sources = require('../dist/lib/sources');
 const S3 = require('../dist/lib/source/s3');
-global.Config = require('nconf')
 
+require('./lib/helpers');
 require('should');
 
 const testServerPort = 3000;

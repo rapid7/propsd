@@ -80,8 +80,8 @@ describe('Metadata / ASG API calls', function() {
 
   afterEach(function() {
     AWS_MOCK.restore();
-    metadataServiceSpy.reset();
-    asgSpy.reset();
+    metadataServiceSpy.resetHistory();
+    asgSpy.resetHistory();
   });
 
   after(function() {

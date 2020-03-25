@@ -40,8 +40,8 @@ describe('Tags source plugin', function() {
 
   afterEach(function() {
     AWS.restore();
-    metadataServiceSpy.reset();
-    ec2Spy.reset();
+    metadataServiceSpy.resetHistory();
+    ec2Spy.resetHistory();
   });
 
   it('should parses tags into a useful object', function() {

@@ -192,7 +192,7 @@ const makeServer = () => {
   return app.listen(testServerPort);
 };
 
-describe('Core API v1', () => {
+describe('Core API v1', function() {
   let server = null;
 
   beforeEach(() => {
@@ -213,7 +213,7 @@ describe('Core API v1', () => {
         .get(endpoints[endpoint])
         .set('Accept', 'application/json')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(HTTP_OK)
+        .expect(HTTP_SERVICE_UNAVAILABLE)
         .end(done);
     });
 

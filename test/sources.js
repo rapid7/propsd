@@ -360,6 +360,10 @@ describe('Sources', function() {
 
     stubs.sources.addIndex(stubs.index);
 
+    it('sets a healthy code and status message', function() {
+      // Explicitly set the state so we don't see a race condition in the test.
+      stubs.layer.state = Source.WAITING;
+      stubs.index.state = Source.WAITING;
       const healthy = stubs.sources.health();
 
       expect(healthy.code).to.equal(503);
@@ -443,6 +447,14 @@ describe('Sources', function() {
         expect(h2.code).to.equal(200);
         expect(h2.status).to.equal('OK');
       });
+    });
+
+    it('sets a not ready code when a layer source is in an initializing state', function() {
+      stubs.layer.state = Source.INITIALIZING;
+      const h = stubs.sources.health();
+
+      expect(h.code).to.equal(503);
+      expect(h.status).to.equal('NOT_READY');
     });
   });
 });

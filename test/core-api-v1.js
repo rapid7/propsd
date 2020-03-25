@@ -1,8 +1,11 @@
 'use strict';
 
+require('./lib/helpers');
+
 const request = require('supertest');
 const Properties = require('../src/lib/properties');
 const Sources = require('../src/lib/sources');
+const Source = require('../src/lib/source/common');
 const S3 = require('../src/lib/source/s3');
 
 require('./lib/helpers');
@@ -10,17 +13,18 @@ require('should');
 
 const testServerPort = 3000;
 const HTTP_OK = 200;
-const HTTP_METHOD_NOT_ALLOWED = 405;
-const HTTP_INTERNAL_SERVER_ERROR = 500;
 const HTTP_SERVICE_UNAVAILABLE = 503;
+const HTTP_INTERNAL_SERVER_ERROR = 500;
+const HTTP_METHOD_NOT_ALLOWED = 405;
+const assertCorrectStatusCodes = (res) => ([HTTP_OK, HTTP_SERVICE_UNAVAILABLE].indexOf(res.body.status) !== -1)
+  .should.be.eql(true, `expected one of ${HTTP_OK}, ${HTTP_SERVICE_UNAVAILABLE} but received ${res.body.status}`);
 
 const endpoints = {
   health: '/v1/health',
   status: '/v1/status'
 };
 
-const expectedInitialStatusResponse = {
-  status: HTTP_SERVICE_UNAVAILABLE,
+const expectedStatusResponse = {
   index: {
     ok: true,
     updated: null,
@@ -181,13 +185,13 @@ sources.addIndex(new S3('index.json', {
 
 /**
  * Create a new Express server for testing
- *
+ * @param {Sources} srcs
  * @return {http.Server}
  */
-const makeServer = () => {
+const makeServer = (srcs) => {
   const app = require('express')();
 
-  require('../src/lib/control/v1/core').attach(app, sources);
+  require('../src/lib/control/v1/core').attach(app, srcs);
 
   return app.listen(testServerPort);
 };
@@ -196,7 +200,7 @@ describe('Core API v1', function() {
   let server = null;
 
   beforeEach(() => {
-    server = makeServer();
+    server = makeServer(sources);
   });
 
   afterEach((done) => {
@@ -213,8 +217,11 @@ describe('Core API v1', function() {
         .get(endpoints[endpoint])
         .set('Accept', 'application/json')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(HTTP_SERVICE_UNAVAILABLE)
-        .end(done);
+        .end((err, res) => {
+          assertCorrectStatusCodes(res);
+          res.body.should.have.properties(['status', 'uptime', 'version']);
+          done();
+        });
     });
 
     it(`rejects all other request types to the ${endpoint} endpoint`, (done) => {
@@ -236,48 +243,66 @@ describe('Core API v1', function() {
     });
   }
 
-  describe('When sources are uninitialized', function() {
-    it('responds correctly to a request to the /status endpoint', (done) => {
-      request(server)
-        .get(endpoints.status)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(HTTP_SERVICE_UNAVAILABLE)
-        .end((err, res) => {
-          res.body.should.have.properties(expectedInitialStatusResponse);
-          res.body.should.have.property('uptime');
-          res.body.should.have.property('version');
-          done();
-        });
-    });
-
-    it('responds correctly to a request to the /health endpoint', (done) => {
-      request(server)
-        .get(endpoints.health)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(HTTP_SERVICE_UNAVAILABLE)
-        .end((err, res) => {
-          res.body.should.have.properties({status: HTTP_SERVICE_UNAVAILABLE, plugins: {s3: expectedInitialStatusResponse.sources.length}});
-          res.body.should.have.property('uptime');
-          res.body.should.have.property('version');
-          done();
-        });
-    });
-
-    it('returns a 500 if any source plugins fail');
-
-    it('returns a 429 if any source plugins have a warning');
+  it('responds correctly to a request to the /status endpoint', (done) => {
+    request(server)
+      .get(endpoints.status)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .end((err, res) => {
+        assertCorrectStatusCodes(res);
+        res.body.should.have.properties(expectedStatusResponse);
+        res.body.should.have.property('uptime');
+        res.body.should.have.property('version');
+        done();
+      });
   });
 
-  describe('When sources are running', function() {
-    before(() => {
-      sources.properties.sources.forEach((source) => {
-        source.state = 'RUNNING'
+  it('responds correctly to a request to the /health endpoint', (done) => {
+    request(server)
+      .get(endpoints.health)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .end((err, res) => {
+        assertCorrectStatusCodes(res);
+        res.body.should.have.properties({plugins: {s3: expectedStatusResponse.sources.length}});
+        res.body.should.have.property('status');
+        res.body.should.have.property('uptime');
+        res.body.should.have.property('version');
+        done();
       });
+  });
 
-      sources.indices.forEach((index) => {
-        index.state = 'RUNNING'
+  it('returns a 500 if any source plugins are in an error state', (done) => {
+    // Stop the server and recreate it with the sources we want to test
+    server.close();
+    const properties = new Properties();
+    const s3 = new S3('foo-bar-baz.json', {
+      bucket: 'test-bucket',
+      path: 'foo-bar-baz.json'
+    });
+
+    properties.addDynamicLayer(s3, 'test');
+
+    const sources = new Sources(properties);
+
+    sources.addIndex(new S3('index.json', {
+      bucket: 'test-bucket',
+      path: 'index.json'
+    }));
+    server = makeServer(sources);
+
+    s3.state = Source.ERROR;
+
+    request(server)
+      .get(endpoints.health)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .end((err, res) => {
+        res.status.should.equal(HTTP_INTERNAL_SERVER_ERROR);
+        res.body.should.have.properties({status: HTTP_INTERNAL_SERVER_ERROR, plugins: {s3: 1}});
+        res.body.should.have.property('uptime');
+        res.body.should.have.property('version');
+        done();
       });
     });
 
@@ -310,43 +335,37 @@ describe('Core API v1', function() {
     });
   });
 
-  describe('When the Index is in an error state', (done) => {
-    before(() => {
-      sources.properties.sources.forEach((source) => {
-        source.state = 'RUNNING'
+  it('returns a 503 if any source plugins are not ready', (done) => {
+    // Stop the server and recreate it with the sources we want to test
+    server.close();
+    const properties = new Properties();
+    const s3 = new S3('foo-bar-baz.json', {
+      bucket: 'test-bucket',
+      path: 'foo-bar-baz.json'
+    });
+
+    properties.addDynamicLayer(s3, 'test');
+
+    const sources = new Sources(properties);
+
+    sources.addIndex(new S3('index.json', {
+      bucket: 'test-bucket',
+      path: 'index.json'
+    }));
+    server = makeServer(sources);
+
+    s3.state = Source.INITIALIZING;
+
+    request(server)
+      .get(endpoints.health)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .end((err, res) => {
+        res.status.should.equal(HTTP_SERVICE_UNAVAILABLE);
+        res.body.should.have.properties({status: HTTP_SERVICE_UNAVAILABLE, plugins: {s3: 1}});
+        res.body.should.have.property('uptime');
+        res.body.should.have.property('version');
+        done();
       });
-
-      sources.indices.forEach((index) => {
-        index.state = 'ERROR'
-      });
-    });
-
-    it('responds correctly to a request to the /status endpoint', (done) => {
-      request(server)
-        .get(endpoints.status)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(HTTP_INTERNAL_SERVER_ERROR)
-        .end((err, res) => {
-          res.body.should.have.properties(expectedIndexErrorStatusResponse);
-          res.body.should.have.property('uptime');
-          res.body.should.have.property('version');
-          done();
-        });
-    });
-
-    it('responds correctly to a request to the /health endpoint', (done) => {
-      request(server)
-        .get(endpoints.health)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(HTTP_INTERNAL_SERVER_ERROR)
-        .end((err, res) => {
-          res.body.should.have.properties({status: 500, plugins: {s3: expectedIndexErrorStatusResponse.sources.length}});
-          res.body.should.have.property('uptime');
-          res.body.should.have.property('version');
-          done();
-        });
-    });
   });
 });

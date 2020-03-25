@@ -154,53 +154,60 @@ class Sources extends EventEmitter {
    * @return {Object}
    */
   health() {
-    const object = {
+    const obj = {
       code: STATUS_CODES.OK,
-      status: 'OK'
+      status: 'OK',
+      indices: [],
+      sources: []
     };
 
-    const source_state = {
-      source: [],
+    let unhealthy = {
+      sources: [],
       count: 0
     };
 
-    object.indices = this.indices.map((source) => {
-      // TODO This logic is fairly ham-fisted right now. It'll work because nothing
-      // is setting `state` to WARNING at the moment. When we do start supporting a
-      // WARNING state, this will have to become aware that OK < WARING < ERROR.
-      if (!source.ready) {
-        object.code = STATUS_CODES.SERVICE_UNAVAILABLE;
-        object.status = source.state;
-      }
+    let notReady = {
+      sources: [],
+      count: 0
+    };
 
+    const sourceHealthPredicate = (u, n, out) => (source) => {
       if (!source.ok) {
-        object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-        object.status = source.state;
+        u.sources.push(source);
+        u.count += 1;
       }
 
-      return source.status();
-    });
-
-    object.sources = this.properties.sources.map((source) => {
       if (!source.ready) {
-        object.code = STATUS_CODES.SERVICE_UNAVAILABLE;
-        object.status = source.state;
+        n.sources.push(source);
+        n.count += 1;
       }
 
-      if (!source.ok) {
-        source_state.source.push(source.state);
-        source_state.count = source_state.count + 1;
-      }
+      out.push(source.status());
+    };
 
-      return source.status();
-    });
+    // Health logic:
+    // 500 - at least one source is !ok
+    // 503 - at least one source is !ready
+    // 200 - all sources both ok and ready
+    //
+    this.indices.forEach(sourceHealthPredicate(unhealthy, notReady, obj.indices));
+    this.properties.sources.forEach(sourceHealthPredicate(unhealthy, notReady, obj.sources));
 
-    if (object.sources.length === source_state.count) {
-      object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-      object.status = source_state.source[source_state.count - 1];
+    if (unhealthy.count > 0) {
+      obj.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
+      obj.status = 'ERROR';
+
+      return obj;
     }
 
-    return object;
+    if (notReady.count > 0) {
+      obj.code = STATUS_CODES.SERVICE_UNAVAILABLE;
+      obj.status = 'NOT_READY';
+
+      return obj;
+    }
+
+    return obj;
   }
 }
 

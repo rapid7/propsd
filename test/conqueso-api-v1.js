@@ -136,7 +136,7 @@ describe('Conqueso API v1', function() {
     request(server)
       .head('/v1/conqueso')
       .expect('Allow', 'GET,POST,PUT,OPTIONS')
-      .expect(HTTP_METHOD_NOT_ALLOWED, '', done);
+      .expect(HTTP_METHOD_NOT_ALLOWED, done);
   });
 });
 

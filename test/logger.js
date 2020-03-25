@@ -1,5 +1,7 @@
 'use strict';
 
+require('./lib/helpers');
+
 require('should');
 const Winston = require('winston');
 

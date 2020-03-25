@@ -105,6 +105,8 @@ describe('S3 source plugin', function() {
 
     s3WithNoSuchKeyError.once('update', () => {
       s3WithNoSuchKeyError.properties.should.be.empty();
+
+      s3WithNoSuchKeyError.stop();
       done();
     });
 
@@ -121,6 +123,8 @@ describe('S3 source plugin', function() {
 
     s3WithNoSuchKeyError.once('update', () => {
       should(s3WithNoSuchKeyError.status().etag).be.null();
+
+      s3WithNoSuchKeyError.stop();
       done();
     });
 
@@ -162,6 +166,8 @@ describe('S3 source plugin', function() {
       status.ok.should.be.false();
       status.state.should.equal(Source.ERROR);
       err.code.should.equal('BigTimeErrorCode');
+
+      s3OtherError.stop();
       done();
     });
 
@@ -177,6 +183,7 @@ describe('S3 source plugin', function() {
     s3OtherError.once('error', () => {
       should(s3OtherError.status().etag).be.null();
       should(s3OtherError.properties).eql({foo: 'bar'});
+      s3OtherError.stop();
       done();
     });
 
@@ -240,6 +247,7 @@ describe('S3 source plugin', function() {
         test: true,
         maxCassandraConnects: 0
       });
+      s3SampleData.stop();
       done();
     });
 

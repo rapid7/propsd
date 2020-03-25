@@ -1,22 +1,21 @@
 'use strict';
 
 require('./lib/helpers');
+require('should');
 
 const Stub = require('./lib/stub/consul');
 const Consul = require('../src/lib/source/consul');
-
-const expect = require('chai').expect;
 
 describe('Consul', function() {
   it('instantiates a Consul Source with defaults', function() {
     const consul = new Consul('test');
 
     // See https://github.com/silas/node-papi/blob/master/lib/client.js#L71
-    expect(consul.client._opts.host).to.equal('127.0.0.1');
-    expect(consul.client._opts.port).to.equal(8500);
-    expect(consul.client._opts.secure).to.equal(false);
+    consul.client._opts.host.should.eql('127.0.0.1');
+    consul.client._opts.port.should.eql(8500);
+    consul.client._opts.secure.should.eql(false);
 
-    expect(consul.properties).to.be.empty;
+    consul.properties.should.be.empty();
   });
 
   it('overrides defaults from constructor options', function() {
@@ -26,9 +25,9 @@ describe('Consul', function() {
       secure: true
     });
 
-    expect(consul.client._opts.host).to.equal('1.1.1.1');
-    expect(consul.client._opts.port).to.equal(1234);
-    expect(consul.client._opts.secure).to.equal(true);
+    consul.client._opts.host.should.eql('1.1.1.1');
+    consul.client._opts.port.should.eql(1234);
+    consul.client._opts.secure.should.eql(true);
   });
 
   it('sets up properties on initialize', function() {
@@ -37,8 +36,8 @@ describe('Consul', function() {
     consul.client = Stub;
 
     return consul.initialize().then(() => {
-      expect(consul.state).to.equal(Consul.RUNNING);
-      expect(consul.properties).to.eql({
+      consul.state.should.eql(Consul.RUNNING);
+      consul.properties.should.eql({
         consul: {
           consul: {
             cluster: 'consul',
@@ -54,6 +53,8 @@ describe('Consul', function() {
           }
         }
       });
+
+      consul.stop();
     });
   });
 
@@ -66,8 +67,10 @@ describe('Consul', function() {
     };
 
     return consul.initialize().then(() => {
-      expect(consul.state).to.equal(Consul.ERROR);
-      expect(consul.properties).to.eql({});
+      consul.state.should.eql(Consul.ERROR);
+      consul.properties.should.be.empty();
+
+      consul.stop();
     });
   });
 });

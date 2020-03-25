@@ -1,12 +1,12 @@
 'use strict';
 
 require('./lib/helpers');
+require('should');
 
 const Properties = require('../src/lib/properties');
 const Sources = require('../src/lib/sources');
 const Source = require('./lib/stub/source');
 const nock = require('nock');
-const expect = require('chai').expect;
 const providers = {stub: Source.Stub};
 
 Sources.providers.stub = Source.Stub;
@@ -20,8 +20,8 @@ describe('Sources', function() {
         type: 'test'
       }]);
 
-      expect(index.order).to.have.length.of(1);
-      expect(index.configurations).to.deep.equal({
+      index.order.should.have.length(1);
+      index.configurations.should.eql({
         'test-source': {
           name: 'test-source',
           type: 'test'
@@ -34,8 +34,8 @@ describe('Sources', function() {
         name: 'test-source'
       }]);
 
-      expect(index.order).to.have.length.of(0);
-      expect(index.configurations).to.be.empty;
+      index.order.should.have.length(0);
+      index.configurations.should.be.empty();
     });
 
     it('generates a name for configuration objects with missing name parameters', function() {
@@ -43,11 +43,11 @@ describe('Sources', function() {
         type: 'test'
       }]);
 
-      expect(index.order.length).to.equal(1);
+      index.order.should.have.length(1);
       const generatedName = index.order[0];
 
-      expect(index.configurations).to.have.key(generatedName);
-      expect(generatedName).to.match(/^test:/);
+      index.configurations.should.have.keys(generatedName);
+      generatedName.should.match(/^test:/);
     });
 
     it('interpolates template values in strings in configuration objects', function() {
@@ -68,8 +68,8 @@ describe('Sources', function() {
         topping: 'fudge!'
       });
 
-      expect(index.order).to.have.length.of(1);
-      expect(index.configurations).to.deep.equal({
+      index.order.should.have.length(1);
+      index.configurations.should.eql({
         'test-source': {
           name: 'test-source',
           type: 'test',
@@ -103,8 +103,8 @@ describe('Sources', function() {
         topping: 'fudge!'
       });
 
-      expect(index.order).to.have.length.of(0);
-      expect(index.configurations).to.be.empty;
+      index.order.should.have.length(0);
+      index.configurations.should.be.empty();
     });
 
     it('returns an ordered set of sources', function() {
@@ -132,8 +132,8 @@ describe('Sources', function() {
         }
       };
 
-      expect(index.order).to.deep.equal(['first', 'second', 'third']);
-      expect(index.ordered()).to.deep.equal([
+      index.order.should.eql(['first', 'second', 'third']);
+      index.ordered().should.eql([
         {name: 'first'},
         {name: 'second'},
         {name: 'third'}
@@ -173,61 +173,61 @@ describe('Sources', function() {
     it('detects new sources', function() {
       const diff = Sources.Comparator.compare(one, two);
 
-      expect(diff.changes).to.equal(true);
-      expect(diff.create).to.have.length.of(2);
-      expect(diff.copy).to.be.empty;
-      expect(diff.destroy).to.be.empty;
+      diff.changes.should.be.true();
+      diff.create.should.have.length(2);
+      diff.copy.should.be.empty();
+      diff.destroy.should.be.empty();
     });
 
     it('detects unchanged and removed sources', function() {
       const diff = Sources.Comparator.compare(two, three);
 
-      expect(diff.changes).to.equal(true);
-      expect(diff.create).to.have.length.of(1);
-      expect(diff.copy).to.have.length.of(1);
-      expect(diff.destroy).to.have.length.of(1);
+      diff.changes.should.be.true();
+      diff.create.should.have.length(1);
+      diff.copy.should.have.length(1);
+      diff.destroy.should.have.length(1);
     });
 
     it('detects changed sources', function() {
       const diff = Sources.Comparator.compare(three, four);
 
-      expect(diff.changes).to.equal(true);
-      expect(diff.create).to.have.length.of(1);
-      expect(diff.copy).to.have.length.of(1);
-      expect(diff.destroy).to.have.length.of(1);
+      diff.changes.should.be.true();
+      diff.create.should.have.length(1);
+      diff.copy.should.have.length(1);
+      diff.destroy.should.have.length(1);
     });
 
     it('detects when no changes have occurred', function() {
       const diff = Sources.Comparator.compare(three, three);
 
-      expect(diff.changes).to.equal(false);
-      expect(diff.create).to.be.empty;
-      expect(diff.copy).to.have.length.of(2);
-      expect(diff.destroy).to.be.empty;
+      diff.changes.should.be.false();
+      diff.create.should.be.empty();
+      diff.copy.should.have.length(2);
+      diff.destroy.should.be.empty();
     });
 
     it('creates sources for a new index', function() {
       const diff = Sources.Comparator.compare(one, two);
       const index = diff.build(providers);
 
-      expect(index.sources).to.not.be.empty;
-      index.ordered().forEach((source) =>
-        expect(source).to.be.instanceOf(Source.Stub)
-      );
+      index.sources.should.not.be.empty();
+      index.ordered().forEach((source) => {
+        source.should.be.instanceOf(Source.Stub);
+      });
     });
 
     it('rejects source configurations with unsupported types', function() {
       const diff = Sources.Comparator.compare(one, new Sources.Index([{type: 'foobar'}]));
       const index = diff.build(providers);
 
-      expect(index.sources).to.be.empty;
+      index.sources.should.be.empty();
     });
 
     it('shuts down removed sources from an old index', function(done) {
       const diff = Sources.Comparator.compare(two, three);
 
       two.sources['source-one'].once('shutdown', (source) => {
-        expect(source.state).to.equal(Source.SHUTDOWN);
+        source.state.should.eql(Source.SHUTDOWN);
         done();
       });
 
@@ -239,7 +239,7 @@ describe('Sources', function() {
 
       diff.build(providers);
 
-      expect(two.sources['source-two']).to.equal(three.sources['source-two']);
+      two.sources['source-two'].should.eql(three.sources['source-two']);
     });
   });
 
@@ -278,7 +278,7 @@ describe('Sources', function() {
     it('adds an index source', function() {
       stubs.sources.addIndex(stubs.index);
 
-      expect(stubs.sources.indices).to.deep.equal([stubs.index]);
+      stubs.sources.indices.should.eql([stubs.index]);
     });
   });
 
@@ -291,6 +291,9 @@ describe('Sources', function() {
     });
 
     after(function() {
+      // We need to ensure that we shut down the Tokend client's polling loop so tests
+      // exit correctly.
+      stubs.properties.tokendTransformer._client.stop();
       nock.enableNetConnect();
     });
 
@@ -300,27 +303,27 @@ describe('Sources', function() {
     it('initializes properties and indices', function() {
       stubs.sources.initialize();
 
-      expect(stubs.sources.initializing).to.equal(true);
+      stubs.sources.initializing.should.be.true();
 
       // Calling initialize multiple times returns valid promises
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
-        expect(stubs.properties.sources).to.have.length.of(3);
+        stubs.index.state.should.eql(Source.RUNNING);
+        stubs.properties.sources.should.have.length(3);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
       });
     });
 
     it('returns a resolved promise if called multiple times', function() {
-      expect(stubs.sources.initialized).to.equal(true);
-      expect(stubs.sources.initialize()).to.be.instanceOf(Promise);
+      stubs.sources.initialized.should.be.true();
+      stubs.sources.initialize().should.be.a.Promise();
     });
 
     it('updates the index when a Properties layer updates', function(done) {
       stubs.sources.once('update', () => {
-        expect(stubs.sources.current.configurations.stub1.parameters.value).to.equal('quux');
+        stubs.sources.current.configurations.stub1.parameters.value.should.eql('quux');
         done();
       });
 
@@ -329,7 +332,7 @@ describe('Sources', function() {
 
     it('updates the index when an Index layer updates', function(done) {
       stubs.sources.once('update', () => {
-        expect(stubs.sources.current.configurations.stub2.parameters.changed).to.equal('parameter!');
+        stubs.sources.current.configurations.stub2.parameters.changed.should.eql('parameter!');
         done();
       });
 

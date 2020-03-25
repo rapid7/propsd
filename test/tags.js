@@ -1,8 +1,8 @@
 'use strict';
 
 require('./lib/helpers');
+require('should');
 
-const expect = require('chai').expect;
 const AWS = require('aws-sdk-mock');
 const AWS_SDK = require('aws-sdk');
 const Tags = require('../src/lib/source/tags');
@@ -48,15 +48,15 @@ describe('Tags source plugin', function() {
     const parser = new Parser();
 
     parser.update(tagValues);
-    expect(parser.properties.Name).to.be.a('string');
-    expect(parser.properties.Service).to.be.a('string');
-    expect(parser.properties['This tag']).to.be.a('string');
-    expect(parser.properties['Another tag']).to.be.a('string');
+    parser.properties.Name.should.be.a.String();
+    parser.properties.Service.should.be.a.String();
+    parser.properties['This tag'].should.be.a.String();
+    parser.properties['Another tag'].should.be.a.String();
 
-    expect(parser.properties.Name).to.equal('service-name');
-    expect(parser.properties.Service).to.equal('service-type');
-    expect(parser.properties['This tag']).to.equal('a value');
-    expect(parser.properties['Another tag']).to.equal('some other value');
+    parser.properties.Name.should.eql('service-name');
+    parser.properties.Service.should.eql('service-type');
+    parser.properties['This tag'].should.eql('a value');
+    parser.properties['Another tag'].should.eql('some other value');
   });
 
   it('handles errors from the AWS Metadata SDK gracefully by not exposing the property', function() {
@@ -70,9 +70,10 @@ describe('Tags source plugin', function() {
 
     return source.initialize()
       .then(() => {
-        expect(metadataServiceSpy.called).to.be.true;
-        expect(source.properties).to.be.a('object');
-        expect(source.properties).to.be.empty;
+        metadataServiceSpy.called.should.be.true();
+        source.properties.should.be.an.Object();
+        source.properties.should.be.empty();
+        source.stop();
       });
   });
 
@@ -93,10 +94,11 @@ describe('Tags source plugin', function() {
 
     return source.initialize()
       .then(() => {
-        expect(metadataServiceSpy.called).to.be.true;
-        expect(ec2Spy.called).to.be.true;
-        expect(source.properties).to.be.a('object');
-        expect(source.properties).to.be.empty;
+        metadataServiceSpy.called.should.be.true();
+        ec2Spy.called.should.be.true();
+        source.properties.should.be.an.Object();
+        source.properties.should.be.empty();
+        source.stop();
       });
   });
 
@@ -123,21 +125,22 @@ describe('Tags source plugin', function() {
     return source.initialize()
       .then(() => {
         ec2InitialCount = ec2Spy.callCount;
-        expect(source.properties.Name).to.be.a('string');
-        expect(source.properties.Service).to.be.a('string');
-        expect(source.properties['This tag']).to.be.a('string');
-        expect(source.properties['Another tag']).to.be.a('string');
+        source.properties.Name.should.be.a.String();
+        source.properties.Service.should.be.a.String();
+        source.properties['This tag'].should.be.a.String();
+        source.properties['Another tag'].should.be.a.String();
 
-        expect(source.properties.Name).to.equal('service-name');
-        expect(source.properties.Service).to.equal('service-type');
-        expect(source.properties['This tag']).to.equal('a value');
-        expect(source.properties['Another tag']).to.equal('some other value');
+        source.properties.Name.should.eql('service-name');
+        source.properties.Service.should.eql('service-type');
+        source.properties['This tag'].should.eql('a value');
+        source.properties['Another tag'].should.eql('some other value');
       })
       .then(() => new Promise((resolve) => {
         setTimeout(resolve, 1000);
       }))
       .then(() => {
-        expect(ec2Spy.callCount).to.be.above(ec2InitialCount);
+        ec2Spy.callCount.should.be.above(ec2InitialCount);
+        source.stop();
       });
   });
 });

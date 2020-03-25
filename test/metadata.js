@@ -2,7 +2,7 @@
 
 require('./lib/helpers');
 
-const expect = require('chai').expect;
+const should = require('should');
 const sinon = require('sinon');
 const nock = require('nock');
 const AWS_MOCK = require('aws-sdk-mock');
@@ -26,7 +26,7 @@ describe('Metadata traversals / parsing', function() {
           return done(err);
         }
 
-        expect(data).to.eql(metadataValues);
+        data.should.eql(metadataValues);
         done();
       });
   });
@@ -37,15 +37,15 @@ describe('Metadata traversals / parsing', function() {
     parser.update(metadataValues);
 
     // Currently used in our Index object.
-    expect(parser.properties.account).to.be.a('string');
-    expect(parser.properties.region).to.be.a('string');
-    expect(parser.properties['iam-role']).to.eq('fake-fake');
-    expect(parser.properties['vpc-id']).to.be.a('string');
-    expect(parser.properties['instance-id']).to.be.a('string');
+    parser.properties.account.should.be.a.String();
+    parser.properties.region.should.be.a.String();
+    parser.properties['iam-role'].should.eql('fake-fake');
+    parser.properties['vpc-id'].should.be.a.String();
+    parser.properties['instance-id'].should.be.a.String();
 
-    expect(parser.properties.identity).to.be.an('object');
-    expect(parser.properties.credentials).to.be.an('object');
-    expect(parser.properties.interface).to.be.an('object');
+    parser.properties.identity.should.be.an.Object();
+    parser.properties.credentials.should.be.an.Object();
+    parser.properties.interface.should.be.an.Object();
   });
 
   it('should not display values that are undefined', function() {
@@ -56,10 +56,10 @@ describe('Metadata traversals / parsing', function() {
     deletedMetadataValues['dynamic/instance-identity/document'] = undefined;
 
     parser.update(deletedMetadataValues);
-    expect(parser.properties).to.not.have.property('instance-id');
-    expect(parser.properties.identity).to.not.have.property('document');
-    expect(parser.properties).to.not.have.property('account');
-    expect(parser.properties).to.not.have.property('region');
+    parser.properties.should.not.have.property('instance-id');
+    parser.properties.identity.should.not.have.property('document');
+    parser.properties.should.not.have.property('account');
+    parser.properties.should.not.have.property('region');
   });
 });
 
@@ -101,9 +101,11 @@ describe('Metadata / ASG API calls', function() {
 
     return source.initialize()
       .then(() => {
-        expect(metadataServiceSpy.called).to.be.true;
-        expect(source.properties).to.be.a('object');
-        expect(source.properties).to.be.empty;
+        metadataServiceSpy.called.should.be.true();
+        source.properties.should.be.an.Object();
+        source.properties.should.be.empty();
+
+        source.stop();
       });
   });
 
@@ -124,9 +126,11 @@ describe('Metadata / ASG API calls', function() {
 
     return source.initialize()
       .then(() => {
-        expect(metadataServiceSpy.called).to.be.true;
-        expect(asgSpy.calledOnce).to.be.true;
-        expect(source.properties['auto-scaling-group']).to.be.undefined;
+        metadataServiceSpy.called.should.be.true();
+        asgSpy.calledOnce.should.be.true();
+        should(source.properties['auto-scaling-group']).be.undefined();
+
+        source.stop();
       });
   });
 
@@ -151,18 +155,20 @@ describe('Metadata / ASG API calls', function() {
 
     return source.initialize()
       .then(() => {
-        expect(metadataServiceSpy.called).to.be.true;
-        expect(asgSpy.calledOnce).to.be.true;
-        expect(source.properties.account).to.be.a('string');
-        expect(source.properties.region).to.be.a('string');
-        expect(source.properties['vpc-id']).to.be.a('string');
-        expect(source.properties['iam-role']).to.eq('fake-fake');
-        expect(source.properties['instance-id']).to.be.a('string');
-        expect(source.properties.identity).to.be.an('object');
-        expect(source.properties.credentials).to.be.an('object');
-        expect(source.properties.interface).to.be.an('object');
-        expect(source.properties['auto-scaling-group']).to.be.a('string');
-        expect(source.properties['auto-scaling-group']).to.equal('my-cool-auto-scaling-group');
+        metadataServiceSpy.called.should.be.true();
+        asgSpy.calledOnce.should.be.true();
+        source.properties.account.should.be.a.String();
+        source.properties.region.should.be.a.String();
+        source.properties['vpc-id'].should.be.a.String();
+        source.properties['iam-role'].should.eql('fake-fake');
+        source.properties['instance-id'].should.be.a.String();
+        source.properties.identity.should.be.an.Object();
+        source.properties.credentials.should.be.an.Object();
+        source.properties.interface.should.be.an.Object();
+        source.properties['auto-scaling-group'].should.be.a.String();
+        source.properties['auto-scaling-group'].should.eql('my-cool-auto-scaling-group');
+
+        source.stop();
       });
   });
 
@@ -186,15 +192,17 @@ describe('Metadata / ASG API calls', function() {
     return source.initialize()
       .then(() => {
         metadataInitialCallCount = metadataServiceSpy.callCount;
-        expect(metadataServiceSpy.called).to.be.true;
-        expect(asgSpy.calledOnce).to.be.true;
+        metadataServiceSpy.called.should.be.true();
+        asgSpy.calledOnce.should.be.true();
       })
       .then(() => new Promise((resolve) => {
         setTimeout(resolve, 1000);
       }))
       .then(() => {
-        expect(metadataServiceSpy.callCount).to.be.above(metadataInitialCallCount);
-        expect(asgSpy.calledOnce).to.be.false;
+        metadataServiceSpy.callCount.should.be.above(metadataInitialCallCount);
+        asgSpy.calledOnce.should.be.false();
+
+        source.stop();
       });
   });
 
@@ -218,13 +226,15 @@ describe('Metadata / ASG API calls', function() {
 
     return source.initialize()
       .then(() => {
-        expect(asgSpy.calledOnce).to.be.true;
+        asgSpy.calledOnce.should.be.true();
       })
       .then(() => new Promise((resolve) => {
         setTimeout(resolve, 1000);
       }))
       .then(() => {
-        expect(asgSpy.calledOnce).to.be.true;
+        asgSpy.calledOnce.should.be.true();
+
+        source.stop();
       });
   });
 });

@@ -1,11 +1,11 @@
 'use strict';
 
 require('./lib/helpers');
+require('should');
 
 const ConsulStub = require('./lib/stub/consul');
 const Consul = require('../src/lib/source/consul');
 
-const expect = require('chai').expect;
 const request = require('supertest');
 
 const testServerPort = 3000;
@@ -210,7 +210,7 @@ describe('Conqueso API v1', function() {
       .set('Accept', 'text/plain')
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect((res) => {
-        expect(res.text.split(/\n/g)).to.members(expected);
+        res.text.split(/\n/g).should.containDeep(expected);
       })
       .expect(HTTP_OK, done);
   });

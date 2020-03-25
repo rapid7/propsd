@@ -2,7 +2,7 @@
 
 require('./lib/helpers');
 
-const expect = require('chai').expect;
+const should = require('should');
 const nock = require('nock');
 const TokendClient = require('../src/lib/transformers/tokend-client');
 
@@ -27,8 +27,8 @@ describe('TokendClient', function() {
   it('finds Tokend on 127.0.0.1:4500 by default', function() {
     _client = new TokendClient();
 
-    expect(_client._host).to.equal('127.0.0.1');
-    expect(_client._port).to.equal(4500);
+    _client._host.should.eql('127.0.0.1');
+    _client._port.should.eql(4500);
   });
 
   it('allows Tokend to be found on a non-default host:port', function() {
@@ -37,8 +37,8 @@ describe('TokendClient', function() {
       port: 2600
     });
 
-    expect(_client._host).to.equal('token.d');
-    expect(_client._port).to.equal(2600);
+    _client._host.should.eql('token.d');
+    _client._port.should.eql(2600);
   });
 
   it('only calls Tokend once for each generic secret', function() {
@@ -57,7 +57,7 @@ describe('TokendClient', function() {
 
     return Promise.all([secret1, secret2]).then((secrets) => {
       secrets.forEach((secret) => {
-        expect(secret).to.eql({
+        secret.should.eql({
           plaintext: 'toor'
         });
       });
@@ -87,7 +87,7 @@ describe('TokendClient', function() {
     return _client.initialize().then(() => {
       // First request will resolve with the original secret.
       _client.get('/v1/secret/default/kali/root/password').then((originalSecret) => {
-        expect(originalSecret).to.eql({
+        originalSecret.should.eql({
           plaintext: 'toor'
         });
 
@@ -95,7 +95,7 @@ describe('TokendClient', function() {
         _client.once('update', () => {
           // Second request should resolve with the new secret.
           _client.get('/v1/secret/default/kali/root/password').then((updatedSecret) => {
-            expect(updatedSecret).to.eql({
+            updatedSecret.should.eql({
               plaintext: 'myvoiceismypassword'
             });
 
@@ -125,7 +125,7 @@ describe('TokendClient', function() {
 
     return Promise.all([secret1, secret2]).then((secrets) => {
       secrets.forEach((secret) => {
-        expect(secret).to.eql({
+        secret.should.eql({
           plaintext: 'toor'
         });
       });
@@ -151,12 +151,12 @@ describe('TokendClient', function() {
     return _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'}).then(() => {
       const postRequestQueue = _client._pendingPostRequests;
 
-      expect(Object.keys(postRequestQueue).length).to.equal(1);
-      expect(postRequestQueue[keyId]).to.be.an.instanceof(Promise);
+      Object.keys(postRequestQueue).should.have.length(1);
+      postRequestQueue[keyId].should.be.a.Promise();
 
       _client.clearCacheAtKey('POST', keyId);
 
-      expect(Object.keys(postRequestQueue).length).to.equal(0);
+      Object.keys(postRequestQueue).should.have.length(0);
 
       tokend.done();
     });
@@ -177,7 +177,7 @@ describe('TokendClient', function() {
     const keyId = '/v1/transit/default/decrypt.kali.gbbe';
 
     return _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'}).then(() => {
-      expect(() => _client.clearCacheAtKey('HEAD', keyId)).to.throw(Error, 'A HEAD request does not map to an' +
+      should.throws(() => _client.clearCacheAtKey('HEAD', keyId), Error, 'A HEAD request does not map to an' +
         ' existing cache.');
       tokend.done();
     });

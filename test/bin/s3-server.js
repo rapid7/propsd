@@ -51,7 +51,9 @@ const path = Path.resolve(__dirname, `../../${args.d}`);
 
 const awsConfig = {
   s3ForcePathStyle: true,
-  endpoint: new AWS.Endpoint(`http://${hostname}:${port}`)
+  endpoint: new AWS.Endpoint(`http://${hostname}:${port}`),
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
 };
 const awsClient = new AWS.S3(awsConfig);
 
@@ -188,7 +190,7 @@ function init() {
       directory: tmpDir
     });
 
-    client.run((serverErr, host, p) => {
+    client.run((serverErr, {address, port}) => {
       if (serverErr) {
         Log.log('ERROR', serverErr, serverErr.stack);
         process.exit(1);
@@ -196,7 +198,7 @@ function init() {
 
       createBucket(bucket);
 
-      Log.log('INFO', `listening for S3 requests at http://${host}:${p}`);
+      Log.log('INFO', `listening for S3 requests at http://${address}:${port}`);
     });
   });
 }

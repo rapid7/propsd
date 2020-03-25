@@ -11,14 +11,16 @@ require('should');
 const testServerPort = 3000;
 const HTTP_OK = 200;
 const HTTP_METHOD_NOT_ALLOWED = 405;
+const HTTP_INTERNAL_SERVER_ERROR = 500;
+const HTTP_SERVICE_UNAVAILABLE = 503;
 
 const endpoints = {
   health: '/v1/health',
   status: '/v1/status'
 };
 
-const expectedStatusResponse = {
-  status: HTTP_OK,
+const expectedInitialStatusResponse = {
+  status: HTTP_SERVICE_UNAVAILABLE,
   index: {
     ok: true,
     updated: null,
@@ -58,6 +60,100 @@ const expectedStatusResponse = {
     updated: null,
     etag: null,
     state: 'CREATED',
+    resource: 's3://test-bucket/foo-quiz-buzz.json',
+    ok: true,
+    interval: 60000
+  }]
+};
+
+const expectedRunningStatusResponse = {
+  status: HTTP_OK,
+  index: {
+    ok: true,
+    updated: null,
+    interval: 60000,
+    running: true,
+    etag: null,
+    state: 'RUNNING',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
+  },
+  indices: [{
+    ok: true,
+    updated: null,
+    interval: 60000,
+    running: true,
+    etag: null,
+    state: 'RUNNING',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
+  }],
+  sources: [{
+    name: 'foo-bar-baz.json',
+    type: 's3',
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'RUNNING',
+    resource: 's3://test-bucket/foo-bar-baz.json',
+    ok: true,
+    interval: 60000
+  }, {
+    name: 'foo-quiz-buzz.json',
+    type: 's3',
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'RUNNING',
+    resource: 's3://test-bucket/foo-quiz-buzz.json',
+    ok: true,
+    interval: 60000
+  }]
+};
+
+const expectedIndexErrorStatusResponse = {
+  status: HTTP_INTERNAL_SERVER_ERROR,
+  index: {
+    ok: false,
+    updated: null,
+    interval: 60000,
+    running: true,
+    etag: null,
+    state: 'ERROR',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
+  },
+  indices: [{
+    ok: false,
+    updated: null,
+    interval: 60000,
+    running: true,
+    etag: null,
+    state: 'ERROR',
+    resource: 's3://test-bucket/index.json',
+    name: 'index.json',
+    type: 's3'
+  }],
+  sources: [{
+    name: 'foo-bar-baz.json',
+    type: 's3',
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'RUNNING',
+    resource: 's3://test-bucket/foo-bar-baz.json',
+    ok: true,
+    interval: 60000
+  }, {
+    name: 'foo-quiz-buzz.json',
+    type: 's3',
+    status: 'okay',
+    updated: null,
+    etag: null,
+    state: 'RUNNING',
     resource: 's3://test-bucket/foo-quiz-buzz.json',
     ok: true,
     interval: 60000

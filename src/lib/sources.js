@@ -161,7 +161,7 @@ class Sources extends EventEmitter {
     const source_state = {
       source: [],
       count: 0
-    }
+    };
 
     object.indices = this.indices.map((source) => {
       // TODO This logic is fairly ham-fisted right now. It'll work because nothing
@@ -182,14 +182,14 @@ class Sources extends EventEmitter {
       }
 
       if (!source.ok) {
-        source_state.source.push(source.state)
-        source_state.count = source_state.count + 1
+        source_state.source.push(source.state);
+        source_state.count = source_state.count + 1;
       }
 
       return source.status();
     });
 
-    if (object.sources.length == source_state.count) {
+    if (object.sources.length === source_state.count) {
       object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
       object.status = source_state.source[source_state.count - 1];
     }

@@ -355,38 +355,120 @@ describe('Sources', function() {
   });
 
   describe('Health', function() {
-    const stubs = setUp();
+    this.timeout(5000);
+    let stubs = null;
 
-    stubs.sources.index(stubs.index);
-
-    it('sets a healthy code and status message', function() {
-      const healthy = stubs.sources.health();
-
-      expect(healthy.code).to.equal(200);
-      expect(healthy.status).to.equal('OK');
+    beforeEach(function() {
+      stubs = setUp();
+      stubs.sources.index(stubs.index);
     });
 
-    it('sets an unhealthy code and status message when an index source is in an error state', function() {
-      stubs.index.error();
+    it('sets a healthy code and status message when index and sources are in ready state', function() {
+      stubs.sources.initialize();
+
+      return stubs.sources.initialize().then(() => {
+        expect(stubs.index.state).to.equal(Source.RUNNING);
+
+        stubs.properties.sources.forEach((source) => {
+          expect(source.state).to.equal(Source.RUNNING);
+        });
+
+        const healthy = stubs.sources.health();
+
+        expect(healthy.code).to.equal(200);
+        expect(healthy.status).to.equal('OK');
+      });
+    });
+
+    // test for any initialising
+    it('sets an uninitialized code (503) and status message when all index and sources are uninitialized', function() {
+      stubs.sources.initialize();
+
+      expect(stubs.sources.initializing).to.equal(true);
 
       const healthy = stubs.sources.health();
 
-      expect(healthy.code).to.equal(500);
-      expect(healthy.status).to.equal('ERROR');
+      expect(healthy.code).to.equal(503);
+      expect(healthy.status).to.equal('INITIALIZING');
     });
 
-    it('sets an unhealthy code and status message when a layer source is in an error state', function() {
-      stubs.index.recover();
-      const h1 = stubs.sources.health();
+    it('sets an uninitialized code (503) and status message when any index and sources are uninitialized', function() {
+      // Leave the index uninitialized
+      stubs.properties.sources.forEach((source) => {
+        source.initialize().then(() => {
+          expect(source.state).to.equal(Source.RUNNING);
+        });
+      });
 
-      expect(h1.code).to.equal(200);
-      expect(h1.status).to.equal('OK');
+      expect(stubs.index.state).to.equal(Source.CREATED);
 
-      stubs.layer.error();
-      const h2 = stubs.sources.health();
+      const healthy = stubs.sources.health();
 
-      expect(h2.code).to.equal(500);
-      expect(h2.status).to.equal('ERROR');
+      expect(healthy.code).to.equal(503);
+      expect(healthy.status).to.equal('INITIALIZING');
+    });
+
+    it('sets an unhealthy (500) code and status message when an index is in an error state', function() {
+      return stubs.sources.initialize().then(() => {
+        expect(stubs.index.state).to.equal(Source.RUNNING);
+
+        stubs.index.error();
+
+        stubs.properties.sources.forEach((source) => {
+          expect(source.state).to.equal(Source.RUNNING);
+        });
+
+        const healthy = stubs.sources.health();
+
+        expect(healthy.code).to.equal(500);
+        expect(healthy.status).to.equal('ERROR');
+      });
+    });
+
+    it('sets an unhealthy code (500) and status message when all sources are in an error state', function() {
+      return stubs.sources.initialize().then(() => {
+        expect(stubs.index.state).to.equal(Source.RUNNING);
+
+        stubs.properties.sources.forEach((source) => {
+          expect(source.state).to.equal(Source.RUNNING)
+          source.error();
+        });
+
+        expect(stubs.index.state).to.equal(Source.RUNNING);
+
+        const healthy = stubs.sources.health();
+
+        expect(healthy.code).to.equal(500);
+        expect(healthy.status).to.equal('ERROR');
+      });
+    });
+
+    it('sets a healthy code and status message when only some sources are in an error state', function() {
+      const layer2 = new Source.Stub('stub2', {delay: 5});
+      layer2.properties = {bar: 'foo'};
+      stubs.properties.dynamic(layer2);
+
+      return stubs.sources.initialize().then(() => {
+        expect(stubs.index.state).to.equal(Source.RUNNING);
+
+        stubs.properties.sources.forEach((source) => {
+          expect(source.state).to.equal(Source.RUNNING)
+        });
+
+        expect(stubs.index.state).to.equal(Source.RUNNING);
+
+        const h1 = stubs.sources.health();
+
+        expect(h1.code).to.equal(200);
+        expect(h1.status).to.equal('OK');
+
+        layer2.error();
+
+        const h2 = stubs.sources.health();
+
+        expect(h2.code).to.equal(200);
+        expect(h2.status).to.equal('OK');
+      });
     });
   });
 });

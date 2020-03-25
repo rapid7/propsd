@@ -191,7 +191,7 @@ class Sources extends EventEmitter {
 
     if (object.sources.length == source_state.count) {
       object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-      object.status = source_state.source;
+      object.status = source_state.source[source_state.count - 1];
     }
 
     return object;

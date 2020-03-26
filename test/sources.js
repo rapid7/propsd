@@ -355,6 +355,7 @@ describe('Sources', function() {
   });
 
   describe('Health', function() {
+    this.timeout(3000);
     let stubs = null;
 
     beforeEach(function() {
@@ -363,8 +364,6 @@ describe('Sources', function() {
     });
 
     it('sets a healthy code and status message when index and sources are in ready state', function() {
-      stubs.sources.initialize();
-
       return stubs.sources.initialize().then(() => {
         expect(stubs.index.state).to.equal(Source.RUNNING);
 

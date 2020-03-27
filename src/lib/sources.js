@@ -138,7 +138,7 @@ class Sources extends EventEmitter {
           delete this._updating;
 
           Log.log('INFO', `Update successful, created ${difference.create.length} sources, ` +
-                          `shutting down ${difference.destroy.length} sources`);
+              `shutting down ${difference.destroy.length} sources`);
 
           this.emit('_resolve_update', this);
           this.emit('update', this);
@@ -157,52 +157,55 @@ class Sources extends EventEmitter {
     const obj = {
       code: STATUS_CODES.OK,
       status: 'OK',
-      indices: [],
-      sources: []
-    };
-
-    let unhealthy = {
-      sources: [],
-      count: 0
-    };
-
-    let notReady = {
-      sources: [],
-      count: 0
-    };
-
-    const sourceHealthPredicate = (u, n, out) => (source) => {
-      if (!source.ok) {
-        u.sources.push(source);
-        u.count += 1;
-      }
-
-      if (!source.ready) {
-        n.sources.push(source);
-        n.count += 1;
-      }
-
-      out.push(source.status());
+      indices: this.indices.map((i) => i.status()),
+      sources: this.properties.sources.map((s) => s.status())
     };
 
     // Health logic:
-    // 500 - at least one source is !ok
-    // 503 - at least one source is !ready
+    // Indices:
+    // 500 - any index is !ok
+    // 503 - any index is !ready
+    // 200 - all indices are both ok and ready
+    // Sources:
+    // 500 - all sources are !ok
+    // 503 - any source is !ready
     // 200 - all sources both ok and ready
     //
-    this.indices.forEach(sourceHealthPredicate(unhealthy, notReady, obj.indices));
-    this.properties.sources.forEach(sourceHealthPredicate(unhealthy, notReady, obj.sources));
+    const notReady = (s) => !s.ready;
+    const unhealthy = (s) => !s.ok;
 
-    if (unhealthy.count > 0) {
+    if (this.indices.some(unhealthy)) {
+      const u = this.indices.find((i) => !i.ok);
+
       obj.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-      obj.status = 'ERROR';
+      obj.status = u.status().state;
 
       return obj;
     }
 
-    if (notReady.count > 0) {
+    if (this.indices.some(notReady)) {
+      const u = this.indices.find((i) => !i.ready);
+
       obj.code = STATUS_CODES.SERVICE_UNAVAILABLE;
-      obj.status = 'NOT_READY';
+      obj.status = u.status().state;
+
+      return obj;
+    }
+
+    if (this.properties.sources.every(unhealthy)) {
+      const u = this.properties.sources.find((s) => !s.ok);
+
+      obj.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
+      obj.status = u.status().state;
+
+      return obj;
+    }
+
+    if (this.properties.sources.some(notReady)) {
+      const u = this.properties.sources.find((s) => !s.ready);
+
+      obj.code = STATUS_CODES.SERVICE_UNAVAILABLE;
+      obj.status = u.status().state;
 
       return obj;
     }

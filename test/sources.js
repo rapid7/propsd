@@ -245,7 +245,7 @@ describe('Sources', function() {
 
   const setUp = () => {
     const properties = new Properties();
-    const layer = new Source.Stub('stub1', {delay: 5});
+    const layer = new Source.Stub('stub1', {delay: 0});
     const sources = new Sources(properties);
     const index = new Source.IndexStub([{
       type: 'stub',
@@ -268,11 +268,11 @@ describe('Sources', function() {
     const stubs = setUp();
 
     it('has the correct initial state', function() {
-      expect(stubs.sources.properties).to.be.instanceOf(Properties);
-      expect(stubs.sources.indices).to.be.instanceOf(Array);
-      expect(stubs.sources.initialized).to.equal(false);
-      expect(stubs.sources.current).to.be.instanceOf(Sources.Index);
-      expect(stubs.sources.current.order).to.have.length.of(0);
+      stubs.sources.properties.should.be.instanceOf(Properties);
+      stubs.sources.indices.should.be.an.Array();
+      stubs.sources.initialized.should.be.false();
+      stubs.sources.current.should.be.instanceOf(Sources.Index);
+      stubs.sources.current.order.should.be.empty();
     });
 
     it('adds an index source', function() {
@@ -358,103 +358,135 @@ describe('Sources', function() {
     this.timeout(3000);
     let stubs = null;
 
-    stubs.sources.addIndex(stubs.index);
+    beforeEach(function() {
+      stubs = setUp();
+      stubs.sources.addIndex(stubs.index);
+    });
 
-    it('sets a healthy code and status message', function() {
-      // Explicitly set the state so we don't see a race condition in the test.
-      stubs.layer.state = Source.WAITING;
-      stubs.index.state = Source.WAITING;
+    afterEach(function() {
+      stubs.properties.sources.forEach((s) => {
+        s.shutdown();
+      });
+
+      stubs.layer.shutdown();
+      stubs.index.shutdown();
+      stubs.properties.tokendTransformer._client.stop();
+    });
+
+    it('sets a healthy code and status message when index and sources are in ready state', function() {
+      return stubs.sources.initialize().then(() => {
+        stubs.index.state.should.eql(Source.RUNNING);
+
+        stubs.properties.sources.forEach((source) => {
+          source.state.should.eql(Source.RUNNING);
+        });
+
+        const healthy = stubs.sources.health();
+
+        healthy.code.should.eql(200);
+        healthy.status.should.eql('OK');
+      });
+    });
+
+    // test for any initialising
+    it('sets an uninitialized code (503) and status message when all index and sources are uninitialized', function() {
+      stubs.sources.initialize();
+
+      stubs.sources.initializing.should.be.true();
+
       const healthy = stubs.sources.health();
 
-      expect(healthy.code).to.equal(503);
-      expect(healthy.status).to.equal('INITIALIZING');
+      healthy.code.should.eql(503);
+      healthy.status.should.eql('CREATED');
     });
 
     it('sets an uninitialized code (503) and status message when any index and sources are uninitialized', function() {
       // Leave the index uninitialized
       stubs.properties.sources.forEach((source) => {
         source.initialize().then(() => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
       });
 
-      expect(stubs.index.state).to.equal(Source.CREATED);
+      // Test index uninitialized
+      stubs.index.state.should.eql(Source.CREATED);
 
       const healthy = stubs.sources.health();
 
-      expect(healthy.code).to.equal(503);
-      expect(healthy.status).to.equal('INITIALIZING');
+      healthy.code.should.eql(503);
+      healthy.status.should.eql('CREATED');
+
+      stubs.index.state = Source.RUNNING;
+
+      // Test source initializing
+      const h2 = stubs.sources.health();
+
+      h2.code.should.eql(503);
+      h2.status.should.eql('INITIALIZING');
     });
 
     it('sets an unhealthy (500) code and status message when an index is in an error state', function() {
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.index.error();
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
 
         const healthy = stubs.sources.health();
 
-        expect(healthy.code).to.equal(500);
-        expect(healthy.status).to.equal('ERROR');
+        healthy.code.should.eql(500);
+        healthy.status.should.eql('ERROR');
       });
     });
 
     it('sets an unhealthy code (500) and status message when all sources are in an error state', function() {
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING)
+          source.state.should.eql(Source.RUNNING);
           source.error();
         });
 
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         const healthy = stubs.sources.health();
 
-        expect(healthy.code).to.equal(500);
-        expect(healthy.status).to.equal('ERROR');
+        healthy.code.should.eql(500);
+        healthy.status.should.eql('ERROR');
       });
     });
 
     it('sets a healthy code and status message when only some sources are in an error state', function() {
       const layer2 = new Source.Stub('stub2', {delay: 5});
+
       layer2.properties = {bar: 'foo'};
-      stubs.properties.dynamic(layer2);
+      stubs.properties.addDynamicLayer(layer2);
 
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING)
+          source.state.should.eql(Source.RUNNING);
         });
 
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         const h1 = stubs.sources.health();
 
-        expect(h1.code).to.equal(200);
-        expect(h1.status).to.equal('OK');
+        h1.code.should.eql(200);
+        h1.status.should.eql('OK');
 
         layer2.error();
 
         const h2 = stubs.sources.health();
 
-        expect(h2.code).to.equal(200);
-        expect(h2.status).to.equal('OK');
+        h2.code.should.eql(200);
+        h2.status.should.eql('OK');
       });
-    });
-
-    it('sets a not ready code when a layer source is in an initializing state', function() {
-      stubs.layer.state = Source.INITIALIZING;
-      const h = stubs.sources.health();
-
-      expect(h.code).to.equal(503);
-      expect(h.status).to.equal('NOT_READY');
     });
   });
 });

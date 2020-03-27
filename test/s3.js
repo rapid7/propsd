@@ -26,13 +26,15 @@ describe('S3 source plugin', function() {
     getObject: sinon.stub().callsArgWith(1, null, fakeResponse)
   });
 
-  beforeEach((done) => {
-    this.s3 = new S3('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
+  let s3 = null;
+
+  beforeEach(function(done) {
+    s3 = new S3('foo.json', {bucket: DEFAULT_BUCKET, path: 'foo.json', interval: DEFAULT_INTERVAL});
     done();
   });
 
-  afterEach(() => {
-    this.s3.shutdown();
+  afterEach(function() {
+    s3.shutdown();
   });
 
   it('throws an error if instantiated without bucket or path', () => {
@@ -54,39 +56,39 @@ describe('S3 source plugin', function() {
   });
 
   it('initializes a timer with the set interval', (done) => {
-    this.s3.on('update', () => {
-      this.s3._timer.should.have.properties(['_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
+    s3.on('update', () => {
+      s3._timer.should.have.properties(['_idleNext', '_idlePrev', '_idleStart', '_idleTimeout',
         '_onTimeout', '_repeat']);
       done();
     });
 
-    this.s3.initialize();
+    s3.initialize();
   });
 
   it('shuts down cleanly', (done) => {
-    this.s3.on('shutdown', () => {
-      const status = this.s3.status();
+    s3.on('shutdown', () => {
+      const status = s3.status();
 
       status.state.should.equal(Source.SHUTDOWN);
       done();
     });
 
-    this.s3.initialize();
-    this.s3.shutdown();
+    s3.initialize();
+    s3.shutdown();
   });
 
   it('parses a buffer from S3 to a JSON object', (done) => {
-    this.s3.on('update', () => {
-      this.s3.properties.should.deepEqual({a: 1, b: 'foo', c: {d: 0}});
+    s3.on('update', () => {
+      s3.properties.should.deepEqual({a: 1, b: 'foo', c: {d: 0}});
       done();
     });
 
-    this.s3.initialize();
+    s3.initialize();
   });
 
   it('returns a properly formed status object', (done) => {
-    this.s3.on('update', () => {
-      const status = this.s3.status();
+    s3.on('update', () => {
+      const status = s3.status();
 
       status.ok.should.equal(true);
       status.updated.should.be.instanceOf(Date);
@@ -96,7 +98,7 @@ describe('S3 source plugin', function() {
       done();
     });
 
-    this.s3.initialize();
+    s3.initialize();
   });
 
   it('clears cached properties if getRequest returns a NoSuchKey error', (done) => {
@@ -197,31 +199,31 @@ describe('S3 source plugin', function() {
   it('can\'t shutdown a plugin that\'s already shut down', (done) => {
     const shutdownSpy = sinon.spy();
 
-    this.s3.on('shutdown', shutdownSpy);
-    this.s3.on('shutdown', () => {
+    s3.on('shutdown', shutdownSpy);
+    s3.on('shutdown', () => {
       shutdownSpy.should.be.calledOnce();
       done();
     });
-    this.s3.initialize();
-    this.s3.shutdown();
-    this.s3.shutdown();
+    s3.initialize();
+    s3.shutdown();
+    s3.shutdown();
   });
 
   it('can only be initialized once', (done) => {
-    this.s3.initialize();
-    this.s3.state.should.equal(Source.INITIALIZING);
+    s3.initialize();
+    s3.state.should.equal(Source.INITIALIZING);
 
-    this.s3.once('update', () => {
-      this.s3.state.should.equal(Source.RUNNING);
-      this.s3.initialize();
-      this.s3.state.should.equal(Source.RUNNING);
+    s3.once('update', () => {
+      s3.state.should.equal(Source.RUNNING);
+      s3.initialize();
+      s3.state.should.equal(Source.RUNNING);
 
       done();
     });
   });
 
   it('identifies as a \'s3\' source plugin', () => {
-    this.s3.type.should.equal('s3');
+    s3.type.should.equal('s3');
   });
 
   it('correctly parses a sample document', (done) => {

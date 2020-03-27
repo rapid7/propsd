@@ -366,16 +366,6 @@ describe('Sources', function() {
       stubs.sources.addIndex(stubs.index);
     });
 
-    afterEach(function() {
-      stubs.properties.sources.forEach((s) => {
-        s.shutdown();
-      });
-
-      stubs.layer.shutdown();
-      stubs.index.shutdown();
-      stubs.properties.tokendTransformer._client.stop();
-    });
-
     it('sets a healthy code and status message when index and sources are in ready state', function() {
       return stubs.sources.initialize().then(() => {
         stubs.index.state.should.eql(Source.RUNNING);

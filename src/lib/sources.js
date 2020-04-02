@@ -192,7 +192,7 @@ class Sources extends EventEmitter {
       return obj;
     }
 
-    if (this.properties.sources.every(unhealthy)) {
+    if (this.properties.sources.length > 0 && this.properties.sources.every(unhealthy)) {
       const u = this.properties.sources.find((s) => !s.ok);
 
       obj.code = STATUS_CODES.INTERNAL_SERVER_ERROR;

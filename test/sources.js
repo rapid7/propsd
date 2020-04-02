@@ -481,5 +481,28 @@ describe('Sources', function() {
         h2.status.should.eql('OK');
       });
     });
+
+    it('sets a healthy code and status message when there are no sources', function() {
+      // Empty the layers and no-op the tokendtransformer to test this behavior
+      const stubTokendTransformer = {
+        on: () => {}
+      };
+
+      stubTokendTransformer.initialize = () =>
+        new Promise((resolve) => resolve(stubTokendTransformer));
+      stubTokendTransformer.transform = () =>
+        new Promise((resolve) => resolve(stubTokendTransformer));
+
+      stubs.properties.layers = [];
+      stubs.properties.tokendTransformer = stubTokendTransformer;
+      stubs.sources.indices = [];
+
+      return stubs.sources.initialize().then(() => {
+        const h = stubs.sources.health();
+
+        h.code.should.eql(200);
+        h.status.should.eql('OK');
+      });
+    });
   });
 });

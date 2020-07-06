@@ -79,11 +79,16 @@ directory 'propsd-configuration-directory' do
   recursive true
 end
 
+# Use the default default, and if a node exists under propsd->config->overrides-><region>, use it
+region = node[:region] || node['region'] || node.region || nil
+config = node['propsd']['config']
+config = config.merge(config['overrides'][region]) if region && config['overrides'] && config['overrides'][region]
+
 template 'propsd-configuration' do
   path node['propsd']['paths']['configuration']
   source 'json.erb'
 
-  variables(:properties => node['propsd']['config'])
+  variables(:properties => config)
   notifies :restart, 'service[propsd]' if node['propsd']['enable']
 end
 

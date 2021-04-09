@@ -1,6 +1,6 @@
 {
   "name": "propsd",
-  "version": "3.1.3",
+  "version": "3.2.0-irsa",
   "description": "A local daemon for loading static and dynamic properties",
   "scripts": {
     "start": "nodemon ./src/bin/server.js --exec babel-node --",
@@ -55,14 +55,14 @@
     "walk": "~2.3.9"
   },
   "dependencies": {
-    "aws-sdk": "~2.2.28",
+    "aws-sdk": "~2.635.0",
     "babel-runtime": "^6.23.0",
     "clone": "~1.0.2",
     "consul": "~0.23.0",
     "deep-diff": "~0.3.4",
     "deep-equal": "~1.0.1",
     "depd": "~1.1.0",
-    "express": "~4.13.3",
+    "express": "^4.17.1",
     "express-winston": "~1.3.0",
     "flat": "~2.0.0",
     "immutable": "~3.8.1",

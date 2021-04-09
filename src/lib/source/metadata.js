@@ -1,4 +1,3 @@
-/* global Log, Config */
 'use strict';
 
 const Crypto = require('crypto');
@@ -140,7 +139,7 @@ class Metadata extends Source.Polling(Parser) { // eslint-disable-line new-cap
 }
 
 Metadata.version = 'latest';
-Metadata.DEFAULT_TIMEOUT = 500; // eslint-disable-line rapid7/static-magic-numbers
+Metadata.DEFAULT_TIMEOUT = 500;
 Metadata.DEFAULT_HOST = '169.254.169.254:80';
 
 /* Export */

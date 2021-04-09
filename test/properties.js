@@ -2,37 +2,43 @@
 
 require('./lib/helpers');
 
-const Properties = require('../dist/lib/properties');
-const Source = require('./lib/stub/source');
 const nock = require('nock');
+
+const Properties = require('../src/lib/properties');
+const View = require('../src/lib/properties/view');
+const Source = require('./lib/stub/source');
+const merge = require('../src/lib/util').merge;
 
 // Shorten build hold-down timeout for testing
 Properties.BUILD_HOLD_DOWN = 100;
 
-const expect = require('chai').expect;
+const should = require('should');
 
 describe('Properties', function() {
   const properties = new Properties();
 
-  before(function () {
+  before(function() {
     nock.disableNetConnect();
   });
 
-  after(function () {
+  after(function() {
+    // We need to ensure that we shut down the Tokend client's polling loop so tests
+    // exit correctly.
+    properties.tokendTransformer._client.stop();
     nock.enableNetConnect();
   });
 
   it('adds static properties and builds', function(done) {
-    properties.static({
+    properties.addStaticLayer({
       hello: 'world'
     });
 
-    expect(properties.layers.length).to.equal(1);
+    properties.layers.should.have.length(1);
 
     properties.once('build', (props) => {
-      expect(props).to.be.instanceOf(Promise);
+      props.should.be.a.Promise();
       props.then((p) => {
-        expect(p.hello).to.equal('world');
+        p.hello.should.eql('world');
         done();
       });
     });
@@ -44,10 +50,10 @@ describe('Properties', function() {
     const localProps = new Properties();
     const correctOrder = ['first', 'second'];
 
-    localProps.static({
+    localProps.addStaticLayer({
       hello: 'world'
     }, 'first');
-    localProps.static({
+    localProps.addStaticLayer({
       world: 'hello'
     }, 'second');
 
@@ -56,9 +62,9 @@ describe('Properties', function() {
     localProps.on('build', () => {
       const layerKeys = localProps.layers.map((i) => i.namespace);
 
-      expect(layerKeys).to.eql(correctOrder);
+      layerKeys.should.eql(correctOrder);
       if (ranOnce) {
-        expect(layerKeys).to.eql(correctOrder);
+        layerKeys.should.eql(correctOrder);
         done();
       }
       ranOnce = true;
@@ -80,20 +86,18 @@ describe('Properties', function() {
       return stub;
     });
 
-    const view = props.view(sources);
-    const expected = ['foo', 'bar', 'baz'];
-    const reversed = ['baz', 'bar', 'foo'];
-
-    return view.activate()
-      .then(function (props) {
-        expect(props.sources[0].properties.path).to.eql('foo');
-        expect(props.sources[1].properties.path).to.eql('bar');
-        expect(props.sources[2].properties.path).to.eql('baz');
+    return props
+      .view(sources)
+      .activate()
+      .then((props) => {
+        props.sources[0].properties.path.should.eql('foo');
+        props.sources[1].properties.path.should.eql('bar');
+        props.sources[2].properties.path.should.eql('baz');
       });
   });
 
   it('adds layers with namespaces', function() {
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world'
     }, 'goodbye');
 
@@ -105,16 +109,16 @@ describe('Properties', function() {
     };
 
     return properties.build()
-      .then(function (props) {
-        expect(props.layers).to.have.length(2);
-        expect(props._properties).to.eql(expectedPropsResult);
+      .then((props) => {
+        props.layers.should.have.length(2);
+        props._properties.should.eql(expectedPropsResult);
       });
   });
 
   it('removes properties that have null values', function(done) {
     const properties = new Properties();
 
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world',
       leaving: null,
       change: 'my-mind'
@@ -126,14 +130,14 @@ describe('Properties', function() {
       stubby: null
     };
 
-    properties.dynamic(stub);
+    properties.addDynamicLayer(stub);
 
     properties.once('build', (props) => {
       props.then((p) => {
-        expect(p.goodbye.cruel).to.equal('world');
-        expect(p.goodbye.leaving).to.be.an('undefined');
-        expect(p.goodbye.change).to.equal('my-mind');
-        expect(p.stubby).to.be.an('undefined');
+        p.goodbye.cruel.should.eql('world');
+        should(p.goodbye.leaving).be.undefined();
+        p.goodbye.change.should.eql('my-mind');
+        should(p.stubby).be.undefined();
         done();
       });
     });
@@ -146,7 +150,7 @@ describe('Properties', function() {
     const stub = new Source.Stub();
     const stub2 = new Source.Stub();
 
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world',
       leaving: null,
       change: 'my-mind'
@@ -160,8 +164,8 @@ describe('Properties', function() {
       cruel: null
     };
 
-    properties.dynamic(stub);
-    properties.dynamic(stub2);
+    properties.addDynamicLayer(stub);
+    properties.addDynamicLayer(stub2);
 
     const expectedLayerResult = {
       cruel: 'world',
@@ -175,32 +179,32 @@ describe('Properties', function() {
     };
 
     return properties.build()
-      .then(function (props) {
-        expect(props.layers).to.have.length(3);
-        expect(props.layers[0].properties).to.eql(expectedLayerResult);
-        expect(props._properties).to.eql(expectedPropsResult);
+      .then((props) => {
+        props.layers.should.have.length(3);
+        props.layers[0].properties.should.eql(expectedLayerResult);
+        props._properties.should.eql(expectedPropsResult);
       });
   });
 
   it('merges namespaced layers correctly', function(done) {
     const properties = new Properties();
 
-    properties.static({
+    properties.addStaticLayer({
       cruel: 'world',
       leaving: null,
       change: 'my-mind'
     }, 'goodbye');
 
-    properties.static({
+    properties.addStaticLayer({
       foo: 'bar'
     }, 'goodbye');
 
     properties.once('build', (props) => {
       props.then((p) => {
-        expect(p.goodbye.cruel).to.equal('world');
-        expect(p.goodbye.leaving).to.be.an('undefined');
-        expect(p.goodbye.change).to.equal('my-mind');
-        expect(p.goodbye.foo).to.equal('bar');
+        p.goodbye.cruel.should.eql('world');
+        should(p.goodbye.leaving).be.undefined();
+        p.goodbye.change.should.eql('my-mind');
+        p.goodbye.foo.should.eql('bar');
         done();
       });
     });
@@ -225,19 +229,19 @@ describe('Properties', function() {
       quiz: true
     };
 
-    properties.dynamic(stub, 'goodbye:friends');
-    properties.dynamic(stub2, 'this:is:really:deeply:nested');
+    properties.addDynamicLayer(stub, 'goodbye:friends');
+    properties.addDynamicLayer(stub2, 'this:is:really:deeply:nested');
 
     properties.once('build', (props) => {
       props.then((p) => {
-        expect(p.goodbye.friends).to.be.instanceOf(Object);
-        expect(p.goodbye.friends.change).to.equal('my-mind');
-        expect(p.goodbye.friends.cruel).to.equal('world');
+        p.goodbye.friends.should.be.an.Object();
+        p.goodbye.friends.change.should.eql('my-mind');
+        p.goodbye.friends.cruel.should.eql('world');
 
-        expect(p.this.is.really.deeply.nested).to.be.instanceOf(Object);
-        expect(p.this.is.really.deeply.nested.foo).to.equal('bar');
-        expect(p.this.is.really.deeply.nested.baz).to.equal(3);
-        expect(p.this.is.really.deeply.nested.quiz).to.be.true;
+        p.this.is.really.deeply.nested.should.be.an.Object();
+        p.this.is.really.deeply.nested.foo.should.eql('bar');
+        p.this.is.really.deeply.nested.baz.should.eql(3);
+        p.this.is.really.deeply.nested.quiz.should.be.true();
         done();
       });
     });
@@ -261,16 +265,16 @@ describe('Properties', function() {
       baz: 3
     };
 
-    properties.dynamic(stub, 'goodbye');
-    properties.dynamic(stub2, 'goodbye:friends');
+    properties.addDynamicLayer(stub, 'goodbye');
+    properties.addDynamicLayer(stub2, 'goodbye:friends');
 
     properties.once('build', (props) => {
       props.then((p) => {
-        expect(p.goodbye.change).to.equal('my-mind');
-        expect(p.goodbye.cruel).to.equal('world');
-        expect(p.goodbye.friends).to.be.instanceOf(Object);
-        expect(p.goodbye.friends.baz).to.equal(3);
-        expect(p.goodbye.friends.foo).to.equal('bar');
+        p.goodbye.change.should.eql('my-mind');
+        p.goodbye.cruel.should.eql('world');
+        p.goodbye.friends.should.be.an.Object();
+        p.goodbye.friends.baz.should.eql(3);
+        p.goodbye.friends.foo.should.eql('bar');
         done();
       });
     });
@@ -285,7 +289,7 @@ describe('Properties', function() {
       stubby: 'property!'
     };
 
-    properties.dynamic(stub);
+    properties.addDynamicLayer(stub);
 
     const expectedPropsResult = {
       goodbye: {
@@ -296,21 +300,21 @@ describe('Properties', function() {
     };
 
     return properties.initialize()
-      .then(function (props) {
-        expect(props.layers).to.be.length(3);
-        expect(props._properties).to.eql(expectedPropsResult);
+      .then((props) => {
+        props.layers.should.have.length(3);
+        props._properties.should.eql(expectedPropsResult);
       });
   });
 
   it('creates and activates a new view', function(done) {
     const view = properties.view();
 
-    expect(view).to.be.instanceOf(Properties.View);
-    expect(view.parent).to.equal(properties);
+    view.should.be.a.instanceof(View);
+    view.parent.should.eql(properties);
 
-    expect(properties.active).to.not.equal(view);
+    properties.active.should.not.equal(view);
     properties.once('build', () => {
-      expect(properties.active).to.equal(view);
+      properties.active.should.eql(view);
       done();
     });
 
@@ -318,7 +322,7 @@ describe('Properties', function() {
   });
 
   it('does nothing when activate is called on the active view', function() {
-    expect(properties.active.activate()).to.be.instanceOf(Promise);
+    properties.active.activate().should.be.a.Promise();
   });
 
   it('rebuilds properties when a source in the active view updates', function(done) {
@@ -334,10 +338,10 @@ describe('Properties', function() {
     view.activate().then(() => {
       properties.once('build', (props) => {
         props.then((p) => {
-          expect(p.hello).to.equal('world');
-          expect(p.goodbye.cruel).to.equal('world');
-          expect(p.stubby).to.equal('property!');
-          expect(p.foo).to.equal('bar');
+          p.hello.should.eql('world');
+          p.goodbye.cruel.should.eql('world');
+          p.stubby.should.eql('property!');
+          p.foo.should.eql('bar');
 
           done();
         });
@@ -358,12 +362,12 @@ describe('Properties', function() {
 
     properties.once('build', (props) => {
       props.then((p) => {
-        expect(stub.state).to.equal(Source.WAITING);
+        stub.state.should.eql(Source.WAITING);
 
-        expect(p.hello).to.equal('world');
-        expect(p.goodbye.cruel).to.equal('world');
-        expect(p.stubby).to.equal('property!');
-        expect(p.foo).to.equal('bar');
+        p.hello.should.eql('world');
+        p.goodbye.cruel.should.eql('world');
+        p.stubby.should.eql('property!');
+        p.foo.should.eql('bar');
 
         done();
       });
@@ -390,14 +394,14 @@ describe('Properties', function() {
 
     properties.once('build', (props) => {
       props.then((p) => {
-        expect(p.hello).to.equal('world');
-        expect(p.goodbye.cruel).to.equal('world');
-        expect(p.stubby).to.equal('property!');
+        p.hello.should.eql('world');
+        p.goodbye.cruel.should.eql('world');
+        p.stubby.should.eql('property!');
 
         // This specifically tests the hold-down behavior. If it didn't work,
         // the first sources indexNumber (0) will be set on the first 'build'
         // event instead
-        expect(p.indexNumber).to.equal(1);
+        p.indexNumber.should.eql(1);
         done();
       });
     });
@@ -459,10 +463,10 @@ describe('Merge', function() {
       }
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(a).to.equal(c);
-    expect(c).to.deep.equal(b);
+    a.should.eql(c);
+    c.should.eql(b);
   });
 
   it('merges objects recursively', function() {
@@ -479,10 +483,10 @@ describe('Merge', function() {
       }
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(a).to.equal(c);
-    expect(c).to.deep.equal({
+    a.should.eql(c);
+    c.should.eql({
       a: 1, b: 2, c: {
         a: [],
         b: new Date(0),
@@ -496,21 +500,19 @@ describe('Merge', function() {
     const a = null;
     const b = {a: 1};
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(c).to.not.equal(a);
-    expect(c).to.not.equal(b);
-    expect(c).to.deep.equal({a: 1});
+    c.should.not.eql(a);
+    c.should.eql(b);
   });
 
   it('avoids merging source when null or undefined are passed', function() {
     const a = {a: 1};
     const b = null;
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(c).to.equal(a);
-    expect(c).to.deep.equal({a: 1});
+    c.should.eql(a);
   });
 
   it('avoids merging keys with null or undefined values', function() {
@@ -521,10 +523,10 @@ describe('Merge', function() {
       u: undefined
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(c).to.equal(a);
-    expect(c).to.deep.equal({
+    c.should.eql(a);
+    c.should.eql({
       a: 0,
       z: 1
     });
@@ -534,12 +536,12 @@ describe('Merge', function() {
     const a = [];
     const b = null;
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(c).to.not.equal(a);
-    expect(c).to.not.equal(b);
-    expect(c).to.be.instanceOf(Object);
-    expect(c).to.deep.equal({});
+    c.should.not.eql(a);
+    c.should.not.eql(b);
+    c.should.be.a.Object();
+    c.should.be.empty();
   });
 
   it('does not attempt to merge values that aren\'t direct descendants of Object', function() {
@@ -562,10 +564,10 @@ describe('Merge', function() {
       }
     };
 
-    const c = Properties.merge(a, b);
+    const c = merge(a, b);
 
-    expect(a).to.equal(c);
-    expect(c).to.deep.equal({
+    a.should.eql(c);
+    c.should.eql({
       a: 1, b: 2, c: {
         a: [],
         b: new Date(0),

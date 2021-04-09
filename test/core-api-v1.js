@@ -1,12 +1,12 @@
 'use strict';
 
-const request = require('supertest');
-const Properties = require('../dist/lib/properties');
-const Sources = require('../dist/lib/sources');
-const S3 = require('../dist/lib/source/s3');
-
 require('./lib/helpers');
 require('should');
+
+const request = require('supertest');
+const Properties = require('../src/lib/properties');
+const Sources = require('../src/lib/sources');
+const S3 = require('../src/lib/source/s3');
 
 const testServerPort = 3000;
 const HTTP_OK = 200;
@@ -162,19 +162,19 @@ const expectedIndexErrorStatusResponse = {
 
 const properties = new Properties();
 
-properties.dynamic(new S3('foo-bar-baz.json', {
+properties.addDynamicLayer(new S3('foo-bar-baz.json', {
   bucket: 'test-bucket',
   path: 'foo-bar-baz.json'
 }), 'test');
 
-properties.dynamic(new S3('foo-quiz-buzz.json', {
+properties.addDynamicLayer(new S3('foo-quiz-buzz.json', {
   bucket: 'test-bucket',
   path: 'foo-quiz-buzz.json'
 }), 'test');
 
 const sources = new Sources(properties);
 
-sources.index(new S3('index.json', {
+sources.addIndex(new S3('index.json', {
   bucket: 'test-bucket',
   path: 'index.json'
 }));
@@ -187,7 +187,7 @@ sources.index(new S3('index.json', {
 const makeServer = () => {
   const app = require('express')();
 
-  require('../dist/lib/control/v1/core').attach(app, sources);
+  require('../src/lib/control/v1/core').attach(app, sources);
 
   return app.listen(testServerPort);
 };
@@ -195,11 +195,11 @@ const makeServer = () => {
 describe('Core API v1', function() {
   let server = null;
 
-  beforeEach(() => {
+  beforeEach(function() {
     server = makeServer();
   });
 
-  afterEach((done) => {
+  afterEach(function(done) {
     server.close(done);
   });
 
@@ -258,7 +258,12 @@ describe('Core API v1', function() {
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(HTTP_SERVICE_UNAVAILABLE)
         .end((err, res) => {
-          res.body.should.have.properties({status: HTTP_SERVICE_UNAVAILABLE, plugins: {s3: expectedInitialStatusResponse.sources.length}});
+          res.body.should.have.properties({
+            status: HTTP_SERVICE_UNAVAILABLE,
+            plugins: {
+              s3: expectedInitialStatusResponse.sources.length
+            }
+          });
           res.body.should.have.property('uptime');
           res.body.should.have.property('version');
           done();
@@ -271,13 +276,13 @@ describe('Core API v1', function() {
   });
 
   describe('When sources are running', function() {
-    before(() => {
+    before(function() {
       sources.properties.sources.forEach((source) => {
-        source.state = 'RUNNING'
+        source.state = 'RUNNING';
       });
 
       sources.indices.forEach((index) => {
-        index.state = 'RUNNING'
+        index.state = 'RUNNING';
       });
     });
 
@@ -302,7 +307,12 @@ describe('Core API v1', function() {
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(HTTP_OK)
         .end((err, res) => {
-          res.body.should.have.properties({status: HTTP_OK, plugins: {s3: expectedRunningStatusResponse.sources.length}});
+          res.body.should.have.properties({
+            status: HTTP_OK,
+            plugins: {
+              s3: expectedRunningStatusResponse.sources.length
+            }
+          });
           res.body.should.have.property('uptime');
           res.body.should.have.property('version');
           done();
@@ -310,14 +320,14 @@ describe('Core API v1', function() {
     });
   });
 
-  describe('When the Index is in an error state', (done) => {
-    before(() => {
+  describe('When the Index is in an error state', () => {
+    before(function() {
       sources.properties.sources.forEach((source) => {
-        source.state = 'RUNNING'
+        source.state = 'RUNNING';
       });
 
       sources.indices.forEach((index) => {
-        index.state = 'ERROR'
+        index.state = 'ERROR';
       });
     });
 
@@ -342,7 +352,12 @@ describe('Core API v1', function() {
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(HTTP_INTERNAL_SERVER_ERROR)
         .end((err, res) => {
-          res.body.should.have.properties({status: 500, plugins: {s3: expectedIndexErrorStatusResponse.sources.length}});
+          res.body.should.have.properties({
+            status: 500,
+            plugins: {
+              s3: expectedIndexErrorStatusResponse.sources.length
+            }
+          });
           res.body.should.have.property('uptime');
           res.body.should.have.property('version');
           done();

@@ -16,7 +16,7 @@ function makeJavaProperties(data) {
 
   for (const key in data) {
     if (data.hasOwnProperty(key)) {
-      results.push(key + '=' + data[key]);
+      results.push(`${key}=${data[key]}`);
     }
   }
 
@@ -45,7 +45,7 @@ function translateConquesoAddresses(properties) {
     Object.keys(properties.consul).forEach((service) => {
       const cluster = properties.consul[service].cluster;
 
-  /* eslint-disable no-param-reassign */
+      /* eslint-disable no-param-reassign */
       properties[`conqueso.${cluster}.ips`] = properties.consul[service].addresses.join(',');
     });
     delete properties.consul;

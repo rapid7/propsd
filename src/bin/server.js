@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-/* global Config, Log */
-'use strict';
-
 const args = require('yargs')
   .usage('Usage: $0 [args]')
   .option('c', {
@@ -56,12 +53,12 @@ const properties = new Properties();
 const sources = new Sources(properties);
 
 // Add metadata and some statics
-properties.dynamic(new Metadata(Config.get('metadata')), 'instance');
-properties.dynamic(new Tags(Config.get('tags')), 'instance:tags');
-properties.static(Config.get('properties'));
+properties.addDynamicLayer(new Metadata(Config.get('metadata')), 'instance');
+properties.addDynamicLayer(new Tags(Config.get('tags')), 'instance:tags');
+properties.addStaticLayer(Config.get('properties'));
 
 // Create the Index source
-sources.index(new S3('index', Config.get('index')));
+sources.addIndex(new S3('index', Config.get('index')));
 
 // Go!
 sources.initialize();

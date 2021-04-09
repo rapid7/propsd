@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-'use strict';
 
-/* eslint-disable no-param-reassign, rapid7/static-magic-numbers */
+'use strict';
 
 /**
  * Modify Consul Node, Service, and Check identifiers consistently in
@@ -18,9 +17,12 @@ const nodes = require('../data/consul-nodes.json');
 const replacements = {};
 
 function replace(input) {
-  if (replacements.hasOwnProperty(input)) { return replacements[input]; }
+  if (replacements.hasOwnProperty(input)) {
+    return replacements[input];
+  }
 
   replacements[input] = Crypto.randomBytes(16).toString('hex');
+
   return replacements[input];
 }
 

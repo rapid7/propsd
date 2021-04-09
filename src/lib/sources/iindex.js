@@ -1,5 +1,5 @@
-/* global Log */
 'use strict';
+
 const Crypto = require('crypto');
 const StringTemplate = require('../string-template');
 
@@ -27,9 +27,7 @@ class Index {
 
       // If the config object doesn't have a name, generate one... Begrudgingly.
       if (!config.hasOwnProperty('name') || !config.name) {
-        config.name = config.type + ':' + // eslint-disable-line no-param-reassign
-          Crypto.randomBytes(8).toString('hex'); // eslint-disable-line rapid7/static-magic-numbers
-
+        config.name = `${config.type}:${Crypto.randomBytes(8).toString('hex')}`;
         Log.log('WARN', `Source configuration does not have a \`name\` parameter! Generated ${config.name}`);
       }
 

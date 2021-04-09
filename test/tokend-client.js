@@ -2,14 +2,14 @@
 
 require('./lib/helpers');
 
-const expect = require('chai').expect;
+const should = require('should');
 const nock = require('nock');
-const TokendClient = require('../dist/lib/transformers/tokend-client');
+const TokendClient = require('../src/lib/transformers/tokend-client');
 
-describe('TokendClient', function () {
+describe('TokendClient', function() {
   let _client = null;
 
-  beforeEach(function () {
+  beforeEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
     if (_client) {
@@ -17,31 +17,31 @@ describe('TokendClient', function () {
     }
   });
 
-  afterEach(function () {
+  afterEach(function() {
     nock.disableNetConnect();
     if (_client) {
       _client.shutdown();
     }
   });
 
-  it('finds Tokend on 127.0.0.1:4500 by default', function () {
+  it('finds Tokend on 127.0.0.1:4500 by default', function() {
     _client = new TokendClient();
 
-    expect(_client._host).to.equal('127.0.0.1');
-    expect(_client._port).to.equal(4500);
+    _client._host.should.eql('127.0.0.1');
+    _client._port.should.eql(4500);
   });
 
-  it('allows Tokend to be found on a non-default host:port', function () {
+  it('allows Tokend to be found on a non-default host:port', function() {
     _client = new TokendClient({
       host: 'token.d',
       port: 2600
     });
 
-    expect(_client._host).to.equal('token.d');
-    expect(_client._port).to.equal(2600);
+    _client._host.should.eql('token.d');
+    _client._port.should.eql(2600);
   });
 
-  it('only calls Tokend once for each generic secret', function (done) {
+  it('only calls Tokend once for each generic secret', function() {
     // Nock clears a response after it's requested.
     // Processing the same secret more than once will fail when tokend.done() is called.
     const tokend = nock('http://127.0.0.1:4500')
@@ -55,19 +55,18 @@ describe('TokendClient', function () {
     const secret1 = _client.get('/v1/secret/default/kali/root/password');
     const secret2 = _client.get('/v1/secret/default/kali/root/password');
 
-    Promise.all([secret1, secret2]).then((secrets) => {
+    return Promise.all([secret1, secret2]).then((secrets) => {
       secrets.forEach((secret) => {
-        expect(secret).to.eql({
+        secret.should.eql({
           plaintext: 'toor'
         });
       });
 
       tokend.done();
-      done();
-    }).catch(done);
+    }).catch((ex) => console.log(ex));
   });
 
-  it('emits "update" events when generic secrets in Tokend change', function (done) {
+  it('emits "update" events when generic secrets in Tokend change', function() {
     // Nock clears a response after it's requested.
     const tokend = nock('http://127.0.0.1:4500')
 
@@ -85,10 +84,10 @@ describe('TokendClient', function () {
 
     _client = new TokendClient();
 
-    _client.initialize().then(() => {
+    return _client.initialize().then(() => {
       // First request will resolve with the original secret.
       _client.get('/v1/secret/default/kali/root/password').then((originalSecret) => {
-        expect(originalSecret).to.eql({
+        originalSecret.should.eql({
           plaintext: 'toor'
         });
 
@@ -96,19 +95,18 @@ describe('TokendClient', function () {
         _client.once('update', () => {
           // Second request should resolve with the new secret.
           _client.get('/v1/secret/default/kali/root/password').then((updatedSecret) => {
-            expect(updatedSecret).to.eql({
+            updatedSecret.should.eql({
               plaintext: 'myvoiceismypassword'
             });
 
             tokend.done();
-            done();
-          }).catch(done);
+          });
         });
-      }).catch(done);
-    }).catch(done);
+      });
+    });
   });
 
-  it('only calls Tokend once for each transit secret', function (done) {
+  it('only calls Tokend once for each transit secret', function() {
     // Nock clears a response after it's requested.
     // Processing the same secret more than once will fail when tokend.done() is called.
     const tokend = nock('http://127.0.0.1:4500')
@@ -122,22 +120,21 @@ describe('TokendClient', function () {
 
     _client = new TokendClient();
 
-    const secret1 = _client.post('/v1/transit/default/decrypt', { key: 'kali', ciphertext: 'gbbe' });
-    const secret2 = _client.post('/v1/transit/default/decrypt', { key: 'kali', ciphertext: 'gbbe' });
+    const secret1 = _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'});
+    const secret2 = _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'});
 
-    Promise.all([secret1, secret2]).then((secrets) => {
+    return Promise.all([secret1, secret2]).then((secrets) => {
       secrets.forEach((secret) => {
-        expect(secret).to.eql({
+        secret.should.eql({
           plaintext: 'toor'
         });
       });
 
       tokend.done();
-      done();
-    }).catch(done);
+    });
   });
 
-  it('provides a method for clearing the request cache', function () {
+  it('provides a method for clearing the request cache', function() {
     const tokend = nock('http://127.0.0.1:4500')
       .post('/v1/transit/default/decrypt', {
         key: 'kali',
@@ -151,21 +148,21 @@ describe('TokendClient', function () {
 
     const keyId = '/v1/transit/default/decrypt.kali.gbbe';
 
-    return _client.post('/v1/transit/default/decrypt', { key: 'kali', ciphertext: 'gbbe' }).then(() => {
+    return _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'}).then(() => {
       const postRequestQueue = _client._pendingPostRequests;
 
-      expect(Object.keys(postRequestQueue).length).to.equal(1);
-      expect(postRequestQueue[keyId]).to.be.an.instanceof(Promise);
+      Object.keys(postRequestQueue).should.have.length(1);
+      postRequestQueue[keyId].should.be.a.Promise();
 
       _client.clearCacheAtKey('POST', keyId);
 
-      expect(Object.keys(postRequestQueue).length).to.equal(0);
+      Object.keys(postRequestQueue).should.have.length(0);
 
       tokend.done();
     });
   });
 
-  it('throws an error if attempting to clear a non-existent cache', function () {
+  it('throws an error if attempting to clear a non-existent cache', function() {
     const tokend = nock('http://127.0.0.1:4500')
       .post('/v1/transit/default/decrypt', {
         key: 'kali',
@@ -179,8 +176,8 @@ describe('TokendClient', function () {
 
     const keyId = '/v1/transit/default/decrypt.kali.gbbe';
 
-    return _client.post('/v1/transit/default/decrypt', { key: 'kali', ciphertext: 'gbbe' }).then(() => {
-      expect(() => _client.clearCacheAtKey('HEAD', keyId)).to.throw(Error, 'A HEAD request does not map to an' +
+    return _client.post('/v1/transit/default/decrypt', {key: 'kali', ciphertext: 'gbbe'}).then(() => {
+      should.throws(() => _client.clearCacheAtKey('HEAD', keyId), Error, 'A HEAD request does not map to an' +
         ' existing cache.');
       tokend.done();
     });

@@ -1,4 +1,5 @@
 'use strict';
+
 const EventEmitter = require('events').EventEmitter;
 const STATUS_CODES = require('./util/status-codes');
 
@@ -35,7 +36,7 @@ class Sources extends EventEmitter {
    *
    * @param  {Source} source
    */
-  index(source) {
+  addIndex(source) {
     this.indices.push(source);
   }
 
@@ -137,7 +138,7 @@ class Sources extends EventEmitter {
           delete this._updating;
 
           Log.log('INFO', `Update successful, created ${difference.create.length} sources, ` +
-                          `shutting down ${difference.destroy.length} sources`);
+              `shutting down ${difference.destroy.length} sources`);
 
           this.emit('_resolve_update', this);
           this.emit('update', this);
@@ -153,53 +154,63 @@ class Sources extends EventEmitter {
    * @return {Object}
    */
   health() {
-    const object = {
+    const obj = {
       code: STATUS_CODES.OK,
-      status: 'OK'
+      status: 'OK',
+      indices: this.indices.map((i) => i.status()),
+      sources: this.properties.sources.map((s) => s.status())
     };
 
-    const source_state = {
-      source: [],
-      count: 0
-    };
+    // Health logic:
+    // Indices:
+    // 500 - any index is !ok
+    // 503 - any index is !ready
+    // 200 - all indices are both ok and ready
+    // Sources:
+    // 500 - all sources are !ok
+    // 503 - any source is !ready
+    // 200 - all sources both ok and ready
+    //
+    const notReady = (s) => !s.ready;
+    const unhealthy = (s) => !s.ok;
 
-    object.indices = this.indices.map((source) => {
-      // TODO This logic is fairly ham-fisted right now. It'll work because nothing
-      // is setting `state` to WARNING at the moment. When we do start supporting a
-      // WARNING state, this will have to become aware that OK < WARING < ERROR.
-      if (!source.ready) {
-        object.code = STATUS_CODES.SERVICE_UNAVAILABLE;
-        object.status = source.state;
-      }
+    if (this.indices.some(unhealthy)) {
+      const u = this.indices.find((i) => !i.ok);
 
-      if (!source.ok) {
-        object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-        object.status = source.state;
-      }
+      obj.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
+      obj.status = u.status().state;
 
-      return source.status();
-    });
-
-    object.sources = this.properties.sources.map((source) => {
-      if (!source.ready) {
-        object.code = STATUS_CODES.SERVICE_UNAVAILABLE;
-        object.status = source.state;
-      }
-
-      if (!source.ok) {
-        source_state.source.push(source.state);
-        source_state.count = source_state.count + 1;
-      }
-
-      return source.status();
-    });
-
-    if (object.sources.length === source_state.count) {
-      object.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
-      object.status = source_state.source[source_state.count - 1];
+      return obj;
     }
 
-    return object;
+    if (this.indices.some(notReady)) {
+      const u = this.indices.find((i) => !i.ready);
+
+      obj.code = STATUS_CODES.SERVICE_UNAVAILABLE;
+      obj.status = u.status().state;
+
+      return obj;
+    }
+
+    if (this.properties.sources.length > 0 && this.properties.sources.every(unhealthy)) {
+      const u = this.properties.sources.find((s) => !s.ok);
+
+      obj.code = STATUS_CODES.INTERNAL_SERVER_ERROR;
+      obj.status = u.status().state;
+
+      return obj;
+    }
+
+    if (this.properties.sources.some(notReady)) {
+      const u = this.properties.sources.find((s) => !s.ready);
+
+      obj.code = STATUS_CODES.SERVICE_UNAVAILABLE;
+      obj.status = u.status().state;
+
+      return obj;
+    }
+
+    return obj;
   }
 }
 
@@ -210,8 +221,8 @@ Sources.providers = {
 };
 
 // Update hold-down timeout
-Sources.UPDATE_HOLD_DOWN = 1000; // eslint-disable-line rapid7/static-magic-numbers
-Sources.MAX_LISTENERS = 100; // eslint-disable-line rapid7/static-magic-numbers
+Sources.UPDATE_HOLD_DOWN = 1000;
+Sources.MAX_LISTENERS = 100;
 
 Sources.Comparator = Comparator;
 Sources.Index = Index;

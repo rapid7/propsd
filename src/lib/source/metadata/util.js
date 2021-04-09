@@ -1,4 +1,5 @@
 'use strict';
+
 const Path = require('path');
 
 const DEFAULT_PARALLEL = 1;

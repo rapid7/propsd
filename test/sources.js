@@ -1,12 +1,12 @@
 'use strict';
 
 require('./lib/helpers');
+require('should');
 
-const Properties = require('../dist/lib/properties');
-const Sources = require('../dist/lib/sources');
+const Properties = require('../src/lib/properties');
+const Sources = require('../src/lib/sources');
 const Source = require('./lib/stub/source');
 const nock = require('nock');
-const expect = require('chai').expect;
 const providers = {stub: Source.Stub};
 
 Sources.providers.stub = Source.Stub;
@@ -20,8 +20,8 @@ describe('Sources', function() {
         type: 'test'
       }]);
 
-      expect(index.order).to.have.length.of(1);
-      expect(index.configurations).to.deep.equal({
+      index.order.should.have.length(1);
+      index.configurations.should.eql({
         'test-source': {
           name: 'test-source',
           type: 'test'
@@ -34,8 +34,8 @@ describe('Sources', function() {
         name: 'test-source'
       }]);
 
-      expect(index.order).to.have.length.of(0);
-      expect(index.configurations).to.be.empty;
+      index.order.should.have.length(0);
+      index.configurations.should.be.empty();
     });
 
     it('generates a name for configuration objects with missing name parameters', function() {
@@ -43,11 +43,11 @@ describe('Sources', function() {
         type: 'test'
       }]);
 
-      expect(index.order.length).to.equal(1);
+      index.order.should.have.length(1);
       const generatedName = index.order[0];
 
-      expect(index.configurations).to.have.key(generatedName);
-      expect(generatedName).to.match(/^test:/);
+      index.configurations.should.have.keys(generatedName);
+      generatedName.should.match(/^test:/);
     });
 
     it('interpolates template values in strings in configuration objects', function() {
@@ -68,8 +68,8 @@ describe('Sources', function() {
         topping: 'fudge!'
       });
 
-      expect(index.order).to.have.length.of(1);
-      expect(index.configurations).to.deep.equal({
+      index.order.should.have.length(1);
+      index.configurations.should.eql({
         'test-source': {
           name: 'test-source',
           type: 'test',
@@ -103,8 +103,8 @@ describe('Sources', function() {
         topping: 'fudge!'
       });
 
-      expect(index.order).to.have.length.of(0);
-      expect(index.configurations).to.be.empty;
+      index.order.should.have.length(0);
+      index.configurations.should.be.empty();
     });
 
     it('returns an ordered set of sources', function() {
@@ -132,8 +132,8 @@ describe('Sources', function() {
         }
       };
 
-      expect(index.order).to.deep.equal(['first', 'second', 'third']);
-      expect(index.ordered()).to.deep.equal([
+      index.order.should.eql(['first', 'second', 'third']);
+      index.ordered().should.eql([
         {name: 'first'},
         {name: 'second'},
         {name: 'third'}
@@ -173,61 +173,61 @@ describe('Sources', function() {
     it('detects new sources', function() {
       const diff = Sources.Comparator.compare(one, two);
 
-      expect(diff.changes).to.equal(true);
-      expect(diff.create).to.have.length.of(2);
-      expect(diff.copy).to.be.empty;
-      expect(diff.destroy).to.be.empty;
+      diff.changes.should.be.true();
+      diff.create.should.have.length(2);
+      diff.copy.should.be.empty();
+      diff.destroy.should.be.empty();
     });
 
     it('detects unchanged and removed sources', function() {
       const diff = Sources.Comparator.compare(two, three);
 
-      expect(diff.changes).to.equal(true);
-      expect(diff.create).to.have.length.of(1);
-      expect(diff.copy).to.have.length.of(1);
-      expect(diff.destroy).to.have.length.of(1);
+      diff.changes.should.be.true();
+      diff.create.should.have.length(1);
+      diff.copy.should.have.length(1);
+      diff.destroy.should.have.length(1);
     });
 
     it('detects changed sources', function() {
       const diff = Sources.Comparator.compare(three, four);
 
-      expect(diff.changes).to.equal(true);
-      expect(diff.create).to.have.length.of(1);
-      expect(diff.copy).to.have.length.of(1);
-      expect(diff.destroy).to.have.length.of(1);
+      diff.changes.should.be.true();
+      diff.create.should.have.length(1);
+      diff.copy.should.have.length(1);
+      diff.destroy.should.have.length(1);
     });
 
     it('detects when no changes have occurred', function() {
       const diff = Sources.Comparator.compare(three, three);
 
-      expect(diff.changes).to.equal(false);
-      expect(diff.create).to.be.empty;
-      expect(diff.copy).to.have.length.of(2);
-      expect(diff.destroy).to.be.empty;
+      diff.changes.should.be.false();
+      diff.create.should.be.empty();
+      diff.copy.should.have.length(2);
+      diff.destroy.should.be.empty();
     });
 
     it('creates sources for a new index', function() {
       const diff = Sources.Comparator.compare(one, two);
       const index = diff.build(providers);
 
-      expect(index.sources).to.not.be.empty;
-      index.ordered().forEach((source) =>
-        expect(source).to.be.instanceOf(Source.Stub)
-      );
+      index.sources.should.not.be.empty();
+      index.ordered().forEach((source) => {
+        source.should.be.instanceOf(Source.Stub);
+      });
     });
 
     it('rejects source configurations with unsupported types', function() {
       const diff = Sources.Comparator.compare(one, new Sources.Index([{type: 'foobar'}]));
       const index = diff.build(providers);
 
-      expect(index.sources).to.be.empty;
+      index.sources.should.be.empty();
     });
 
     it('shuts down removed sources from an old index', function(done) {
       const diff = Sources.Comparator.compare(two, three);
 
       two.sources['source-one'].once('shutdown', (source) => {
-        expect(source.state).to.equal(Source.SHUTDOWN);
+        source.state.should.eql(Source.SHUTDOWN);
         done();
       });
 
@@ -239,13 +239,13 @@ describe('Sources', function() {
 
       diff.build(providers);
 
-      expect(two.sources['source-two']).to.equal(three.sources['source-two']);
+      two.sources['source-two'].should.eql(three.sources['source-two']);
     });
   });
 
   const setUp = () => {
     const properties = new Properties();
-    const layer = new Source.Stub('stub1', {delay: 5});
+    const layer = new Source.Stub('stub1', {delay: 0});
     const sources = new Sources(properties);
     const index = new Source.IndexStub([{
       type: 'stub',
@@ -259,7 +259,7 @@ describe('Sources', function() {
     }]);
 
     layer.properties = {foo: 'bar'};
-    properties.dynamic(layer);
+    properties.addDynamicLayer(layer);
 
     return {properties, layer, sources, index};
   };
@@ -268,17 +268,17 @@ describe('Sources', function() {
     const stubs = setUp();
 
     it('has the correct initial state', function() {
-      expect(stubs.sources.properties).to.be.instanceOf(Properties);
-      expect(stubs.sources.indices).to.be.instanceOf(Array);
-      expect(stubs.sources.initialized).to.equal(false);
-      expect(stubs.sources.current).to.be.instanceOf(Sources.Index);
-      expect(stubs.sources.current.order).to.have.length.of(0);
+      stubs.sources.properties.should.be.instanceOf(Properties);
+      stubs.sources.indices.should.be.an.Array();
+      stubs.sources.initialized.should.be.false();
+      stubs.sources.current.should.be.instanceOf(Sources.Index);
+      stubs.sources.current.order.should.be.empty();
     });
 
     it('adds an index source', function() {
-      stubs.sources.index(stubs.index);
+      stubs.sources.addIndex(stubs.index);
 
-      expect(stubs.sources.indices).to.deep.equal([stubs.index]);
+      stubs.sources.indices.should.eql([stubs.index]);
     });
   });
 
@@ -286,41 +286,44 @@ describe('Sources', function() {
     this.timeout(5000);
     const stubs = setUp();
 
-    before(function () {
+    before(function() {
       nock.disableNetConnect();
     });
 
     after(function() {
+      // We need to ensure that we shut down the Tokend client's polling loop so tests
+      // exit correctly.
+      stubs.properties.tokendTransformer._client.stop();
       nock.enableNetConnect();
-    })
+    });
 
 
-    stubs.sources.index(stubs.index);
+    stubs.sources.addIndex(stubs.index);
 
     it('initializes properties and indices', function() {
       stubs.sources.initialize();
 
-      expect(stubs.sources.initializing).to.equal(true);
+      stubs.sources.initializing.should.be.true();
 
       // Calling initialize multiple times returns valid promises
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
-        expect(stubs.properties.sources).to.have.length.of(3);
+        stubs.index.state.should.eql(Source.RUNNING);
+        stubs.properties.sources.should.have.length(3);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
       });
     });
 
     it('returns a resolved promise if called multiple times', function() {
-      expect(stubs.sources.initialized).to.equal(true);
-      expect(stubs.sources.initialize()).to.be.instanceOf(Promise);
+      stubs.sources.initialized.should.be.true();
+      stubs.sources.initialize().should.be.a.Promise();
     });
 
     it('updates the index when a Properties layer updates', function(done) {
       stubs.sources.once('update', () => {
-        expect(stubs.sources.current.configurations.stub1.parameters.value).to.equal('quux');
+        stubs.sources.current.configurations.stub1.parameters.value.should.eql('quux');
         done();
       });
 
@@ -329,7 +332,7 @@ describe('Sources', function() {
 
     it('updates the index when an Index layer updates', function(done) {
       stubs.sources.once('update', () => {
-        expect(stubs.sources.current.configurations.stub2.parameters.changed).to.equal('parameter!');
+        stubs.sources.current.configurations.stub2.parameters.changed.should.eql('parameter!');
         done();
       });
 
@@ -360,21 +363,21 @@ describe('Sources', function() {
 
     beforeEach(function() {
       stubs = setUp();
-      stubs.sources.index(stubs.index);
+      stubs.sources.addIndex(stubs.index);
     });
 
     it('sets a healthy code and status message when index and sources are in ready state', function() {
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
 
         const healthy = stubs.sources.health();
 
-        expect(healthy.code).to.equal(200);
-        expect(healthy.status).to.equal('OK');
+        healthy.code.should.eql(200);
+        healthy.status.should.eql('OK');
       });
     });
 
@@ -382,90 +385,123 @@ describe('Sources', function() {
     it('sets an uninitialized code (503) and status message when all index and sources are uninitialized', function() {
       stubs.sources.initialize();
 
-      expect(stubs.sources.initializing).to.equal(true);
+      stubs.sources.initializing.should.be.true();
 
       const healthy = stubs.sources.health();
 
-      expect(healthy.code).to.equal(503);
-      expect(healthy.status).to.equal('INITIALIZING');
+      healthy.code.should.eql(503);
+      healthy.status.should.eql('CREATED');
     });
 
     it('sets an uninitialized code (503) and status message when any index and sources are uninitialized', function() {
       // Leave the index uninitialized
       stubs.properties.sources.forEach((source) => {
         source.initialize().then(() => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
       });
 
-      expect(stubs.index.state).to.equal(Source.CREATED);
+      // Test index uninitialized
+      stubs.index.state.should.eql(Source.CREATED);
 
       const healthy = stubs.sources.health();
 
-      expect(healthy.code).to.equal(503);
-      expect(healthy.status).to.equal('INITIALIZING');
+      healthy.code.should.eql(503);
+      healthy.status.should.eql('CREATED');
+
+      stubs.index.state = Source.RUNNING;
+
+      // Test source initializing
+      const h2 = stubs.sources.health();
+
+      h2.code.should.eql(503);
+      h2.status.should.eql('INITIALIZING');
     });
 
     it('sets an unhealthy (500) code and status message when an index is in an error state', function() {
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.index.error();
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING);
+          source.state.should.eql(Source.RUNNING);
         });
 
         const healthy = stubs.sources.health();
 
-        expect(healthy.code).to.equal(500);
-        expect(healthy.status).to.equal('ERROR');
+        healthy.code.should.eql(500);
+        healthy.status.should.eql('ERROR');
       });
     });
 
     it('sets an unhealthy code (500) and status message when all sources are in an error state', function() {
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING)
+          source.state.should.eql(Source.RUNNING);
           source.error();
         });
 
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         const healthy = stubs.sources.health();
 
-        expect(healthy.code).to.equal(500);
-        expect(healthy.status).to.equal('ERROR');
+        healthy.code.should.eql(500);
+        healthy.status.should.eql('ERROR');
       });
     });
 
     it('sets a healthy code and status message when only some sources are in an error state', function() {
       const layer2 = new Source.Stub('stub2', {delay: 5});
+
       layer2.properties = {bar: 'foo'};
-      stubs.properties.dynamic(layer2);
+      stubs.properties.addDynamicLayer(layer2);
 
       return stubs.sources.initialize().then(() => {
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         stubs.properties.sources.forEach((source) => {
-          expect(source.state).to.equal(Source.RUNNING)
+          source.state.should.eql(Source.RUNNING);
         });
 
-        expect(stubs.index.state).to.equal(Source.RUNNING);
+        stubs.index.state.should.eql(Source.RUNNING);
 
         const h1 = stubs.sources.health();
 
-        expect(h1.code).to.equal(200);
-        expect(h1.status).to.equal('OK');
+        h1.code.should.eql(200);
+        h1.status.should.eql('OK');
 
         layer2.error();
 
         const h2 = stubs.sources.health();
 
-        expect(h2.code).to.equal(200);
-        expect(h2.status).to.equal('OK');
+        h2.code.should.eql(200);
+        h2.status.should.eql('OK');
+      });
+    });
+
+    it('sets a healthy code and status message when there are no sources', function() {
+      // Empty the layers and no-op the tokendtransformer to test this behavior
+      const stubTokendTransformer = {
+        on: () => {}
+      };
+
+      stubTokendTransformer.initialize = () =>
+        new Promise((resolve) => resolve(stubTokendTransformer));
+      stubTokendTransformer.transform = () =>
+        new Promise((resolve) => resolve(stubTokendTransformer));
+
+      stubs.properties.layers = [];
+      stubs.properties.tokendTransformer = stubTokendTransformer;
+      stubs.sources.indices = [];
+
+      return stubs.sources.initialize().then(() => {
+        const h = stubs.sources.health();
+
+        h.code.should.eql(200);
+        h.status.should.eql('OK');
       });
     });
   });

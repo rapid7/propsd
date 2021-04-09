@@ -1,6 +1,6 @@
 'use strict';
 
-const Common = require('../../../dist/lib/source/common');
+const Common = require('../../../src/lib/source/common');
 
 class Parser {
   constructor() {
@@ -26,13 +26,14 @@ class Stub extends Common(Parser) {
     this.delay = options.delay;
     this.name = name;
     this.properties = {};
+    this._timeout = null;
   }
 
   initialize() {
     const initialized = super.initialize();
 
     // Simulate a network request
-    setTimeout(() => {
+    this._timeout = setTimeout(() => {
       this._update({properties: this.properties});
     }, this.delay);
 
@@ -49,6 +50,13 @@ class Stub extends Common(Parser) {
 
   recover() {
     this._update({properties: this.properties});
+  }
+
+  stop() {
+    if (this._timeout) {
+      clearTimeout(this._timeout);
+    }
+    this._timeout = null;
   }
 }
 
@@ -78,7 +86,6 @@ class ErrorStub extends Stub {
 
     return initialized;
   }
-
 }
 
 class PollingStub extends Common.Polling(Parser) {

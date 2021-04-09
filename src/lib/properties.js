@@ -1,77 +1,18 @@
-'use strict';
-const EventEmitter = require('events').EventEmitter;
-const Layer = require('./properties/layer');
-const View = require('./properties/view');
-const TokendTransformer = require('./transformers/tokend');
-const Immutable = require('immutable');
-const isPlainObject = require('lodash.isplainobject');
-
-/* eslint-disable eqeqeq */
-/**
- * Deep-merge one Object into another. Do _not_ deep merge anything that isn't explicitly
- * a first-order instance of Object.
- *
- * @param  {Object} destination   The destination of the merge operation. This object is mutated
- * @param  {Object} source        The source that properties are merged from
- * @return {Object}               The destination object
- */
-const merge = (destination, source) => {
-  // Ensure that the destination value is an Object.
-  const dest = isPlainObject(destination) ? destination : {};
-
-  // Only merge source if it's an Object.
-  if (!isPlainObject(source)) {
-    return dest;
-  }
-
-  Object.keys(source).forEach((key) => {
-    // Ignore null and undefined source values. `== null` covers both
-    if (source[key] == null) {
-      return;
-    }
-
-    // Is this an Object (but not something that inherits Object)?
-    if (Object.getPrototypeOf(source[key]) === Object.prototype) {
-      // Recursively merge source Object into destination
-      dest[key] = merge(dest[key], source[key]);
-
-      return;
-    }
-
-    dest[key] = source[key];
-  });
-
-  return dest;
-};
-/* eslint-enable eqeqeq */
-
-/**
- * Recursively traverses a layer namespace and sets the value at the corresponding place in the object
- * @param {Object} destination The destination of the merge operation.
- * @param {Array<String>} namespaceArray An array of keys (namespaces) to traverse
- * @param {Object} source The source that properties are merged from
- * @return {Object}
- */
-const recusiveNamespaceMerge = (destination, namespaceArray, source) => {
-  const nextNamespace = namespaceArray.shift();
-  const dest = isPlainObject(destination) ? destination : {};
-
-  if (namespaceArray.length) {
-    dest[nextNamespace] = recusiveNamespaceMerge(dest[nextNamespace], namespaceArray, source);
-
-    return dest;
-  }
-
-  dest[nextNamespace] = merge(dest[nextNamespace], source);
-
-  return dest;
-};
+import {EventEmitter} from 'events';
+import Layer from './properties/layer';
+import View from './properties/view';
+import TokendTransformer from './transformers/tokend';
+import Immutable from 'immutable';
+import {merge, recusiveNamespaceMerge} from './util';
 
 /**
  * A Properties instance manages multiple statically configured layers,
  * and an active View instance.
  */
 class Properties extends EventEmitter {
+  // Build hold-down timeout
+  static BUILD_HOLD_DOWN = 1000;
+
   /**
    * Constructor
    */
@@ -93,10 +34,8 @@ class Properties extends EventEmitter {
    */
   get sources() {
     return []
-
       // Get Dynamic layers' source instances
       .concat(this.layers.map((layer) => layer.source).filter((source) => !!source))
-
       // Add the active View's sources.
       //  NOTE: This is a shallow copy and only copies object references to a new array.
       //  DO NOT USE THIS GETTER TO PERFORM ANY MUTATING ACTIVITIES.
@@ -120,7 +59,7 @@ class Properties extends EventEmitter {
    * @param {Source}  source
    * @param {String}  namespace
    */
-  dynamic(source, namespace) {
+  addDynamicLayer(source, namespace) {
     this.layers.push(new Layer.Dynamic(source, namespace));
   }
 
@@ -130,7 +69,7 @@ class Properties extends EventEmitter {
    * @param {Object}  properties
    * @param {String}  namespace
    */
-  static(properties, namespace) {
+  addStaticLayer(properties, namespace) {
     this.layers.push(new Layer.Static(properties, namespace));
   }
 
@@ -214,12 +153,5 @@ class Properties extends EventEmitter {
     return built;
   }
 }
-
-// Build hold-down timeout
-Properties.BUILD_HOLD_DOWN = 1000; // eslint-disable-line rapid7/static-magic-numbers
-
-Properties.Layer = Layer;
-Properties.View = View;
-Properties.merge = merge;
 
 module.exports = Properties;

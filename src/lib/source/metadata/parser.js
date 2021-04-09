@@ -1,4 +1,5 @@
 'use strict';
+
 const Path = require('path');
 
 /* eslint-disable no-param-reassign */
@@ -108,7 +109,7 @@ Parser.mappings = {
   },
 
   'meta-data/iam/security-credentials/': (path, metadata, properties) => {
-    const match = new RegExp('^' + path);
+    const match = new RegExp(`^${path}`);
     const roles = Object.keys(metadata).filter((p) => match.test(p));
 
     // Instance does not have a Profile/Role

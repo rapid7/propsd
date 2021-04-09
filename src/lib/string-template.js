@@ -57,12 +57,13 @@ class StringTemplate {
   toString() {
     return this.template.replace(this.constructor.CAPTURE, (match, capture) => {
       const path = capture.split(this.constructor.DELIMITER);
+
       let node = this.scope;
 
       // Traverse the scope object
       for (let i = 0; i < path.length; i++) {
         if (!node.hasOwnProperty(path[i])) {
-          throw new ReferenceError('Undefined parameter ' + capture);
+          throw new ReferenceError(`Undefined parameter ${capture}`);
         }
         node = node[path[i]];
       }

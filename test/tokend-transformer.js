@@ -1,13 +1,13 @@
 'use strict';
 
 require('./lib/helpers');
+require('should');
 
 const crypto = require('crypto');
-const expect = require('chai').expect;
 const nock = require('nock');
 const sinon = require('sinon');
-const TokendTransformer = require('../dist/lib/transformers/tokend');
-const Properties = require('../dist/lib/properties');
+const TokendTransformer = require('../src/lib/transformers/tokend');
+const Properties = require('../src/lib/properties');
 const Source = require('./lib/stub/source');
 
 // Speed up testing by shortening the time we wait for properties to build.
@@ -42,7 +42,8 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({});
+      transformedProperties.should.be.an.Object();
+      transformedProperties.should.be.empty();
     });
   });
 
@@ -52,7 +53,8 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({});
+      transformedProperties.should.be.an.Object();
+      transformedProperties.should.be.empty();
     });
   });
 
@@ -62,7 +64,8 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({});
+      transformedProperties.should.be.an.Object();
+      transformedProperties.should.be.empty();
     });
   });
 
@@ -85,7 +88,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: 'toor'
       });
 
@@ -117,7 +120,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: 'toor'
       });
 
@@ -138,20 +141,20 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          region: 'eu-central-1'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        region: 'eu-central-1'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: 'toor'
       });
 
@@ -171,19 +174,19 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: 'toor'
       });
 
@@ -204,20 +207,20 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: 'toor'
       });
 
@@ -237,19 +240,19 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: 'toor'
       });
 
@@ -278,7 +281,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         database: {
           password: 'toor'
         }
@@ -307,19 +310,19 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        })
-        .get('/v1/secret/default/kali/user/password')
-        .reply(200, {
-          plaintext: 'resu'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      })
+      .get('/v1/secret/default/kali/user/password')
+      .reply(200, {
+        plaintext: 'resu'
+      });
 
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         database: {
           'root-password': 'toor',
           'user-password': 'resu'
@@ -338,7 +341,8 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({});
+      transformedProperties.should.be.an.Object();
+      transformedProperties.should.be.empty();
     });
   });
 
@@ -357,7 +361,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: null
       });
     });
@@ -378,7 +382,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: null
       });
     });
@@ -405,7 +409,7 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: null
       });
 
@@ -424,13 +428,13 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, 'toor');
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, 'toor');
 
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((transformedProperties) => {
-      expect(transformedProperties).to.eql({
+      transformedProperties.should.eql({
         password: null
       });
 
@@ -451,26 +455,26 @@ describe('TokendTransformer', function() {
     };
 
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, {
-          plaintext: 'toor',
-          keyid: 'arn:aws:kms:region:account-id:key/key-id'
-        });
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, {
+        plaintext: 'toor',
+        keyid: 'arn:aws:kms:region:account-id:key/key-id'
+      });
 
     _transformer = new TokendTransformer();
     sinon.spy(_transformer._client, 'clearCacheAtKey');
 
     return _transformer.transform(untransformedProperties).then(() => {
-      expect(_transformer._client.clearCacheAtKey.calledOnce).to.be.true;
+      _transformer._client.clearCacheAtKey.calledOnce.should.be.true();
       const call = _transformer._client.clearCacheAtKey.firstCall;
 
       // KMS type makes POST requests
-      expect(call.args[0]).to.equal('POST');
-      expect(call.args[1]).to.equal(`${untransformedProperties.password.$tokend.resource}.KMS.${untransformedProperties.password.$tokend.ciphertext}`);
+      call.args[0].should.eql('POST');
+      call.args[1].should.eql(`${untransformedProperties.password.$tokend.resource}.KMS.${untransformedProperties.password.$tokend.ciphertext}`);
       tokend.done();
     });
   });
@@ -493,9 +497,9 @@ describe('TokendTransformer', function() {
 
     const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
     const signature = crypto
-        .createHash('sha1')
-        .update(JSON.stringify(payload))
-        .digest('base64');
+      .createHash('sha1')
+      .update(JSON.stringify(payload))
+      .digest('base64');
 
     const response = {
       plaintext: 'toor',
@@ -504,34 +508,34 @@ describe('TokendTransformer', function() {
 
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(200, () => {
-          requestCount++;
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(200, () => {
+        requestCount++;
 
-          return response;
-        });
+        return response;
+      });
 
     _transformer = new TokendTransformer();
 
     const propertyName = keyPathObject.keyPath[0];
 
     return _transformer.transform(untransformedProperties).then(() => {
-      expect(requestCount).to.equal(1);
-      expect(Object.keys(_transformer._cache).length).to.equal(1);
-      expect(_transformer._cache).to.have.property(propertyName);
-      expect(_transformer._cache[propertyName].signature).to.eql(signature);
-      expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+      requestCount.should.eql(1);
+      Object.keys(_transformer._cache).should.have.length(1);
+      _transformer._cache.should.have.property(propertyName);
+      _transformer._cache[propertyName].signature.should.eql(signature);
+      _transformer._cache[propertyName].plaintext.should.eql(response.plaintext);
 
       return _transformer.transform(untransformedProperties).then(() => {
-        expect(requestCount).to.equal(1);
-        expect(Object.keys(_transformer._cache).length).to.equal(1);
-        expect(_transformer._cache).to.have.property(propertyName);
-        expect(_transformer._cache[propertyName].signature).to.eql(signature);
-        expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+        requestCount.should.eql(1);
+        Object.keys(_transformer._cache).should.have.length(1);
+        _transformer._cache.should.have.property(propertyName);
+        _transformer._cache[propertyName].signature.should.eql(signature);
+        _transformer._cache[propertyName].plaintext.should.eql(response.plaintext);
 
         tokend.done();
       });
@@ -559,7 +563,7 @@ describe('TokendTransformer', function() {
           datakey: 'foobar2'
         }
       }
-    }
+    };
 
     const keyPathObject = {
       keyPath: ['password']
@@ -600,7 +604,7 @@ describe('TokendTransformer', function() {
           error: {
             message: 'error'
           }
-        }
+        };
       });
 
     _transformer = new TokendTransformer();
@@ -609,18 +613,18 @@ describe('TokendTransformer', function() {
 
     return _transformer.transform(untransformedProperties)
       .then(() => {
-        expect(requestCount).to.equal(1);
-        expect(Object.keys(_transformer._cache).length).to.equal(1);
-        expect(_transformer._cache).to.have.property(propertyName);
-        expect(_transformer._cache[propertyName].signature).to.eql(signature);
-        expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+        requestCount.should.eql(1);
+        Object.keys(_transformer._cache).should.have.length(1);
+        _transformer._cache.should.have.property(propertyName);
+        _transformer._cache[propertyName].signature.should.eql(signature);
+        _transformer._cache[propertyName].plaintext.should.eql(response.plaintext);
 
         return _transformer.transform(untransformedProperties2).then(() => {
-          expect(requestCount).to.equal(2);
-          expect(Object.keys(_transformer._cache).length).to.equal(1);
-          expect(_transformer._cache).to.have.property(propertyName);
-          expect(_transformer._cache[propertyName].signature).to.eql(signature);
-          expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
+          requestCount.should.eql(2);
+          Object.keys(_transformer._cache).should.have.length(1);
+          _transformer._cache.should.have.property(propertyName);
+          _transformer._cache[propertyName].signature.should.eql(signature);
+          _transformer._cache[propertyName].plaintext.should.eql(response.plaintext);
           tokend.done();
         });
       });
@@ -642,32 +646,31 @@ describe('TokendTransformer', function() {
       keyPath: ['password']
     };
 
-    const payload = Object.assign(untransformedProperties.password.$tokend, keyPathObject);
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
-        .post('/v1/kms/decrypt', {
-          key: 'KMS',
-          ciphertext: 'gbbe',
-          datakey: 'foobar'
-        })
-        .reply(500, () => {
-          requestCount++;
+      .post('/v1/kms/decrypt', {
+        key: 'KMS',
+        ciphertext: 'gbbe',
+        datakey: 'foobar'
+      })
+      .reply(500, () => {
+        requestCount++;
 
-          return {
-            error: {
-              message: 'error'
-            }
-          };
-        });
+        return {
+          error: {
+            message: 'error'
+          }
+        };
+      });
 
     _transformer = new TokendTransformer();
 
     const propertyName = keyPathObject.keyPath[0];
 
     return _transformer.transform(untransformedProperties).then(() => {
-      expect(requestCount).to.equal(1);
-      expect(Object.keys(_transformer._cache).length).to.equal(0);
-      expect(_transformer._cache).to.not.have.property(propertyName);
+      requestCount.should.eql(1);
+      Object.keys(_transformer._cache).should.have.length(0);
+      _transformer._cache.should.not.have.property(propertyName);
       tokend.done();
     });
   });
@@ -713,7 +716,7 @@ describe('TokendTransformer', function() {
     const response2 = {
       plaintext: 'toor2',
       keyid: 'arn:aws:kms:region:account-id:key/key-id'
-    }
+    };
 
     let requestCount = 0;
     const tokend = nock('http://127.0.0.1:4500')
@@ -741,19 +744,20 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     const propertyName = keyPathObject.keyPath[0];
-    return _transformer.transform(untransformedProperties)
-      .then(function () {
-        expect(requestCount).to.equal(1);
-        expect(Object.keys(_transformer._cache).length).to.equal(1);
-        expect(_transformer._cache).to.have.property(propertyName);
-        expect(_transformer._cache[propertyName].signature).to.eql(signature);
-        expect(_transformer._cache[propertyName].plaintext).to.eql(response.plaintext);
 
-        return _transformer.transform(untransformedProperties2).then(function () {
-          expect(requestCount).to.equal(2);
-          expect(Object.keys(_transformer._cache).length).to.equal(1);
-          expect(_transformer._cache).to.not.have.property('password')
-          expect(_transformer._cache).to.have.property('password2');
+    return _transformer.transform(untransformedProperties)
+      .then(() => {
+        requestCount.should.equal(1);
+        Object.keys(_transformer._cache).should.have.length(1);
+        _transformer._cache.should.have.property(propertyName);
+        _transformer._cache[propertyName].signature.should.eql(signature);
+        _transformer._cache[propertyName].plaintext.should.eql(response.plaintext);
+
+        return _transformer.transform(untransformedProperties2).then(() => {
+          requestCount.should.equal(2);
+          Object.keys(_transformer._cache).should.have.length(1);
+          _transformer._cache.should.not.have.property('password');
+          _transformer._cache.should.have.property('password2');
           tokend.done();
         });
       });
@@ -774,10 +778,10 @@ describe('TokendTransformer', function() {
     _transformer = new TokendTransformer();
 
     return _transformer.transform(untransformedProperties).then((data) => {
-      expect(data).to.eql({
+      data.should.eql({
         password: null
       });
-      expect(Object.keys(_transformer._cache).length).to.equal(0);
+      Object.keys(_transformer._cache).should.have.length(0);
     });
   });
 });
@@ -803,14 +807,14 @@ describe('Properties#build', function() {
 
   it('transforms $tokend objects in static properties', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      });
 
     _properties = new Properties();
 
-    _properties.static({
+    _properties.addStaticLayer({
       password: {
         $tokend: {
           type: 'generic',
@@ -821,7 +825,7 @@ describe('Properties#build', function() {
 
     _properties.once('build', (transformedProperties) => {
       transformedProperties.then((p) => {
-        expect(p).to.eql({
+        p.should.eql({
           password: 'toor'
         });
 
@@ -835,10 +839,10 @@ describe('Properties#build', function() {
 
   it('transforms $tokend objects in dynamic properties', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      });
     const stub = new Source.Stub();
 
     stub.properties = {
@@ -851,11 +855,11 @@ describe('Properties#build', function() {
     };
     _properties = new Properties();
 
-    _properties.dynamic(stub);
+    _properties.addDynamicLayer(stub);
 
     _properties.once('build', (props) => {
       props.then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
+        transformedProperties.should.eql({
           password: 'toor'
         });
 
@@ -869,10 +873,10 @@ describe('Properties#build', function() {
 
   it('transforms $tokend objects after they are merged', function(done) {
     const tokend = nock('http://127.0.0.1:4500')
-        .get('/v1/secret/default/kali/root/password')
-        .reply(200, {
-          plaintext: 'toor'
-        });
+      .get('/v1/secret/default/kali/root/password')
+      .reply(200, {
+        plaintext: 'toor'
+      });
     const stub = new Source.Stub();
     const stub2 = new Source.Stub();
 
@@ -899,12 +903,12 @@ describe('Properties#build', function() {
 
     _properties = new Properties();
 
-    _properties.dynamic(stub);
-    _properties.dynamic(stub2);
+    _properties.addDynamicLayer(stub);
+    _properties.addDynamicLayer(stub2);
 
     _properties.once('build', (props) => {
       props.then((transformedProperties) => {
-        expect(transformedProperties).to.eql({
+        transformedProperties.should.eql({
           password: 'toor'
         });
 
@@ -959,7 +963,7 @@ describe('Properties#build', function() {
 
     _properties.initialize().then((initializedProperties) => {
       // First request will resolve with the original secret.
-      expect(initializedProperties.properties).to.eql({
+      initializedProperties.properties.should.eql({
         password: 'toor'
       });
     }).catch(done);

@@ -29,6 +29,7 @@ exports.Watcher = Watcher;
 exports.health = {
   service: function service(options, callback) {
     const name = options.service;
+
     let results = health[name];
 
     if (options.passing) {

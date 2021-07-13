@@ -1,8 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.5.0)
-      public_suffix (~> 2.0, >= 2.0.2)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     archive-tar-minitar (0.5.2)
     arr-pm (0.0.10)
       cabin (> 0)
@@ -124,9 +124,9 @@ GEM
       json (>= 1.7.7, < 2.0)
       pleaserun (~> 0.0.24)
       ruby-xz
-    hashie (3.4.6)
+    hashie (3.6.0)
     highline (1.7.8)
-    hitimes (1.2.4)
+    hitimes (2.0.0)
     httpclient (2.7.2)
     ignorefile (1.1.0)
     insist (1.0.0)
@@ -143,21 +143,21 @@ GEM
     minitar (0.8)
     mixlib-archive (0.2.0)
       mixlib-log
-    mixlib-authentication (1.4.1)
-      mixlib-log
+    mixlib-authentication (1.4.2)
     mixlib-cli (1.7.0)
-    mixlib-config (2.2.4)
+    mixlib-config (2.2.18)
+      tomlrb
     mixlib-install (2.1.5)
       artifactory
       mixlib-shellout
       mixlib-versioning
       thor
     mixlib-log (1.7.1)
-    mixlib-shellout (2.2.7)
+    mixlib-shellout (2.4.4)
     mixlib-versioning (1.1.0)
     molinillo (0.4.5)
     multi_json (1.12.1)
-    multipart-post (2.0.0)
+    multipart-post (2.1.1)
     mustache (0.99.8)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
@@ -168,7 +168,7 @@ GEM
       net-ssh (>= 2.6.5)
       net-ssh-gateway (>= 1.2.0)
     net-telnet (0.1.1)
-    nio4r (1.2.1)
+    nio4r (2.5.7)
     octokit (4.6.2)
       sawyer (~> 0.8.0, >= 0.5.3)
     ohai (8.22.1)
@@ -192,7 +192,7 @@ GEM
       stud
     plist (3.1.0)
     proxifier (1.0.3)
-    public_suffix (2.0.4)
+    public_suffix (4.0.6)
     rack (1.6.11)
     rake (10.5.0)
     retryable (2.0.4)
@@ -237,9 +237,9 @@ GEM
       ffi (~> 1.9)
       io-like (~> 0.3)
     safe_yaml (1.0.4)
-    sawyer (0.8.1)
-      addressable (>= 2.3.5, < 2.6)
-      faraday (~> 0.8, < 1.0)
+    sawyer (0.8.2)
+      addressable (>= 2.3.5)
+      faraday (> 0.8, < 2.0)
     semverse (1.2.1)
     serverspec (2.37.2)
       multi_json
@@ -269,6 +269,7 @@ GEM
     thor (0.19.4)
     timers (4.0.4)
       hitimes
+    tomlrb (2.0.1)
     uuidtools (2.1.5)
     varia_model (0.4.1)
       buff-extensions (~> 1.0)

@@ -67,7 +67,7 @@
     "flat": "~2.0.0",
     "immutable": "~3.8.1",
     "lodash.isplainobject": "^4.0.6",
-    "nconf": "~0.8.4",
+    "nconf": "~0.11.4",
     "winston": "~2.1.1",
     "yargs": "~4.1.0"
   },

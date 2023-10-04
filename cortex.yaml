@@ -1,0 +1,18 @@
+---
+info:
+  title: Propsd
+  description: Dynamic property management at scale
+  x-cortex-git:
+    github:
+      alias: r7org
+      repository: rapid7/propsd
+  x-cortex-tag: propsd
+  x-cortex-type: service
+  x-cortex-groups:
+  - infra
+  - configuration
+  x-cortex-domain-parents:
+  - tag: platform-delivery
+openapi: 3.0.1
+servers:
+- url: "/"

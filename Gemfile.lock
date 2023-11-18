@@ -141,7 +141,7 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
     minitar (0.8)
-    mixlib-archive (0.2.0)
+    mixlib-archive (0.4.20)
       mixlib-log
     mixlib-authentication (1.4.1)
       mixlib-log

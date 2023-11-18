@@ -60,7 +60,7 @@ class Consul extends Source.Polling(Parser) { // eslint-disable-line new-cap
           service: name,
           passing: true,
           consistent: false,
-          stale: true
+          stale: false
         }, (error, data) => {
           if (error) {
             return next(error);

@@ -123,6 +123,13 @@ class Source extends EventEmitter {
     return this.state !== Source.ERROR && this.state !== Source.WARNING;
   }
 
+  /**
+   * Ready States are anything but INITIALIZED or CREATED
+   */
+  get ready() {
+    return this.state !== Source.INITIALIZING && this.state !== Source.CREATED
+  }
+
   /* eslint-disable max-statements */
 
   /**

@@ -1,3 +1,6 @@
+# Deprecated
+This repository is now deprecated. This project will not receive new changes from Rapid.
+
 # Propsd
 [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
 
